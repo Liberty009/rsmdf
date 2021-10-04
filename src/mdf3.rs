@@ -1,3 +1,4 @@
+use crate::utils;
 use std::{convert::TryInto, mem};
 
 use byteorder::{BigEndian, ByteOrder, LittleEndian, ReadBytesExt};
@@ -99,11 +100,11 @@ impl HDBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream[0..].try_into().expect("");
         position += block_type.len();
-        let block_size = read_u16(&stream[position..], little_endian, &mut position);
-        let data_group_block = read_u32(&stream[position..], little_endian, &mut position);
-        let file_comment = read_u32(&stream[position..], little_endian, &mut position);
-        let program_block = read_u32(&stream[position..], little_endian, &mut position);
-        let data_group_number = read_u16(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let data_group_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let file_comment = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let program_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let data_group_number = utils::read_u16(&stream[position..], little_endian, &mut position);
         let date: [u8; 10] = stream[position..].try_into().expect("msg");
         position += date.len();
         let time: [u8; 8] = stream[position..].try_into().expect("msg");
@@ -116,9 +117,9 @@ impl HDBLOCK {
         position += project.len();
         let subject: [u8; 32] = stream[position..].try_into().expect("msg");
         position += subject.len();
-        let timestamp = read_u64(&stream[position..], little_endian, &mut position);
-        let utc_time_offset = read_i16(&stream[position..], little_endian, &mut position);
-        let time_quality = read_u16(&stream[position..], little_endian, &mut position);
+        let timestamp = utils::read_u64(&stream[position..], little_endian, &mut position);
+        let utc_time_offset = utils::read_i16(&stream[position..], little_endian, &mut position);
+        let time_quality = utils::read_u16(&stream[position..], little_endian, &mut position);
         let timer_id: [u8; 32] = stream[position..].try_into().expect("msg");
         position += timer_id.len();
 
@@ -157,7 +158,7 @@ impl TXBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream.try_into().expect("");
         position += block_type.len();
-        let block_size = read_u16(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
 
         let mut text: Vec<u8> = vec![0; block_size as usize];
         text = stream.try_into().expect("msg");
@@ -216,9 +217,10 @@ impl TRBLOCK {
         let mut position = 0;
 
         let block_type = stream.try_into().expect("msg");
-        let block_size = read_u16(&stream[position..], little_endian, &mut position);
-        let trigger_comment = read_u32(&stream[position..], little_endian, &mut position);
-        let trigger_events_number = read_u16(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let trigger_comment = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let trigger_events_number =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
         let events =
             TRBLOCK::read_events(&stream[position..], little_endian, trigger_events_number);
 
@@ -248,53 +250,6 @@ impl TRBLOCK {
     }
 }
 
-fn read_u16(stream: &[u8], little_endian: bool, position: &mut usize) -> u16 {
-    *position += mem::size_of::<u16>() / mem::size_of::<u8>();
-    if little_endian {
-        return LittleEndian::read_u16(stream);
-    } else {
-        return BigEndian::read_u16(stream);
-    }
-}
-
-fn read_i16(stream: &[u8], little_endian: bool, position: &mut usize) -> i16 {
-    *position += mem::size_of::<i16>() / mem::size_of::<u8>();
-    if little_endian {
-        return LittleEndian::read_i16(stream);
-    } else {
-        return BigEndian::read_i16(stream);
-    }
-}
-
-fn read_u32(stream: &[u8], little_endian: bool, position: &mut usize) -> u32 {
-    *position += mem::size_of::<u32>() / mem::size_of::<u8>();
-
-    if little_endian {
-        return LittleEndian::read_u32(stream);
-    } else {
-        return BigEndian::read_u32(stream);
-    }
-}
-
-fn read_u64(stream: &[u8], little_endian: bool, position: &mut usize) -> u64 {
-    *position += mem::size_of::<u64>() / mem::size_of::<u8>();
-
-    if little_endian {
-        return LittleEndian::read_u64(stream);
-    } else {
-        return BigEndian::read_u64(stream);
-    }
-}
-
-fn read_f64(stream: &[u8], little_endian: bool, position: &mut usize) -> f64 {
-    *position += mem::size_of::<f64>() / mem::size_of::<u8>();
-    if little_endian {
-        return LittleEndian::read_f64(stream);
-    } else {
-        return BigEndian::read_f64(stream);
-    }
-}
-
 struct Event {
     trigger_time: REAL,
     pre_trigger_time: REAL,
@@ -304,9 +259,9 @@ struct Event {
 impl Event {
     fn read(stream: &[u8], little_endian: bool) -> (Event, usize) {
         let mut position = 0;
-        let trigger_time = read_f64(&stream[position..], little_endian, &mut position);
-        let pre_trigger_time = read_f64(&stream[position..], little_endian, &mut position);
-        let post_trigger_time = read_f64(&stream[position..], little_endian, &mut position);
+        let trigger_time = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let pre_trigger_time = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let post_trigger_time = utils::read_f64(&stream[position..], little_endian, &mut position);
         return (
             Event {
                 trigger_time,
@@ -332,11 +287,13 @@ impl SRBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..].try_into().expect("msg");
         position += block_type.len();
-        let block_size = read_u16(&stream[position..], little_endian, &mut position);
-        let next = read_u32(&stream[position..], little_endian, &mut position);
-        let data_block = read_u32(&stream[position..], little_endian, &mut position);
-        let samples_reduced_number = read_u32(&stream[position..], little_endian, &mut position);
-        let time_interval_length = read_f64(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let next = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let data_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let samples_reduced_number =
+            utils::read_u32(&stream[position..], little_endian, &mut position);
+        let time_interval_length =
+            utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
             SRBLOCK {
@@ -372,14 +329,14 @@ impl DGBLOCK {
         // Read block type to confirm
         let block_type: [u8; 2] = stream.try_into().expect("msg");
         position += block_type.len();
-        let block_size = read_u16(&stream[position..], little_endian, &mut position);
-        let next = read_u32(&stream[position..], little_endian, &mut &mut position);
-        let first = read_u32(&stream[position..], little_endian, &mut position);
-        let trigger_block = read_u32(&stream[position..], little_endian, &mut position);
-        let data_block = read_u32(&stream[position..], little_endian, &mut position);
-        let group_number = read_u16(&stream[position..], little_endian, &mut position);
-        let id_number = read_u16(&stream[position..], little_endian, &mut position);
-        let reserved = read_u32(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let next = utils::read_u32(&stream[position..], little_endian, &mut &mut position);
+        let first = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let trigger_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let data_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let group_number = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let id_number = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let reserved = utils::read_u32(&stream[position..], little_endian, &mut position);
 
         return (
             DGBLOCK {
@@ -415,16 +372,17 @@ impl CGBLOCK {
     fn read(stream: &[u8], little_endian: bool) -> (CGBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream.try_into().expect("msg");
-        let block_size = read_u16(&stream[position..], little_endian, &mut position);
-        let next = read_u32(&stream[position..], little_endian, &mut position);
-        let first = read_u32(&stream[position..], little_endian, &mut position);
-        let comment = read_u32(&stream[position..], little_endian, &mut position);
-        let record_id = read_u16(&stream[position..], little_endian, &mut &mut position);
-        let channel_number = read_u16(&stream[position..], little_endian, &mut &mut position);
-        let record_size = read_u16(&stream[position..], little_endian, &mut &mut position);
-        let record_number = read_u32(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let next = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let first = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let comment = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let record_id = utils::read_u16(&stream[position..], little_endian, &mut &mut position);
+        let channel_number =
+            utils::read_u16(&stream[position..], little_endian, &mut &mut position);
+        let record_size = utils::read_u16(&stream[position..], little_endian, &mut &mut position);
+        let record_number = utils::read_u32(&stream[position..], little_endian, &mut position);
         let first_sample_reduction_block =
-            read_u32(&stream[position..], little_endian, &mut position);
+            utils::read_u32(&stream[position..], little_endian, &mut position);
 
         return (
             CGBLOCK {
@@ -471,26 +429,27 @@ impl CNBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream.try_into().expect("msg");
         position += block_type.len();
-        let block_size = read_u16(&stream[position..], little_endian, &mut &mut position);
-        let next = read_u32(&stream[position..], little_endian, &mut position);
-        let conversion_formula = read_u32(&stream[position..], little_endian, &mut position);
-        let source_ext = read_u32(&stream[position..], little_endian, &mut position);
-        let comment = read_u32(&stream[position..], little_endian, &mut position);
-        let channel_type = read_u16(&stream[position..], little_endian, &mut position);
+        let block_size = utils::read_u16(&stream[position..], little_endian, &mut &mut position);
+        let next = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let conversion_formula = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let source_ext = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let comment = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let channel_type = utils::read_u16(&stream[position..], little_endian, &mut position);
         let short_name: [u8; 32] = stream[position..].try_into().expect("msg");
         position += short_name.len();
         let desc: [u8; 128] = stream[position..].try_into().expect("msg");
         position += desc.len();
-        let start_offset = read_u16(&stream[position..], little_endian, &mut position);
-        let bit_number = read_u16(&stream[position..], little_endian, &mut position);
-        let data_type = read_u16(&stream[position..], little_endian, &mut position);
-        let value_range_valid = read_u16(&stream[position..], little_endian, &mut position);
-        let signal_min = read_f64(&stream[position..], little_endian, &mut position);
-        let signal_max = read_f64(&stream[position..], little_endian, &mut position);
-        let sample_rate = read_f64(&stream[position..], little_endian, &mut position);
-        let long_name = read_u32(&stream[position..], little_endian, &mut position);
-        let display_name = read_u32(&stream[position..], little_endian, &mut position);
-        let addition_byte_offset = read_u16(&stream[position..], little_endian, &mut position);
+        let start_offset = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let bit_number = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let data_type = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let value_range_valid = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let signal_min = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let signal_max = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let sample_rate = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let long_name = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let display_name = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let addition_byte_offset =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
 
         return (
             CNBLOCK {
@@ -536,16 +495,17 @@ impl CCBLOCK {
         let mut position = 0;
         let block_type: [CHAR; 2] = stream.try_into().expect("msg");
         position += block_type.len();
-        let block_size: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
+        let block_size: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
         let physical_range_valid: BOOL =
-            read_u16(&stream[position..], little_endian, &mut position);
-        let physical_min: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let physical_max: REAL = read_f64(&stream[position..], little_endian, &mut position);
+            utils::read_u16(&stream[position..], little_endian, &mut position);
+        let physical_min: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let physical_max: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
         let unit: [CHAR; 20] = stream[position..].try_into().expect("msg");
         position += unit.len();
-        let conversion_type: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-        let size_info: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-        let (conversion_data, pos): Conversion_Data =
+        let conversion_type: UINT16 =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
+        let size_info: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let (conversion_data, pos) =
             Conversion_Data::read(&stream[position..], little_endian);
         position += pos;
 
@@ -566,9 +526,9 @@ impl CCBLOCK {
     }
 }
 
-trait ConversionBlock {
-    fn read(stream: &[u8], little_endian: bool) -> (Box<dyn ConversionBlock>, usize);
-}
+// trait ConversionBlock {
+//     fn read(stream: &[u8], little_endian: bool) -> (Box<dyn ConversionBlock>, usize);
+// }
 
 enum Conversion_Data {
     Parameters,
@@ -576,9 +536,9 @@ enum Conversion_Data {
     Text,
 }
 
-impl ConversionBlock for Conversion_Data {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Data, usize) {}
-}
+// impl Conversion_Data {
+//     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Data, usize) {}
+// }
 
 enum Parameters {
     Conversion_Linear,
@@ -593,11 +553,11 @@ struct Conversion_Linear {
     p2: REAL,
 }
 
-impl ConversionBlock for Conversion_Linear {
+impl Conversion_Linear {
     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Linear, usize) {
         let mut position = 0;
-        let p1 = read_f64(stream, little_endian, &mut position);
-        let p2 = read_f64(&stream[position..], little_endian, &mut &mut position);
+        let p1 = utils::read_f64(stream, little_endian, &mut position);
+        let p2 = utils::read_f64(&stream[position..], little_endian, &mut &mut position);
 
         return (Conversion_Linear { p1, p2 }, position);
     }
@@ -615,12 +575,12 @@ struct Conversion_Poly {
 impl Conversion_Poly {
     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Poly, usize) {
         let mut position = 0;
-        let p1: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p2: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p3: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p4: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p5: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p6: REAL = read_f64(&stream[position..], little_endian, &mut position);
+        let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p3: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p4: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p5: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p6: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
             Conversion_Poly {
@@ -649,13 +609,13 @@ struct Conversion_Exponetial {
 impl Conversion_Exponetial {
     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Exponetial, usize) {
         let mut position = 0;
-        let p1: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p2: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p3: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p4: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p5: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p6: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p7: REAL = read_f64(&stream[position..], little_endian, &mut position);
+        let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p3: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p4: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p5: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p6: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p7: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
             Conversion_Exponetial {
@@ -685,13 +645,13 @@ struct Conversion_Log {
 impl Conversion_Log {
     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Log, usize) {
         let mut position = 0;
-        let p1: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p2: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p3: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p4: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p5: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p6: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p7: REAL = read_f64(&stream[position..], little_endian, &mut position);
+        let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p3: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p4: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p5: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p6: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p7: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
             Conversion_Log {
@@ -720,12 +680,12 @@ struct Conversion_Rational {
 impl Conversion_Rational {
     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Rational, usize) {
         let mut position = 0;
-        let p1: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p2: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p3: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p4: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p5: REAL = read_f64(&stream[position..], little_endian, &mut position);
-        let p6: REAL = read_f64(&stream[position..], little_endian, &mut position);
+        let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p3: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p4: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p5: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let p6: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
             Conversion_Rational {
@@ -761,8 +721,8 @@ struct TableEntry {
 impl TableEntry {
     fn read(stream: &[u8], little_endian: bool) -> (TableEntry, usize) {
         let mut position = 0;
-        let internal = read_f64(&stream[position..], little_endian, &mut &mut position);
-        let physical = read_f64(&stream[position..], little_endian, &mut position);
+        let internal = utils::read_f64(&stream[position..], little_endian, &mut &mut position);
+        let physical = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (TableEntry { internal, physical }, position);
     }
@@ -813,8 +773,8 @@ struct TextTableEntry {
 impl TextTableEntry {
     fn read(stream: &[u8], little_endian: bool) -> (TextTableEntry, usize) {
         let mut position = 0;
-        let internal = read_f64(stream, little_endian, &mut position);
-        let text = &stream[position..].try_into().expect("msg");
+        let internal = utils::read_f64(stream, little_endian, &mut position);
+        let text: [CHAR; 32] = stream[position..].try_into().expect("msg");
 
         return (TextTableEntry { internal, text }, position);
     }
@@ -830,9 +790,9 @@ struct Conversion_TextRangeTable {
 impl Conversion_TextRangeTable {
     fn read(&stream: &[u8], little_endian: bool) -> (Conversion_TextRangeTable, usize) {
         let mut position = 0;
-        let undef1 = read_f64(&stream[position..], little_endian, &mut position);
-        let undef2 = read_f64(&stream[position..], little_endian, &mut position);
-        let txblock = read_u32(&stream[position..], little_endian, &mut &mut position);
+        let undef1 = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let undef2 = utils::read_f64(&stream[position..], little_endian, &mut position);
+        let txblock = utils::read_u32(&stream[position..], little_endian, &mut &mut position);
     }
 }
 
@@ -843,11 +803,11 @@ struct TextRange {
 }
 
 impl TextRange {
-    fn read(&stream: &[u8], little_endian: bool) -> (TextRange, usize) {
+    fn read(stream: &[u8], little_endian: bool) -> (TextRange, usize) {
         let mut position = 0;
-        let lower = read_f64(&stream[position..], little_endian, &mut &mut position);
-        let upper = read_f64(&stream[position..], little_endian, &mut &mut position);
-        let txblock = read_u32(&stream[position..], little_endian, &mut position);
+        let lower = utils::read_f64(&stream[position..], little_endian, &mut &mut position);
+        let upper = utils::read_f64(&stream[position..], little_endian, &mut &mut position);
+        let txblock = utils::read_u32(&stream[position..], little_endian, &mut position);
 
         return (
             TextRange {
@@ -860,7 +820,7 @@ impl TextRange {
     }
 }
 
-struct Date_Struct {
+struct DateStruct {
     ms: UINT16,
     min: BYTE,
     hour: BYTE,
@@ -869,23 +829,18 @@ struct Date_Struct {
     year: BYTE,
 }
 
-fn read_u8(stream: &[u8], little_endian: bool, position: &mut usize) -> u8 {
-    *position += 1;
-    return stream[0];
-}
-
-impl Date_Struct {
-    fn read(stream: &[u8], little_endian: bool) -> (Date_Struct, usize) {
+impl DateStruct {
+    fn read(stream: &[u8], little_endian: bool) -> (DateStruct, usize) {
         let mut position = 0;
-        let ms = read_u16(&stream[position..], little_endian, &mut position);
-        let min = read_u8(&stream[position..], little_endian, &mut position);
-        let hour = read_u8(&stream[position..], little_endian, &mut position);
-        let day = read_u8(&stream[position..], little_endian, &mut position);
-        let month = read_u8(&stream[position..], little_endian, &mut position);
-        let year = read_u8(&stream[position..], little_endian, &mut position);
+        let ms = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let min = utils::read_u8(&stream[position..], little_endian, &mut position);
+        let hour = utils::read_u8(&stream[position..], little_endian, &mut position);
+        let day = utils::read_u8(&stream[position..], little_endian, &mut position);
+        let month = utils::read_u8(&stream[position..], little_endian, &mut position);
+        let year = utils::read_u8(&stream[position..], little_endian, &mut position);
 
         return (
-            Date_Struct {
+            DateStruct {
                 ms,
                 min,
                 hour,
@@ -906,8 +861,8 @@ struct Time_Struct {
 impl Time_Struct {
     fn read(stream: &[u8], little_endian: bool) -> (Time_Struct, usize) {
         let mut position = 0;
-        let ms = read_u32(&stream[position..], little_endian, &mut position);
-        let days = read_u8(&stream[position..], little_endian, &mut position);
+        let ms = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let days = utils::read_u8(&stream[position..], little_endian, &mut position);
 
         return (Time_Struct { ms, days }, position);
     }
@@ -926,14 +881,16 @@ impl CDBLOCK {
     fn read(stream: &[u8], little_endian: bool) -> (CDBLOCK, usize) {
         let mut position = 0;
         let block_type: [CHAR; 2] = stream.try_into().expect("msg");
-        let block_size: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-        let dependency_type: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-        let signal_number: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
+        let block_size: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let dependency_type: UINT16 =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
+        let signal_number: UINT16 =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
 
         let mut groups = Vec::new();
 
         for _i in 0..signal_number - 1 {
-            let (temp, pos) = Signal::read(&stream[position..], little_endian, signal_number);
+            let (temp, pos) = Signal::read(&stream[position..], little_endian);
             groups.push(temp);
             position += pos;
         }
@@ -946,7 +903,11 @@ impl CDBLOCK {
             dependency_type - 255
         };
         for _i in 0..no_dependencies - 1 {
-            dims.push(read_u16(&stream[position..], little_endian, &mut position))
+            dims.push(utils::read_u16(
+                &stream[position..],
+                little_endian,
+                &mut position,
+            ))
         }
 
         return (
@@ -970,11 +931,11 @@ struct Signal {
 }
 
 impl Signal {
-    fn read(stream: &[u8], little_endian: bool, number: usize) -> (Signal, usize) {
+    fn read(stream: &[u8], little_endian: bool) -> (Signal, usize) {
         let mut position = 0;
-        let data_group = read_u32(&stream[position..], little_endian, &mut position);
-        let channel_group = read_u32(&stream[position..], little_endian, &mut position);
-        let channel = read_u32(&stream[position..], little_endian, &mut position);
+        let data_group = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let channel_group = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let channel = utils::read_u32(&stream[position..], little_endian, &mut position);
 
         return (
             Signal {
@@ -995,24 +956,25 @@ struct CEBLOCK {
 }
 
 impl CEBLOCK {
-	fn read(stream: &[u8], little_endian: bool) -> (CEBLOCK, usize) {
-		let mut position = 0;
-		let block_type: [CHAR; 2] = stream.try_into().expect("msg");
-		position += block_type.len();
-		let block_size: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-		let extension_type: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-		let additional: Supplement = Supplement::read(&stream[position..], little_endian);
+    fn read(stream: &[u8], little_endian: bool) -> (CEBLOCK, usize) {
+        let mut position = 0;
+        let block_type: [CHAR; 2] = stream.try_into().expect("msg");
+        position += block_type.len();
+        let block_size: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
+        let extension_type: UINT16 =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
+        let additional: Supplement = Supplement::read(&stream[position..], little_endian);
 
-		return (
-			CEBLOCK {
-				block_type,
-				block_size,
-				extension_type,
-				additional,
-			}, 
-			position,
-		)
-	}
+        return (
+            CEBLOCK {
+                block_type,
+                block_size,
+                extension_type,
+                additional,
+            },
+            position,
+        );
+    }
 }
 
 enum Supplement {
@@ -1028,25 +990,26 @@ struct DIMBlock {
 }
 
 impl DIMBlock {
-	fn read(stream: &[u8], little_endian: bool) -> (DIMBlock, usize) {
-		let mut position = 0;
-		let module_number: UINT16 = read_u16(&stream[position..], little_endian, &mut position);
-		let address: UINT32 = read_u32(&stream[position..], little_endian, &mut position);
-		let desc: [CHAR; 80] = &stream[position..].try_into().expect("msg");
-		position += desc.len();
-		let ecu_id: [CHAR; 32] = &stream[position..].try_into().expect("msg");
-		position += ecu_id.len();
+    fn read(stream: &[u8], little_endian: bool) -> (DIMBlock, usize) {
+        let mut position = 0;
+        let module_number: UINT16 =
+            utils::read_u16(&stream[position..], little_endian, &mut position);
+        let address: UINT32 = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let desc: [CHAR; 80] = stream[position..].try_into().expect("msg");
+        position += desc.len();
+        let ecu_id: [CHAR; 32] = stream[position..].try_into().expect("msg");
+        position += ecu_id.len();
 
-		return (
-			DIMBlock{
-				module_number,
-				address,
-				desc,
-				ecu_id,
-			}, 
-			position
-		)
-	}
+        return (
+            DIMBlock {
+                module_number,
+                address,
+                desc,
+                ecu_id,
+            },
+            position,
+        );
+    }
 }
 
 struct VectorBlock {
@@ -1056,24 +1019,25 @@ struct VectorBlock {
     sender_name: [CHAR; 36],
 }
 
-impl  VectorBlock {
-	fn read(stream: &[u8], little_endian: bool) -> (VectorBlock, usize) {
-		let mut position = 0;
-		let can_id: UINT32 = read_u32(&stream[position..], little_endian, &mut position);
-		let can_channel: UINT32 = read_u32(&stream[position..], little_endian, &mut position);
-		let message_name: [CHAR; 36] = &stream[position..].try_into().expect("msg");
-		position += message_name.len();
-		let sender_name: [CHAR; 36] = &stream[position..].try_into().expect("msg");
-		position += sender_name.len();
+impl VectorBlock {
+    fn read(stream: &[u8], little_endian: bool) -> (VectorBlock, usize) {
+        let mut position = 0;
+        let can_id: UINT32 = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let can_channel: UINT32 =
+            utils::read_u32(&stream[position..], little_endian, &mut position);
+        let message_name: [CHAR; 36] = stream[position..].try_into().expect("msg");
+        position += message_name.len();
+        let sender_name: [CHAR; 36] = stream[position..].try_into().expect("msg");
+        position += sender_name.len();
 
-		return (
-			VectorBlock{
-				can_id,
-				can_channel,
-				message_name,
-				sender_name,
-			}, 
-			position,
-		)
-	}
+        return (
+            VectorBlock {
+                can_id,
+                can_channel,
+                message_name,
+                sender_name,
+            },
+            position,
+        );
+    }
 }
