@@ -1,7 +1,6 @@
-use std::{convert::TryInto, f32::MIN_POSITIVE, intrinsics::exp2f64, mem, ops::Bound, ptr::read, sync::PoisonError};
+use std::{convert::TryInto, mem};
 
 use byteorder::{BigEndian, ByteOrder, LittleEndian, ReadBytesExt};
-use itertools::Powerset;
 
 // Define types from standard
 type CHAR = u8;
