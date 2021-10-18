@@ -1,8 +1,8 @@
 use std::mem;
 
-use byteorder::{BigEndian, LittleEndian};
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
 
-pub fn read_u8(stream: &[u8], little_endian: bool, position: &mut usize) -> u8 {
+pub fn read_u8(stream: &[u8], _little_endian: bool, position: &mut usize) -> u8 {
     *position += 1;
     return stream[0];
 }
