@@ -16,9 +16,14 @@ type BOOL = u16;
 type REAL = f64;
 type LINK = u32;
 
-pub fn read(file: &[u8]) -> IDBLOCK{
-	let (id_block, _position, _little_endian) = IDBLOCK::read(file);
-	return id_block;
+pub fn read(file: &[u8]) -> (IDBLOCK, bool) {
+	let (id_block, _position, little_endian) = IDBLOCK::read(file);
+	return (id_block, little_endian);
+}
+
+pub fn read_head(file: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
+	let (HDBLOCK, position) = HDBLOCK::read(file, little_endian);
+	return (HDBLOCK, position)
 }
 
 pub struct IDBLOCK {
@@ -43,7 +48,6 @@ impl IDBLOCK {
 		if !eq(&file_id[..], &[0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20,]) {
 			panic!("Error: Incorrect file type");
 		}
-
 
         let format_id = stream[9..17].try_into().expect("msg");
         let program_id = stream[18..26].try_into().expect("msg");
@@ -96,50 +100,55 @@ impl IDBLOCK {
 }
 
 pub struct HDBLOCK {
-    block_type: [CHAR; 2],
-    block_size: UINT16,
-    data_group_block: LINK,
-    file_comment: LINK,
-    program_block: LINK,
-    data_group_number: UINT16,
-    date: [CHAR; 10],
-    time: [CHAR; 8],
-    author: [CHAR; 32],
-    department: [CHAR; 32],
-    project: [CHAR; 32],
-    subject: [CHAR; 32],
-    timestamp: UINT64,
-    utc_time_offset: INT16,
-    time_quality: UINT16,
-    timer_id: [CHAR; 32],
+    pub block_type: [CHAR; 2],
+    pub block_size: UINT16,
+    pub data_group_block: LINK,
+    pub file_comment: LINK,
+    pub program_block: LINK,
+    pub data_group_number: UINT16,
+    pub date: [CHAR; 10],
+    pub time: [CHAR; 8],
+    pub author: [CHAR; 32],
+    pub department: [CHAR; 32],
+    pub project: [CHAR; 32],
+    pub subject: [CHAR; 32],
+    pub timestamp: UINT64,
+    pub utc_time_offset: INT16,
+    pub time_quality: UINT16,
+    pub timer_id: [CHAR; 32],
 }
 
 impl HDBLOCK {
     fn read(stream: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
         let mut position = 0;
-        let block_type: [u8; 2] = stream[0..].try_into().expect("");
+        let block_type: [u8; 2] = stream[0..2].try_into().expect("");
+
+		if !eq(&block_type, &['H' as u8, 'D' as u8]) {
+			panic!("Incorrect type for HDBLOCK");
+		}
+
         position += block_type.len();
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
         let data_group_block = utils::read_u32(&stream[position..], little_endian, &mut position);
         let file_comment = utils::read_u32(&stream[position..], little_endian, &mut position);
         let program_block = utils::read_u32(&stream[position..], little_endian, &mut position);
         let data_group_number = utils::read_u16(&stream[position..], little_endian, &mut position);
-        let date: [u8; 10] = stream[position..].try_into().expect("msg");
+        let date: [u8; 10] = stream[position..position+10].try_into().expect("msg");
         position += date.len();
-        let time: [u8; 8] = stream[position..].try_into().expect("msg");
+        let time: [u8; 8] = stream[position..position+8].try_into().expect("msg");
         position += time.len();
-        let author: [u8; 32] = stream[position..].try_into().expect("msg");
+        let author: [u8; 32] = stream[position..position+32].try_into().expect("msg");
         position += author.len();
-        let department: [u8; 32] = stream[position..].try_into().expect("msg");
+        let department: [u8; 32] = stream[position..position+32].try_into().expect("msg");
         position += department.len();
-        let project: [u8; 32] = stream[position..].try_into().expect("msg");
+        let project: [u8; 32] = stream[position..position+32].try_into().expect("msg");
         position += project.len();
-        let subject: [u8; 32] = stream[position..].try_into().expect("msg");
+        let subject: [u8; 32] = stream[position..position+32].try_into().expect("msg");
         position += subject.len();
         let timestamp = utils::read_u64(&stream[position..], little_endian, &mut position);
         let utc_time_offset = utils::read_i16(&stream[position..], little_endian, &mut position);
         let time_quality = utils::read_u16(&stream[position..], little_endian, &mut position);
-        let timer_id: [u8; 32] = stream[position..].try_into().expect("msg");
+        let timer_id: [u8; 32] = stream[position..position+32].try_into().expect("msg");
         position += timer_id.len();
 
         return (
@@ -167,9 +176,9 @@ impl HDBLOCK {
 }
 
 pub struct TXBLOCK {
-    block_type: [CHAR; 2],
-    block_size: UINT16,
-    text: Vec<CHAR>,
+    pub block_type: [CHAR; 2],
+    pub block_size: UINT16,
+    pub text: Vec<CHAR>,
 }
 
 impl TXBLOCK {
@@ -195,9 +204,9 @@ impl TXBLOCK {
 }
 
 pub struct PRBLOCK {
-    block_type: [CHAR; 2],
-    block_size: UINT16,
-    program_data: Vec<CHAR>,
+    pub block_type: [CHAR; 2],
+    pub block_size: UINT16,
+    pub program_data: Vec<CHAR>,
 }
 
 impl PRBLOCK {
@@ -224,11 +233,11 @@ impl PRBLOCK {
 }
 
 pub struct TRBLOCK {
-    block_type: [CHAR; 2],
-    block_size: UINT16,
-    trigger_comment: LINK,
-    trigger_events_number: UINT16,
-    events: Vec<Event>,
+    pub block_type: [CHAR; 2],
+    pub block_size: UINT16,
+    pub trigger_comment: LINK,
+    pub trigger_events_number: UINT16,
+    pub events: Vec<Event>,
 }
 
 impl TRBLOCK {
@@ -270,9 +279,9 @@ impl TRBLOCK {
 }
 
 pub struct Event {
-    trigger_time: REAL,
-    pre_trigger_time: REAL,
-    post_trigger_time: REAL,
+    pub trigger_time: REAL,
+    pub pre_trigger_time: REAL,
+    pub post_trigger_time: REAL,
 }
 
 impl Event {
@@ -293,12 +302,12 @@ impl Event {
 }
 
 pub struct SRBLOCK {
-    block_type: [CHAR; 2],
-    block_size: UINT16,
-    next: LINK,
-    data_block: LINK,
-    samples_reduced_number: UINT32,
-    time_interval_length: REAL,
+    pub block_type: [CHAR; 2],
+    pub block_size: UINT16,
+    pub next: LINK,
+    pub data_block: LINK,
+    pub samples_reduced_number: UINT32,
+    pub time_interval_length: REAL,
 }
 
 impl SRBLOCK {
