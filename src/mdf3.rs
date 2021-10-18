@@ -1,7 +1,8 @@
 use crate::utils;
-use std::{convert::TryInto, mem};
+use std::{convert::TryInto};
 
-use byteorder::{BigEndian, ByteOrder, LittleEndian, ReadBytesExt};
+
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
 
 // Define types from standard
 type CHAR = u8;
@@ -15,28 +16,45 @@ type BOOL = u16;
 type REAL = f64;
 type LINK = u32;
 
-struct IDBLOCK {
-    file_id: [CHAR; 8],
-    format_id: [CHAR; 8],
-    program_id: [CHAR; 8],
-    default_byte_order: UINT16,
-    default_float_format: UINT16,
-    version_number: UINT16,
-    code_page_number: UINT16,
-    reserved1: [CHAR; 2],
-    reserved2: [CHAR; 30],
+pub fn read(file: &[u8]) -> IDBLOCK{
+	let (id_block, _position, _little_endian) = IDBLOCK::read(file);
+	return id_block;
+}
+
+pub struct IDBLOCK {
+    pub file_id: [CHAR; 8],
+    pub format_id: [CHAR; 8],
+    pub program_id: [CHAR; 8],
+    pub default_byte_order: UINT16,
+    pub default_float_format: UINT16,
+    pub version_number: UINT16,
+    pub code_page_number: UINT16,
+    pub reserved1: [CHAR; 2],
+    pub reserved2: [CHAR; 30],
+}
+
+fn eq(array1: &[u8], other: &[u8]) -> bool {
+	array1.iter().zip(other.iter()).all(|(a,b)| a == b) 
 }
 
 impl IDBLOCK {
-    fn read(stream: &[u8], little_endian: bool) -> (IDBLOCK, usize) {
-        let file_id = stream[0..7].try_into().expect("msg");
-        let format_id = stream[8..].try_into().expect("msg");
-        let program_id = stream[16..].try_into().expect("msg");
-        let default_byte_order = if little_endian {
-            LittleEndian::read_u16(&stream[24..])
-        } else {
-            BigEndian::read_u16(&stream[24..])
-        };
+    fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
+        let file_id: [u8;8] = stream[0..8].try_into().expect("msg");
+		if !eq(&file_id[..], &[0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20,]) {
+			panic!("Error: Incorrect file type");
+		}
+
+
+        let format_id = stream[9..17].try_into().expect("msg");
+        let program_id = stream[18..26].try_into().expect("msg");
+
+        let default_byte_order = LittleEndian::read_u16(&stream[24..]);
+
+		let little_endian = if default_byte_order == 0 {
+			true
+		} else {
+			false
+		};
 
         let default_float_format = if little_endian {
             LittleEndian::read_u16(&stream[26..])
@@ -72,11 +90,12 @@ impl IDBLOCK {
                 reserved2,
             },
             64,
+			little_endian,
         );
     }
 }
 
-struct HDBLOCK {
+pub struct HDBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     data_group_block: LINK,
@@ -147,7 +166,7 @@ impl HDBLOCK {
     }
 }
 
-struct TXBLOCK {
+pub struct TXBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     text: Vec<CHAR>,
@@ -175,7 +194,7 @@ impl TXBLOCK {
     }
 }
 
-struct PRBLOCK {
+pub struct PRBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     program_data: Vec<CHAR>,
@@ -204,7 +223,7 @@ impl PRBLOCK {
     }
 }
 
-struct TRBLOCK {
+pub struct TRBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     trigger_comment: LINK,
@@ -250,7 +269,7 @@ impl TRBLOCK {
     }
 }
 
-struct Event {
+pub struct Event {
     trigger_time: REAL,
     pre_trigger_time: REAL,
     post_trigger_time: REAL,
@@ -273,7 +292,7 @@ impl Event {
     }
 }
 
-struct SRBLOCK {
+pub struct SRBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     next: LINK,
@@ -309,7 +328,7 @@ impl SRBLOCK {
     }
 }
 
-struct DGBLOCK {
+pub struct DGBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     next: LINK,
@@ -355,7 +374,7 @@ impl DGBLOCK {
     }
 }
 
-struct CGBLOCK {
+pub struct CGBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     next: LINK,
@@ -402,7 +421,7 @@ impl CGBLOCK {
     }
 }
 
-struct CNBLOCK {
+pub struct CNBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     next: LINK,
@@ -478,7 +497,7 @@ impl CNBLOCK {
     }
 }
 
-struct CCBLOCK {
+pub struct CCBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     physical_range_valid: BOOL,
@@ -505,8 +524,13 @@ impl CCBLOCK {
         let conversion_type: UINT16 =
             utils::read_u16(&stream[position..], little_endian, &mut position);
         let size_info: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
+
+
+		let datatype = 1;
+
+
         let (conversion_data, pos) =
-            Conversion_Data::read(&stream[position..], little_endian);
+            Conversion_Data::read(&stream[position..], little_endian, datatype);
         position += pos;
 
         return (
@@ -536,34 +560,52 @@ enum Conversion_Data {
     Text,
 }
 
+impl Conversion_Data {
+	fn read(data: &[u8], little_endian: bool, datatype: u8 ) -> (Conversion_Data, usize){
+		if datatype == 1 {
+			return (Conversion_Data::Parameters, 1)
+		} else {
+			return (Conversion_Data::Table, 1)
+		}
+	}
+}
+
 // impl Conversion_Data {
 //     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Data, usize) {}
 // }
 
 enum Parameters {
-    Conversion_Linear,
-    Conversion_Poly,
-    Conversion_Exponetial,
-    Conversion_Log,
-    Conversion_Rational,
+    ConversionLinear,
+    ConversionPoly,
+    ConversionExponetial,
+    ConversionLog,
+    ConversionRational,
 }
 
-struct Conversion_Linear {
+impl Parameters {
+	fn read(data: &[u8], little_endian: bool) -> (Parameters, usize) {
+		return (
+			Parameters::ConversionLinear, 10
+		)
+	}
+}
+
+pub struct ConversionLinear {
     p1: REAL,
     p2: REAL,
 }
 
-impl Conversion_Linear {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Linear, usize) {
+impl ConversionLinear {
+    fn read(stream: &[u8], little_endian: bool) -> (ConversionLinear, usize) {
         let mut position = 0;
         let p1 = utils::read_f64(stream, little_endian, &mut position);
         let p2 = utils::read_f64(&stream[position..], little_endian, &mut &mut position);
 
-        return (Conversion_Linear { p1, p2 }, position);
+        return (ConversionLinear { p1, p2 }, position);
     }
 }
 
-struct Conversion_Poly {
+pub struct ConversionPoly {
     p1: REAL,
     p2: REAL,
     p3: REAL,
@@ -572,8 +614,8 @@ struct Conversion_Poly {
     p6: REAL,
 }
 
-impl Conversion_Poly {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Poly, usize) {
+impl ConversionPoly {
+    fn read(stream: &[u8], little_endian: bool) -> (ConversionPoly, usize) {
         let mut position = 0;
         let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
         let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
@@ -583,7 +625,7 @@ impl Conversion_Poly {
         let p6: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
-            Conversion_Poly {
+            ConversionPoly {
                 p1,
                 p2,
                 p3,
@@ -596,7 +638,7 @@ impl Conversion_Poly {
     }
 }
 
-struct Conversion_Exponetial {
+pub struct ConversionExponetial {
     p1: REAL,
     p2: REAL,
     p3: REAL,
@@ -606,8 +648,8 @@ struct Conversion_Exponetial {
     p7: REAL,
 }
 
-impl Conversion_Exponetial {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Exponetial, usize) {
+impl ConversionExponetial {
+    fn read(stream: &[u8], little_endian: bool) -> (ConversionExponetial, usize) {
         let mut position = 0;
         let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
         let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
@@ -618,7 +660,7 @@ impl Conversion_Exponetial {
         let p7: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
-            Conversion_Exponetial {
+            ConversionExponetial {
                 p1,
                 p2,
                 p3,
@@ -632,7 +674,7 @@ impl Conversion_Exponetial {
     }
 }
 
-struct Conversion_Log {
+pub struct ConversionLog {
     p1: REAL,
     p2: REAL,
     p3: REAL,
@@ -642,8 +684,8 @@ struct Conversion_Log {
     p7: REAL,
 }
 
-impl Conversion_Log {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Log, usize) {
+impl ConversionLog {
+    fn read(stream: &[u8], little_endian: bool) -> (ConversionLog, usize) {
         let mut position = 0;
         let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
         let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
@@ -654,7 +696,7 @@ impl Conversion_Log {
         let p7: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
-            Conversion_Log {
+            ConversionLog {
                 p1,
                 p2,
                 p3,
@@ -668,7 +710,7 @@ impl Conversion_Log {
     }
 }
 
-struct Conversion_Rational {
+pub struct ConversionRational {
     p1: REAL,
     p2: REAL,
     p3: REAL,
@@ -677,8 +719,8 @@ struct Conversion_Rational {
     p6: REAL,
 }
 
-impl Conversion_Rational {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Rational, usize) {
+impl ConversionRational {
+    fn read(stream: &[u8], little_endian: bool) -> (ConversionRational, usize) {
         let mut position = 0;
         let p1: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
         let p2: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
@@ -688,7 +730,7 @@ impl Conversion_Rational {
         let p6: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
 
         return (
-            Conversion_Rational {
+            ConversionRational {
                 p1,
                 p2,
                 p3,
@@ -702,18 +744,34 @@ impl Conversion_Rational {
 }
 
 enum Table {
-    Conversion_Tabular,
+    ConversionTabular,
 }
 
-struct Conversion_Tabular {
+pub struct ConversionTabular {
     value: Vec<TableEntry>,
 }
 
-impl Conversion_Tabular {
-    fn read(stream: &[u8], little_endian: bool) -> (Conversion_Tabular, usize) {}
+impl ConversionTabular {
+    fn read(stream: &[u8], little_endian: bool) -> (ConversionTabular, usize) {
+
+		let mut position = 0;
+		let mut value = Vec::new();
+		for _i in 0..1 {
+			let (temp, pos) = TableEntry::read(&stream[position..], little_endian);
+			position += pos;
+			value.push(temp);
+		}
+
+		return (
+			ConversionTabular{
+				value, 
+			}, 
+			position
+		)
+	}
 }
 
-struct TableEntry {
+pub struct TableEntry {
     internal: REAL,
     physical: REAL,
 }
@@ -733,14 +791,14 @@ enum Text {
     Conversion_TextRangeTable,
 }
 
-struct Conversion_TextFormula {
+pub struct Conversion_TextFormula {
     formula: [CHAR; 256],
 }
 
 impl Conversion_TextFormula {
     fn read(stream: &[u8], little_endian: bool) -> (Conversion_TextFormula, usize) {
         let mut position = 0;
-        let formula = stream.try_into().expect("msg");
+        let formula: [CHAR; 256] = stream.try_into().expect("msg");
         position += formula.len();
 
         return (Conversion_TextFormula { formula }, position);
@@ -765,7 +823,7 @@ impl Conversion_TextTable {
     }
 }
 
-struct TextTableEntry {
+pub struct TextTableEntry {
     internal: REAL,
     text: [CHAR; 32],
 }
@@ -780,7 +838,7 @@ impl TextTableEntry {
     }
 }
 
-struct Conversion_TextRangeTable {
+pub struct Conversion_TextRangeTable {
     undef1: REAL,
     undef2: REAL,
     txblock: LINK,
@@ -788,15 +846,27 @@ struct Conversion_TextRangeTable {
 }
 
 impl Conversion_TextRangeTable {
-    fn read(&stream: &[u8], little_endian: bool) -> (Conversion_TextRangeTable, usize) {
+    fn read(stream: &[u8], little_endian: bool) -> (Conversion_TextRangeTable, usize) {
         let mut position = 0;
         let undef1 = utils::read_f64(&stream[position..], little_endian, &mut position);
         let undef2 = utils::read_f64(&stream[position..], little_endian, &mut position);
         let txblock = utils::read_u32(&stream[position..], little_endian, &mut &mut position);
+		let entry = Vec::new();
+
+
+		return (
+			Conversion_TextRangeTable{
+				undef1,
+				undef2,
+				txblock,
+				entry,
+			}, 
+			position
+		)
     }
 }
 
-struct TextRange {
+pub struct TextRange {
     lower: REAL,
     upper: REAL,
     txblock: LINK,
@@ -820,7 +890,7 @@ impl TextRange {
     }
 }
 
-struct DateStruct {
+pub struct DateStruct {
     ms: UINT16,
     min: BYTE,
     hour: BYTE,
@@ -853,7 +923,7 @@ impl DateStruct {
     }
 }
 
-struct Time_Struct {
+pub struct Time_Struct {
     ms: UINT32,
     days: BYTE,
 }
@@ -868,7 +938,7 @@ impl Time_Struct {
     }
 }
 
-struct CDBLOCK {
+pub struct CDBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     dependency_type: UINT16,
@@ -924,7 +994,7 @@ impl CDBLOCK {
     }
 }
 
-struct Signal {
+pub struct Signal {
     data_group: LINK,
     channel_group: LINK,
     channel: LINK,
@@ -948,7 +1018,7 @@ impl Signal {
     }
 }
 
-struct CEBLOCK {
+pub struct CEBLOCK {
     block_type: [CHAR; 2],
     block_size: UINT16,
     extension_type: UINT16,
@@ -982,7 +1052,13 @@ enum Supplement {
     VectorBlock,
 }
 
-struct DIMBlock {
+impl Supplement {
+	fn read(stream: &[u8], little_endian: bool) -> Supplement {
+		return Supplement::DIMBlock;
+	}
+}
+
+pub struct DIMBlock {
     module_number: UINT16,
     address: UINT32,
     desc: [CHAR; 80],
@@ -1012,7 +1088,7 @@ impl DIMBlock {
     }
 }
 
-struct VectorBlock {
+pub struct VectorBlock {
     can_id: UINT32,
     can_channel: UINT32,
     message_name: [CHAR; 36],
