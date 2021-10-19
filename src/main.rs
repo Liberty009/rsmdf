@@ -22,9 +22,9 @@ fn main() {
 	println!("Text: {}", str::from_utf8(&test.block_type).expect(""));
 	println!("Text: {}", str::from_utf8(&test.text[0..]).expect(""));
 
-	println!("PRBLOCK ADDRESS: {}", head.program_block);
-	let (test_pr, _pos) = mdf3::PRBLOCK::read(&file[head.program_block as usize..], little_endian);
-	println!("Program data: {}", str::from_utf8(&test_pr.program_data).expect(""));
+	// println!("PRBLOCK ADDRESS: {}", head.program_block);
+	// let (test_pr, _pos) = mdf3::PRBLOCK::read(&file[head.program_block as usize..], little_endian);
+	// println!("Program data: {}", str::from_utf8(&test_pr.program_data).expect(""));
 
 }
 
