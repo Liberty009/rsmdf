@@ -80,7 +80,7 @@ impl IDBLOCK {
         };
 
         let reserved1 = [stream[32], stream[33]];
-        let reserved2 = stream[34..].try_into().expect("msg");
+        let reserved2 = stream[34..64].try_into().expect("msg");
 
         return (
             IDBLOCK {
