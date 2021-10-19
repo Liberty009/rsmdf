@@ -41,15 +41,23 @@ pub struct IDBLOCK {
 
 impl IDBLOCK {
     pub fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
-        let file_id: [u8;8] = stream[0..8].try_into().expect("msg");
+		let mut position = 0;
+        let file_id: [u8;8] = stream[position..position + 8].try_into().expect("msg");
+
 		if !utils::eq(&file_id[..], &[0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20,]) {
 			panic!("Error: Incorrect file type");
 		}
 
-        let format_id = stream[9..17].try_into().expect("msg");
-        let program_id = stream[18..26].try_into().expect("msg");
+		position += file_id.len();
 
-        let default_byte_order = LittleEndian::read_u16(&stream[24..]);
+        let format_id: [u8; 8] = stream[position..position+8].try_into().expect("msg");
+		position += format_id.len();
+
+        let program_id: [u8; 8] = stream[position..position+8].try_into().expect("msg");
+		position += program_id.len();
+
+        let default_byte_order = LittleEndian::read_u16(&stream[position..]);
+		position += 2;
 
 		let little_endian = if default_byte_order == 0 {
 			true
@@ -58,25 +66,30 @@ impl IDBLOCK {
 		};
 
         let default_float_format = if little_endian {
-            LittleEndian::read_u16(&stream[26..])
+            LittleEndian::read_u16(&stream[position..])
         } else {
-            BigEndian::read_u16(&stream[26..])
+            BigEndian::read_u16(&stream[position..])
         };
+		position += 2;
 
         let version_number = if little_endian {
-            LittleEndian::read_u16(&stream[28..])
+            LittleEndian::read_u16(&stream[position..])
         } else {
-            BigEndian::read_u16(&stream[28..])
+            BigEndian::read_u16(&stream[position..])
         };
+		position += 2;
 
         let code_page_number = if little_endian {
-            LittleEndian::read_u16(&stream[30..])
+            LittleEndian::read_u16(&stream[position..])
         } else {
-            BigEndian::read_u16(&stream[30..])
+            BigEndian::read_u16(&stream[position..])
         };
+		position += 2;
 
-        let reserved1 = [stream[32], stream[33]];
-        let reserved2 = stream[34..64].try_into().expect("msg");
+        let reserved1: [u8; 2] = [stream[position], stream[position + 1]];
+		position += 2;
+        let reserved2: [u8; 30] = stream[position..position + 30].try_into().expect("msg");
+		position += reserved2.len();
 
         return (
             IDBLOCK {
@@ -90,7 +103,7 @@ impl IDBLOCK {
                 reserved1,
                 reserved2,
             },
-            64,
+            position,
 			little_endian,
         );
     }
