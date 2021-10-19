@@ -283,5 +283,104 @@ use mdf_rust::mdf3;
 			]
 		));
 	}
+
+	#[test]
+	fn txblock(){
+
+	}
+
+	#[test]
+	fn prblock(){
+
+	}
+
+	#[test]
+	fn trblock(){
+
+	}
+
+	#[test]
+	fn event(){
+
+	}
+
+	#[test]
+	fn srblock(){
+
+	}
+
+	#[test]
+	fn dgblock(){}
+
+	#[test]
+	fn cgblock(){}
+
+	#[test]
+	fn cnblock(){}
+
+	#[test]
+	fn ccblock(){}
+
+	#[test]
+	fn conversion_linear(){}
+
+	#[test]
+	fn conversion_poly(){}
+
+	#[test]
+	fn conversion_exponential(){}
+
+	#[test]
+	fn conversion_log(){}
+
+	#[test]
+	fn conversion_rational(){}
+
+	#[test]
+	fn conversion_tabular(){}
+
+	#[test]
+	fn table_entry(){}
+
+	#[test]
+	fn conversion_text_formula(){}
+
+	#[test]
+	fn conversion_text_table(){}
+
+	#[test]
+	fn text_table_entry(){}
+
+	#[test]
+	fn conversion_text_range_table(){}
+
+	#[test]
+	fn text_range(){}
+
+	#[test]
+	fn date_struct(){}
+
+	#[test]
+	fn time_struct(){}
+
+	#[test]
+	fn cdblock(){}
+
+	#[test]
+	fn signal(){}
+
+	#[test]
+	fn ceblock(){}
+
+	#[test]
+	fn supplement(){}
+
+	#[test]
+	fn dimblock(){}
+
+	#[test]
+	fn vector_block(){}
+
+	
 }
 
