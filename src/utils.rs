@@ -53,3 +53,7 @@ pub fn read_f64(stream: &[u8], little_endian: bool, position: &mut usize) -> f64
         return BigEndian::read_f64(stream);
     }
 }
+
+pub fn eq(array1: &[u8], other: &[u8]) -> bool {
+	array1.iter().zip(other.iter()).all(|(a,b)| a == b) 
+}
