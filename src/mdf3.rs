@@ -408,7 +408,6 @@ impl DGBLOCK {
         );
     }
 }
-
 pub struct CGBLOCK {
     pub block_type: [CHAR; 2],
     pub block_size: UINT16,
@@ -585,10 +584,6 @@ impl CCBLOCK {
     }
 }
 
-// trait ConversionBlock {
-//     fn read(stream: &[u8], little_endian: bool) -> (Box<dyn ConversionBlock>, usize);
-// }
-
 pub enum ConversionData {
     Parameters,
     Table,
@@ -604,10 +599,6 @@ impl ConversionData {
 		}
 	}
 }
-
-// impl Conversion_Data {
-//     fn read(stream: &[u8], little_endian: bool) -> (Conversion_Data, usize) {}
-// }
 
 pub enum Parameters {
     ConversionLinear,
