@@ -16,15 +16,16 @@ type BOOL = u16;
 type REAL = f64;
 type LINK = u32;
 
-pub fn read(file: &[u8]) -> (IDBLOCK, bool) {
-	let (id_block, _position, little_endian) = IDBLOCK::read(file);
-	return (id_block, little_endian);
+pub fn read(file: &[u8]) -> (IDBLOCK, bool, usize) {
+	let (id_block, position, little_endian) = IDBLOCK::read(file);
+	return (id_block, little_endian, position);
 }
 
 pub fn read_head(file: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
 	let (HDBLOCK, position) = HDBLOCK::read(file, little_endian);
 	return (HDBLOCK, position)
 }
+
 
 pub struct IDBLOCK {
     pub file_id: [CHAR; 8],
@@ -43,7 +44,7 @@ fn eq(array1: &[u8], other: &[u8]) -> bool {
 }
 
 impl IDBLOCK {
-    fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
+    pub fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
         let file_id: [u8;8] = stream[0..8].try_into().expect("msg");
 		if !eq(&file_id[..], &[0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20,]) {
 			panic!("Error: Incorrect file type");
@@ -119,7 +120,7 @@ pub struct HDBLOCK {
 }
 
 impl HDBLOCK {
-    fn read(stream: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[0..2].try_into().expect("");
 
@@ -182,14 +183,21 @@ pub struct TXBLOCK {
 }
 
 impl TXBLOCK {
-    fn read(stream: &[u8], little_endian: bool) -> (TXBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (TXBLOCK, usize) {
         let mut position = 0;
-        let block_type: [u8; 2] = stream.try_into().expect("");
+        let block_type: [u8; 2] = stream[0..2].try_into().expect("");
         position += block_type.len();
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
 
         let mut text: Vec<u8> = vec![0; block_size as usize];
-        text = stream.try_into().expect("msg");
+        text = stream[position..position+block_size as usize-5].try_into().expect("msg");
+		
+		// make sure that the text is utf8
+		for c in &mut text {
+			if 128 < *c {
+				*c = 32;
+			}
+		}
         position += text.len();
 
         return (
@@ -210,8 +218,11 @@ pub struct PRBLOCK {
 }
 
 impl PRBLOCK {
-    fn read(stream: &[u8], little_endian: bool) -> (PRBLOCK, usize) {
-        let block_type = stream.try_into().expect("");
+    pub fn read(stream: &[u8], little_endian: bool) -> (PRBLOCK, usize) {
+        let block_type:[u8; 2] = stream[0..2].try_into().expect("");
+		if !eq(&block_type, &['P' as u8, 'R' as u8,]) {
+			panic!("PR Block not found");
+		}
         let block_size = if little_endian {
             LittleEndian::read_u16(&stream[2..])
         } else {
@@ -221,13 +232,20 @@ impl PRBLOCK {
         let mut program_data = vec![0; block_size as usize];
         program_data = stream.try_into().expect("msg");
 
+		// make sure that the text is utf8
+		for c in &mut program_data {
+			if 128 <= *c {
+				*c = 32;
+			}
+		}
+
         return (
             PRBLOCK {
                 block_type,
                 block_size,
                 program_data,
             },
-            20,
+            block_size as usize,
         );
     }
 }
