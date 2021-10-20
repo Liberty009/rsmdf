@@ -1,6 +1,5 @@
 use crate::utils;
-use std::{convert::TryInto};
-
+use std::convert::TryInto;
 
 use byteorder::{BigEndian, ByteOrder, LittleEndian};
 
@@ -17,15 +16,14 @@ type REAL = f64;
 type LINK = u32;
 
 pub fn read(file: &[u8]) -> (IDBLOCK, bool, usize) {
-	let (id_block, position, little_endian) = IDBLOCK::read(file);
-	return (id_block, little_endian, position);
+    let (id_block, position, little_endian) = IDBLOCK::read(file);
+    return (id_block, little_endian, position);
 }
 
 pub fn read_head(file: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
-	let (hdblock, position) = HDBLOCK::read(file, little_endian);
-	return (hdblock, position)
+    let (hdblock, position) = HDBLOCK::read(file, little_endian);
+    return (hdblock, position);
 }
-
 
 pub struct IDBLOCK {
     pub file_id: [CHAR; 8],
@@ -41,55 +39,54 @@ pub struct IDBLOCK {
 
 impl IDBLOCK {
     pub fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
-		let mut position = 0;
-        let file_id: [u8;8] = stream[position..position + 8].try_into().expect("msg");
+        let mut position = 0;
+        let file_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
 
-		if !utils::eq(&file_id[..], &[0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20,]) {
-			panic!("Error: Incorrect file type");
-		}
+        if !utils::eq(
+            &file_id[..],
+            &[0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20],
+        ) {
+            panic!("Error: Incorrect file type");
+        }
 
-		position += file_id.len();
+        position += file_id.len();
 
-        let format_id: [u8; 8] = stream[position..position+8].try_into().expect("msg");
-		position += format_id.len();
+        let format_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
+        position += format_id.len();
 
-        let program_id: [u8; 8] = stream[position..position+8].try_into().expect("msg");
-		position += program_id.len();
+        let program_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
+        position += program_id.len();
 
         let default_byte_order = LittleEndian::read_u16(&stream[position..]);
-		position += 2;
+        position += 2;
 
-		let little_endian = if default_byte_order == 0 {
-			true
-		} else {
-			false
-		};
+        let little_endian = if default_byte_order == 0 { true } else { false };
 
         let default_float_format = if little_endian {
             LittleEndian::read_u16(&stream[position..])
         } else {
             BigEndian::read_u16(&stream[position..])
         };
-		position += 2;
+        position += 2;
 
         let version_number = if little_endian {
             LittleEndian::read_u16(&stream[position..])
         } else {
             BigEndian::read_u16(&stream[position..])
         };
-		position += 2;
+        position += 2;
 
         let code_page_number = if little_endian {
             LittleEndian::read_u16(&stream[position..])
         } else {
             BigEndian::read_u16(&stream[position..])
         };
-		position += 2;
+        position += 2;
 
         let reserved1: [u8; 2] = [stream[position], stream[position + 1]];
-		position += 2;
+        position += 2;
         let reserved2: [u8; 30] = stream[position..position + 30].try_into().expect("msg");
-		position += reserved2.len();
+        position += reserved2.len();
 
         return (
             IDBLOCK {
@@ -104,7 +101,7 @@ impl IDBLOCK {
                 reserved2,
             },
             position,
-			little_endian,
+            little_endian,
         );
     }
 }
@@ -133,9 +130,9 @@ impl HDBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream[0..2].try_into().expect("");
 
-		if !utils::eq(&block_type, &['H' as u8, 'D' as u8]) {
-			panic!("Incorrect type for HDBLOCK");
-		}
+        if !utils::eq(&block_type, &['H' as u8, 'D' as u8]) {
+            panic!("Incorrect type for HDBLOCK");
+        }
 
         position += block_type.len();
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
@@ -143,22 +140,22 @@ impl HDBLOCK {
         let file_comment = utils::read_u32(&stream[position..], little_endian, &mut position);
         let program_block = utils::read_u32(&stream[position..], little_endian, &mut position);
         let data_group_number = utils::read_u16(&stream[position..], little_endian, &mut position);
-        let date: [u8; 10] = stream[position..position+10].try_into().expect("msg");
+        let date: [u8; 10] = stream[position..position + 10].try_into().expect("msg");
         position += date.len();
-        let time: [u8; 8] = stream[position..position+8].try_into().expect("msg");
+        let time: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
         position += time.len();
-        let author: [u8; 32] = stream[position..position+32].try_into().expect("msg");
+        let author: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
         position += author.len();
-        let department: [u8; 32] = stream[position..position+32].try_into().expect("msg");
+        let department: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
         position += department.len();
-        let project: [u8; 32] = stream[position..position+32].try_into().expect("msg");
+        let project: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
         position += project.len();
-        let subject: [u8; 32] = stream[position..position+32].try_into().expect("msg");
+        let subject: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
         position += subject.len();
         let timestamp = utils::read_u64(&stream[position..], little_endian, &mut position);
         let utc_time_offset = utils::read_i16(&stream[position..], little_endian, &mut position);
         let time_quality = utils::read_u16(&stream[position..], little_endian, &mut position);
-        let timer_id: [u8; 32] = stream[position..position+32].try_into().expect("msg");
+        let timer_id: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
         position += timer_id.len();
 
         return (
@@ -195,17 +192,27 @@ impl TXBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (TXBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[0..2].try_into().expect("");
+
+        if !utils::eq(&block_type, &['T' as u8, 'X' as u8]) {
+            panic!(
+                "TXBLOCK type incorrect. Found : {}, {}",
+                block_type[0], block_type[1]
+            );
+        }
+
         position += block_type.len();
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
 
-        let mut text: Vec<u8> = stream[position..position+block_size as usize-5].try_into().expect("msg");
-		
-		// make sure that the text is utf8
-		for c in &mut text {
-			if 128 < *c {
-				*c = 32;
-			}
-		}
+        let mut text: Vec<u8> = stream[position..position + block_size as usize - 5]
+            .try_into()
+            .expect("msg");
+
+        // make sure that the text is utf8
+        for c in &mut text {
+            if 128 < *c {
+                *c = 32;
+            }
+        }
         position += text.len();
 
         return (
@@ -227,10 +234,10 @@ pub struct PRBLOCK {
 
 impl PRBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (PRBLOCK, usize) {
-        let block_type:[u8; 2] = stream[0..2].try_into().expect("");
-		if !utils::eq(&block_type, &['P' as u8, 'R' as u8,]) {
-			panic!("PR Block not found");
-		}
+        let block_type: [u8; 2] = stream[0..2].try_into().expect("");
+        if !utils::eq(&block_type, &['P' as u8, 'R' as u8]) {
+            panic!("PR Block not found");
+        }
         let block_size = if little_endian {
             LittleEndian::read_u16(&stream[2..])
         } else {
@@ -240,12 +247,12 @@ impl PRBLOCK {
         //let mut program_data = vec![0; block_size as usize];
         let mut program_data: Vec<u8> = stream.try_into().expect("msg");
 
-		// make sure that the text is utf8
-		for c in &mut program_data {
-			if 128 <= *c {
-				*c = 32;
-			}
-		}
+        // make sure that the text is utf8
+        for c in &mut program_data {
+            if 128 <= *c {
+                *c = 32;
+            }
+        }
 
         return (
             PRBLOCK {
@@ -559,9 +566,7 @@ impl CCBLOCK {
             utils::read_u16(&stream[position..], little_endian, &mut position);
         let size_info: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
 
-
-		let datatype = 1;
-
+        let datatype = 1;
 
         let (conversion_data, pos) =
             ConversionData::read(&stream[position..], little_endian, datatype);
@@ -591,13 +596,13 @@ pub enum ConversionData {
 }
 
 impl ConversionData {
-	pub fn read(_data: &[u8], _little_endian: bool, datatype: u8 ) -> (ConversionData, usize){
-		if datatype == 1 {
-			return (ConversionData::Parameters, 1)
-		} else {
-			return (ConversionData::Table, 1)
-		}
-	}
+    pub fn read(_data: &[u8], _little_endian: bool, datatype: u8) -> (ConversionData, usize) {
+        if datatype == 1 {
+            return (ConversionData::Parameters, 1);
+        } else {
+            return (ConversionData::Table, 1);
+        }
+    }
 }
 
 pub enum Parameters {
@@ -609,11 +614,9 @@ pub enum Parameters {
 }
 
 impl Parameters {
-	pub fn read(_data: &[u8], _little_endian: bool) -> (Parameters, usize) {
-		return (
-			Parameters::ConversionLinear, 10
-		)
-	}
+    pub fn read(_data: &[u8], _little_endian: bool) -> (Parameters, usize) {
+        return (Parameters::ConversionLinear, 10);
+    }
 }
 
 pub struct ConversionLinear {
@@ -779,22 +782,16 @@ pub struct ConversionTabular {
 
 impl ConversionTabular {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTabular, usize) {
+        let mut position = 0;
+        let mut value = Vec::new();
+        for _i in 0..1 {
+            let (temp, pos) = TableEntry::read(&stream[position..], little_endian);
+            position += pos;
+            value.push(temp);
+        }
 
-		let mut position = 0;
-		let mut value = Vec::new();
-		for _i in 0..1 {
-			let (temp, pos) = TableEntry::read(&stream[position..], little_endian);
-			position += pos;
-			value.push(temp);
-		}
-
-		return (
-			ConversionTabular{
-				value, 
-			}, 
-			position
-		)
-	}
+        return (ConversionTabular { value }, position);
+    }
 }
 
 pub struct TableEntry {
@@ -877,18 +874,17 @@ impl ConversionTextRangeTable {
         let undef1 = utils::read_f64(&stream[position..], little_endian, &mut position);
         let undef2 = utils::read_f64(&stream[position..], little_endian, &mut position);
         let txblock = utils::read_u32(&stream[position..], little_endian, &mut &mut position);
-		let entry = Vec::new();
+        let entry = Vec::new();
 
-
-		return (
-			ConversionTextRangeTable{
-				undef1,
-				undef2,
-				txblock,
-				entry,
-			}, 
-			position
-		)
+        return (
+            ConversionTextRangeTable {
+                undef1,
+                undef2,
+                txblock,
+                entry,
+            },
+            position,
+        );
     }
 }
 
@@ -1079,9 +1075,9 @@ pub enum Supplement {
 }
 
 impl Supplement {
-	pub fn read(_stream: &[u8], _little_endian: bool) -> Supplement {
-		return Supplement::DIMBlock;
-	}
+    pub fn read(_stream: &[u8], _little_endian: bool) -> Supplement {
+        return Supplement::DIMBlock;
+    }
 }
 
 pub struct DIMBlock {
