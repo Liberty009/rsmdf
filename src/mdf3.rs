@@ -398,15 +398,30 @@ impl DGBLOCK {
         let mut position = 0;
 
         // Read block type to confirm
-        let block_type: [u8; 2] = stream.try_into().expect("msg");
+        let block_type: [u8; 2] = stream[0..2].try_into().expect("msg");
+        if !utils::eq(&block_type, &['D' as u8, 'G' as u8]) {
+            panic!(
+                "DGBLOCK not found. Found: {}, {}",
+                block_type[0], block_type[1]
+            );
+        }
+
         position += block_type.len();
+
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
+
         let next = utils::read_u32(&stream[position..], little_endian, &mut &mut position);
+
         let first = utils::read_u32(&stream[position..], little_endian, &mut position);
+
         let trigger_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+
         let data_block = utils::read_u32(&stream[position..], little_endian, &mut position);
+
         let group_number = utils::read_u16(&stream[position..], little_endian, &mut position);
+
         let id_number = utils::read_u16(&stream[position..], little_endian, &mut position);
+
         let reserved = utils::read_u32(&stream[position..], little_endian, &mut position);
 
         return (

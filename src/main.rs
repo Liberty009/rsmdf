@@ -593,7 +593,23 @@ mod tests {
     fn srblock() {}
 
     #[test]
-    fn dgblock() {}
+    fn dgblock() {
+        let dg_data = [
+            0x44, 0x47, 0x1C, 0x00, 0xF4, 0xDF, 0x10, 0x00, 0x99, 0xE4, 0x10, 0x00, 0x2B, 0xE5,
+            0x10, 0x00, 0xDC, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        ];
+
+        let (dg_block, position) = mdf3::DGBLOCK::read(&dg_data, true);
+
+        assert_eq!(position, 28);
+        assert_eq!(dg_block.next, 1105908);
+        assert_eq!(dg_block.first, 1107097);
+        assert_eq!(dg_block.trigger_block, 1107243);
+        assert_eq!(dg_block.data_block, 988);
+        assert_eq!(dg_block.group_number, 1);
+        assert_eq!(dg_block.id_number, 0);
+        assert_eq!(dg_block.reserved, 0);
+    }
 
     #[test]
     fn cgblock() {}
