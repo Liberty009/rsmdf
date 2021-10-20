@@ -287,14 +287,23 @@ impl TRBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (TRBLOCK, usize) {
         let mut position = 0;
 
-        let block_type = stream.try_into().expect("msg");
+        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
+        if !utils::eq(&block_type, &['T' as u8, 'R' as u8]) {
+            panic!(
+                "TRBLOCK not found. Found: {}, {}",
+                block_type[0], block_type[1]
+            );
+        }
+
+        position += block_type.len();
+
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
         let trigger_comment = utils::read_u32(&stream[position..], little_endian, &mut position);
         let trigger_events_number =
             utils::read_u16(&stream[position..], little_endian, &mut position);
-        let events =
+        let (events, pos) =
             TRBLOCK::read_events(&stream[position..], little_endian, trigger_events_number);
-
+        position += pos;
         return (
             TRBLOCK {
                 block_type,
@@ -303,21 +312,21 @@ impl TRBLOCK {
                 trigger_events_number,
                 events,
             },
-            position + block_size as usize,
+            position,
         );
     }
 
-    fn read_events(stream: &[u8], little_endian: bool, no_events: u16) -> Vec<Event> {
+    fn read_events(stream: &[u8], little_endian: bool, no_events: u16) -> (Vec<Event>, usize) {
         let mut events = Vec::new();
         let mut position = 0;
 
-        for _i in 0..no_events - 1 {
+        for _i in 0..no_events {
             let (event, pos) = Event::read(&stream[position..], little_endian);
             events.push(event);
-            position = pos;
+            position += pos;
         }
 
-        return events;
+        return (events, position);
     }
 }
 
@@ -456,7 +465,17 @@ pub struct CGBLOCK {
 impl CGBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (CGBLOCK, usize) {
         let mut position = 0;
-        let block_type: [u8; 2] = stream.try_into().expect("msg");
+        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
+
+        if !utils::eq(&block_type, &['C' as u8, 'G' as u8]) {
+            panic!(
+                "CGBLOCK not found. Found: {}, {}",
+                block_type[0], block_type[1]
+            );
+        }
+
+        position += block_type.len();
+
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut position);
         let next = utils::read_u32(&stream[position..], little_endian, &mut position);
         let first = utils::read_u32(&stream[position..], little_endian, &mut position);
