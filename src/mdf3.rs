@@ -234,18 +234,28 @@ pub struct PRBLOCK {
 
 impl PRBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (PRBLOCK, usize) {
-        let block_type: [u8; 2] = stream[0..2].try_into().expect("");
+        let mut position = 0;
+        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("");
         if !utils::eq(&block_type, &['P' as u8, 'R' as u8]) {
             panic!("PR Block not found");
         }
+
+        position += block_type.len();
+
         let block_size = if little_endian {
-            LittleEndian::read_u16(&stream[2..])
+            LittleEndian::read_u16(&stream[position..])
         } else {
-            BigEndian::read_u16(&stream[2..])
+            BigEndian::read_u16(&stream[position..])
         };
 
+        position += 2;
+
         //let mut program_data = vec![0; block_size as usize];
-        let mut program_data: Vec<u8> = stream.try_into().expect("msg");
+        let mut program_data: Vec<u8> = stream[position..block_size as usize - position]
+            .try_into()
+            .expect("msg");
+
+        position += program_data.len();
 
         // make sure that the text is utf8
         for c in &mut program_data {
@@ -260,7 +270,7 @@ impl PRBLOCK {
                 block_size,
                 program_data,
             },
-            block_size as usize,
+            position,
         );
     }
 }
