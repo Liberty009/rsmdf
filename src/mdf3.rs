@@ -512,7 +512,7 @@ pub struct CNBLOCK {
     pub next: LINK,
     pub conversion_formula: LINK,
     pub source_ext: LINK,
-	pub dependency: LINK, 
+    pub dependency: LINK,
     pub comment: LINK,
     pub channel_type: UINT16,
     pub short_name: [CHAR; 32],
@@ -543,7 +543,7 @@ impl CNBLOCK {
         let conversion_formula = utils::read_u32(&stream[position..], little_endian, &mut position);
         let source_ext = utils::read_u32(&stream[position..], little_endian, &mut position);
         let dependency = utils::read_u32(&stream[position..], little_endian, &mut position);
-		let comment = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let comment = utils::read_u32(&stream[position..], little_endian, &mut position);
         let channel_type = utils::read_u16(&stream[position..], little_endian, &mut position);
 
         let short_name: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
@@ -571,7 +571,7 @@ impl CNBLOCK {
                 next,
                 conversion_formula,
                 source_ext,
-				dependency, 
+                dependency,
                 comment,
                 channel_type,
                 short_name,
@@ -607,14 +607,19 @@ pub struct CCBLOCK {
 impl CCBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (CCBLOCK, usize) {
         let mut position = 0;
-        let block_type: [CHAR; 2] = stream.try_into().expect("msg");
+        let block_type: [CHAR; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
+
+        if !utils::eq(&block_type, &['C' as u8, 'C' as u8]) {
+            panic!("CC not found");
+        }
+
         let block_size: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
         let physical_range_valid: BOOL =
             utils::read_u16(&stream[position..], little_endian, &mut position);
         let physical_min: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
         let physical_max: REAL = utils::read_f64(&stream[position..], little_endian, &mut position);
-        let unit: [CHAR; 20] = stream[position..].try_into().expect("msg");
+        let unit: [CHAR; 20] = stream[position..position + 20].try_into().expect("msg");
         position += unit.len();
         let conversion_type: UINT16 =
             utils::read_u16(&stream[position..], little_endian, &mut position);
