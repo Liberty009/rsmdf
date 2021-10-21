@@ -512,6 +512,7 @@ pub struct CNBLOCK {
     pub next: LINK,
     pub conversion_formula: LINK,
     pub source_ext: LINK,
+	pub dependency: LINK, 
     pub comment: LINK,
     pub channel_type: UINT16,
     pub short_name: [CHAR; 32],
@@ -531,18 +532,26 @@ pub struct CNBLOCK {
 impl CNBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (CNBLOCK, usize) {
         let mut position = 0;
-        let block_type: [u8; 2] = stream.try_into().expect("msg");
+        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
+        if !utils::eq(&block_type, &['C' as u8, 'N' as u8]) {
+            panic!("CNBLOCK");
+        }
+
         let block_size = utils::read_u16(&stream[position..], little_endian, &mut &mut position);
         let next = utils::read_u32(&stream[position..], little_endian, &mut position);
         let conversion_formula = utils::read_u32(&stream[position..], little_endian, &mut position);
         let source_ext = utils::read_u32(&stream[position..], little_endian, &mut position);
-        let comment = utils::read_u32(&stream[position..], little_endian, &mut position);
+        let dependency = utils::read_u32(&stream[position..], little_endian, &mut position);
+		let comment = utils::read_u32(&stream[position..], little_endian, &mut position);
         let channel_type = utils::read_u16(&stream[position..], little_endian, &mut position);
-        let short_name: [u8; 32] = stream[position..].try_into().expect("msg");
+
+        let short_name: [u8; 32] = stream[position..position + 32].try_into().expect("msg");
         position += short_name.len();
-        let desc: [u8; 128] = stream[position..].try_into().expect("msg");
+
+        let desc: [u8; 128] = stream[position..position + 128].try_into().expect("msg");
         position += desc.len();
+
         let start_offset = utils::read_u16(&stream[position..], little_endian, &mut position);
         let bit_number = utils::read_u16(&stream[position..], little_endian, &mut position);
         let data_type = utils::read_u16(&stream[position..], little_endian, &mut position);
@@ -562,6 +571,7 @@ impl CNBLOCK {
                 next,
                 conversion_formula,
                 source_ext,
+				dependency, 
                 comment,
                 channel_type,
                 short_name,
