@@ -1031,7 +1031,8 @@ pub struct CDBLOCK {
 impl CDBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (CDBLOCK, usize) {
         let mut position = 0;
-        let block_type: [CHAR; 2] = stream.try_into().expect("msg");
+        let block_type: [CHAR; 2] = stream[position..position + 2].try_into().expect("msg");
+        position += block_type.len();
         let block_size: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
         let dependency_type: UINT16 =
             utils::read_u16(&stream[position..], little_endian, &mut position);
@@ -1103,18 +1104,19 @@ pub struct CEBLOCK {
     pub block_type: [CHAR; 2],
     pub block_size: UINT16,
     pub extension_type: UINT16,
-    pub additional: Supplement,
+    pub additional: Vec<u8>,
 }
 
 impl CEBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (CEBLOCK, usize) {
         let mut position = 0;
-        let block_type: [CHAR; 2] = stream.try_into().expect("msg");
+        let block_type: [CHAR; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
         let block_size: UINT16 = utils::read_u16(&stream[position..], little_endian, &mut position);
         let extension_type: UINT16 =
             utils::read_u16(&stream[position..], little_endian, &mut position);
-        let additional: Supplement = Supplement::read(&stream[position..], little_endian);
+
+        let additional = stream[position..block_size as usize].to_vec();
 
         return (
             CEBLOCK {
@@ -1128,73 +1130,73 @@ impl CEBLOCK {
     }
 }
 
-pub enum Supplement {
-    DIMBlock,
-    VectorBlock,
-}
+// pub enum Supplement {
+//     DIMBlock,
+//     VectorBlock,
+// }
 
-impl Supplement {
-    pub fn read(_stream: &[u8], _little_endian: bool) -> Supplement {
-        return Supplement::DIMBlock;
-    }
-}
+// impl Supplement {
+//     pub fn read(_stream: &[u8], _little_endian: bool) -> Supplement {
+//         return Supplement::DIMBlock;
+//     }
+// }
 
-pub struct DIMBlock {
-    pub module_number: UINT16,
-    pub address: UINT32,
-    pub desc: [CHAR; 80],
-    pub ecu_id: [CHAR; 32],
-}
+// pub struct DIMBlock {
+//     pub module_number: UINT16,
+//     pub address: UINT32,
+//     pub desc: [CHAR; 80],
+//     pub ecu_id: [CHAR; 32],
+// }
 
-impl DIMBlock {
-    pub fn read(stream: &[u8], little_endian: bool) -> (DIMBlock, usize) {
-        let mut position = 0;
-        let module_number: UINT16 =
-            utils::read_u16(&stream[position..], little_endian, &mut position);
-        let address: UINT32 = utils::read_u32(&stream[position..], little_endian, &mut position);
-        let desc: [CHAR; 80] = stream[position..].try_into().expect("msg");
-        position += desc.len();
-        let ecu_id: [CHAR; 32] = stream[position..].try_into().expect("msg");
-        position += ecu_id.len();
+// impl DIMBlock {
+//     pub fn read(stream: &[u8], little_endian: bool) -> (DIMBlock, usize) {
+//         let mut position = 0;
+//         let module_number: UINT16 =
+//             utils::read_u16(&stream[position..], little_endian, &mut position);
+//         let address: UINT32 = utils::read_u32(&stream[position..], little_endian, &mut position);
+//         let desc: [CHAR; 80] = stream[position..position+80].try_into().expect("msg");
+//         position += desc.len();
+//         let ecu_id: [CHAR; 32] = stream[position..position+32].try_into().expect("msg");
+//         position += ecu_id.len();
 
-        return (
-            DIMBlock {
-                module_number,
-                address,
-                desc,
-                ecu_id,
-            },
-            position,
-        );
-    }
-}
+//         return (
+//             DIMBlock {
+//                 module_number,
+//                 address,
+//                 desc,
+//                 ecu_id,
+//             },
+//             position,
+//         );
+//     }
+// }
 
-pub struct VectorBlock {
-    pub can_id: UINT32,
-    pub can_channel: UINT32,
-    pub message_name: [CHAR; 36],
-    pub sender_name: [CHAR; 36],
-}
+// pub struct VectorBlock {
+//     pub can_id: UINT32,
+//     pub can_channel: UINT32,
+//     pub message_name: [CHAR; 36],
+//     pub sender_name: [CHAR; 36],
+// }
 
-impl VectorBlock {
-    pub fn read(stream: &[u8], little_endian: bool) -> (VectorBlock, usize) {
-        let mut position = 0;
-        let can_id: UINT32 = utils::read_u32(&stream[position..], little_endian, &mut position);
-        let can_channel: UINT32 =
-            utils::read_u32(&stream[position..], little_endian, &mut position);
-        let message_name: [CHAR; 36] = stream[position..].try_into().expect("msg");
-        position += message_name.len();
-        let sender_name: [CHAR; 36] = stream[position..].try_into().expect("msg");
-        position += sender_name.len();
+// impl VectorBlock {
+//     pub fn read(stream: &[u8], little_endian: bool) -> (VectorBlock, usize) {
+//         let mut position = 0;
+//         let can_id: UINT32 = utils::read_u32(&stream[position..], little_endian, &mut position);
+//         let can_channel: UINT32 =
+//             utils::read_u32(&stream[position..], little_endian, &mut position);
+//         let message_name: [CHAR; 36] = stream[position..].try_into().expect("msg");
+//         position += message_name.len();
+//         let sender_name: [CHAR; 36] = stream[position..].try_into().expect("msg");
+//         position += sender_name.len();
 
-        return (
-            VectorBlock {
-                can_id,
-                can_channel,
-                message_name,
-                sender_name,
-            },
-            position,
-        );
-    }
-}
+//         return (
+//             VectorBlock {
+//                 can_id,
+//                 can_channel,
+//                 message_name,
+//                 sender_name,
+//             },
+//             position,
+//         );
+//     }
+// }
