@@ -1,4 +1,4 @@
-use mdf_rust::mdf3;
+use rsmdf::mdf3;
 use std::fs;
 
 fn main() {
@@ -23,8 +23,8 @@ fn main() {
 #[cfg(test)]
 mod tests {
 
-    use mdf_rust::mdf3;
-    use mdf_rust::utils;
+    use rsmdf::mdf3;
+    use rsmdf::utils;
     #[test]
     fn idblock() {
         let id_data = [
