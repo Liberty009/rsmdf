@@ -1,31 +1,17 @@
 use mdf_rust::mdf3;
-use std::{fs, str};
+use std::fs;
 
 fn main() {
     let file = fs::read("example3.30.mdf").expect("msg");
 
-    let (header, little_endian, position) = mdf3::read(&file);
-    println!("File ID: {}", str::from_utf8(&header.file_id).expect("msg"));
+    //let dg = mdf3::list(&file);
+    let channels = mdf3::list_channels(&file);
 
-    let (head, position) = mdf3::read_head(&file[position..], little_endian);
-    println!(
-        "Block Type: {}",
-        str::from_utf8(&head.block_type).expect("")
-    );
-    println!("Position: {}", position);
-    println!("Project: {}", str::from_utf8(&head.project).expect(""));
-    println!("Author: {}", str::from_utf8(&head.author).expect(""));
+    println!("Number of channels: {}", channels.len());
 
-    println!("File Comment: {}", head.file_comment);
-
-    //Try TXBLOCK with address in HDBLOCK
-    let (test, _pos) = mdf3::TXBLOCK::read(&file[head.file_comment as usize..], little_endian);
-    println!("Text: {}", str::from_utf8(&test.block_type).expect(""));
-    println!("Text: {}", str::from_utf8(&test.text[0..]).expect(""));
-
-    // println!("PRBLOCK ADDRESS: {}", head.program_block);
-    // let (test_pr, _pos) = mdf3::PRBLOCK::read(&file[head.program_block as usize..], little_endian);
-    // println!("Program data: {}", str::from_utf8(&test_pr.program_data).expect(""));
+    for (i, channel) in channels.iter().enumerate() {
+        println!("Channel {} Name: {}", i, channel.name(&file, true));
+    }
 }
 
 #[cfg(test)]
@@ -33,7 +19,6 @@ mod tests {
 
     use mdf_rust::mdf3;
     use mdf_rust::utils;
-    use std::{fs, str};
     #[test]
     fn idblock() {
         let id_data = [
@@ -244,9 +229,9 @@ mod tests {
 		Post-trigger Time: 0[s]</TX><time_source>INCA PC Reference Time</time_source><common_properties><e name="subject">TestVehicle</e><e name="project">P2016_09_AE_MCD_2MC_BS_V1_7_1_main</e><e name="department">CompanyName</e><e name="author">UserName</e></common_properties></HDcomment>
 		Sat Oct  2 15:35:13 2021: updated by asammdf 6.4.4"#;
 
-        let text_bytes = text.as_bytes();
+        let _text_bytes = text.as_bytes();
 
-        let (tx_block, position) = mdf3::TXBLOCK::read(&tx_data, true);
+        let (_tx_block, position) = mdf3::TXBLOCK::read(&tx_data, true);
 
         //println!("Pos: {}", position);
         //println!("String: {}END", str::from_utf8(&tx_block.text).expect(""));
@@ -578,7 +563,7 @@ mod tests {
             0xCE, 0x9C, 0x24, 0x81, 0xAB, 0x1A, 0x29, 0x40, 0x11, 0x40, 0xCB, 0x99,
         ];
 
-        let (_pr_block, position) = mdf3::PRBLOCK::read(&pr_data, true);
+        let (_pr_block, _position) = mdf3::PRBLOCK::read(&pr_data, true);
 
         //assert_eq!(position, 4349);
     }
@@ -851,21 +836,21 @@ mod tests {
 
     #[test]
     fn cdblock() {
-    //     let cd_data = [
-    //         0x43, 0x44, 0x01, 0xA8, 0x0C, 0x70, 0xD4, 0x01, 0x90, 0x0B, 0x7E, 0xAF, 0x7C, 0x11,
-    //         0xF4, 0x3F, 0x44, 0x7C, 0xE0, 0x9C, 0x03, 0x00, 0x00, 0x18, 0x7C, 0xE0, 0x44, 0x70,
-    //         0x00, 0x00, 0xD4, 0x43, 0x0C, 0xD4, 0x38, 0x03, 0x00, 0x00, 0x39, 0x00, 0x18, 0x7C,
-    //         0x00, 0x00, 0x00, 0x60, 0x43, 0x44, 0x01, 0xA8, 0x0C, 0x70, 0xD4, 0x01, 0x90, 0xC7,
-    //         0xF2, 0x42, 0x95, 0x15, 0xF4, 0x3F, 0x44, 0x7C, 0xE0, 0x9C, 0x03, 0x00, 0x00, 0x18,
-    //         0x7C, 0xE0, 0x44, 0x70, 0x00, 0x00, 0xD4, 0x43, 0x0C, 0xD4, 0x38, 0x03, 0x00, 0x00,
-    //         0x39, 0x00, 0x18, 0x7C, 0x00, 0x00, 0x00, 0x60, 0x43, 0x44, 0x01, 0xA8, 0x0C, 0x70,
-    //         0xD4, 0x01, 0x90, 0x84, 0x67, 0xD6, 0xAD, 0x19, 0xF4, 0x3F, 0x44, 0x7C, 0xE0, 0x9C,
-    //         0x03,
-    //     ];
+        //     let cd_data = [
+        //         0x43, 0x44, 0x01, 0xA8, 0x0C, 0x70, 0xD4, 0x01, 0x90, 0x0B, 0x7E, 0xAF, 0x7C, 0x11,
+        //         0xF4, 0x3F, 0x44, 0x7C, 0xE0, 0x9C, 0x03, 0x00, 0x00, 0x18, 0x7C, 0xE0, 0x44, 0x70,
+        //         0x00, 0x00, 0xD4, 0x43, 0x0C, 0xD4, 0x38, 0x03, 0x00, 0x00, 0x39, 0x00, 0x18, 0x7C,
+        //         0x00, 0x00, 0x00, 0x60, 0x43, 0x44, 0x01, 0xA8, 0x0C, 0x70, 0xD4, 0x01, 0x90, 0xC7,
+        //         0xF2, 0x42, 0x95, 0x15, 0xF4, 0x3F, 0x44, 0x7C, 0xE0, 0x9C, 0x03, 0x00, 0x00, 0x18,
+        //         0x7C, 0xE0, 0x44, 0x70, 0x00, 0x00, 0xD4, 0x43, 0x0C, 0xD4, 0x38, 0x03, 0x00, 0x00,
+        //         0x39, 0x00, 0x18, 0x7C, 0x00, 0x00, 0x00, 0x60, 0x43, 0x44, 0x01, 0xA8, 0x0C, 0x70,
+        //         0xD4, 0x01, 0x90, 0x84, 0x67, 0xD6, 0xAD, 0x19, 0xF4, 0x3F, 0x44, 0x7C, 0xE0, 0x9C,
+        //         0x03,
+        //     ];
 
-    //     let (cd_block, position) = mdf3::CDBLOCK::read(&cd_data, true);
+        //     let (cd_block, position) = mdf3::CDBLOCK::read(&cd_data, true);
 
-    //     assert_eq!(position, 0);
+        //     assert_eq!(position, 0);
     }
 
     #[test]

@@ -1,6 +1,43 @@
 use std::mem;
 
 use byteorder::{BigEndian, ByteOrder, LittleEndian};
+use xml::reader::{EventReader, XmlEvent};
+
+pub fn extract_name(text: &[u8]) -> String {
+    let parser = EventReader::new(text);
+
+    let mut display_name = "".to_string();
+
+    let mut display = false;
+    for e in parser {
+        match e {
+            Ok(XmlEvent::StartElement { name, .. }) => {
+                //println!("{}", name);
+                if name.to_string().contains("display") {
+                    display = true;
+                }
+            }
+            Ok(XmlEvent::Characters(text)) => {
+                if display {
+                    //println!("{}", text); // or something else
+                    display_name = text;
+                }
+            }
+            Ok(XmlEvent::EndElement { name }) => {
+                if name.to_string().contains("display") {
+                    display = false;
+                }
+            }
+            Err(e) => {
+                println!("Error: {}", e);
+                break;
+            }
+            _ => {}
+        }
+    }
+
+    return display_name;
+}
 
 pub fn read_u8(stream: &[u8], _little_endian: bool, position: &mut usize) -> u8 {
     *position += 1;

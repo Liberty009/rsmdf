@@ -15,14 +15,59 @@ type BOOL = u16;
 type REAL = f64;
 type LINK = u32;
 
-pub fn read(file: &[u8]) -> (IDBLOCK, bool, usize) {
-    let (id_block, position, little_endian) = IDBLOCK::read(file);
-    return (id_block, little_endian, position);
+pub fn list(stream: &[u8]) -> Vec<DGBLOCK> {
+    let mut dg = Vec::new();
+
+    let (_id_block, position, little_endian) = IDBLOCK::read(stream);
+    let (hd_block, _pos) = HDBLOCK::read(&stream[position..], little_endian);
+    //position += pos;
+
+    let mut next = hd_block.data_group_block;
+
+    while next != 0 {
+        let (dg_block, _position) = DGBLOCK::read(&stream[next as usize..], little_endian);
+        next = dg_block.next;
+        dg.push(dg_block);
+    }
+
+    return dg;
 }
 
-pub fn read_head(file: &[u8], little_endian: bool) -> (HDBLOCK, usize) {
-    let (hdblock, position) = HDBLOCK::read(file, little_endian);
-    return (hdblock, position);
+pub fn list_channels(stream: &[u8]) -> Vec<CNBLOCK> {
+    let mut dg = Vec::new();
+    let mut cg = Vec::new();
+    let mut ch = Vec::new();
+
+    let (_id_block, position, little_endian) = IDBLOCK::read(stream);
+    let (hd_block, _pos) = HDBLOCK::read(&stream[position..], little_endian);
+    //position += pos;
+
+    let mut next_dg = hd_block.data_group_block;
+
+    while next_dg != 0 {
+        let (dg_block, _position) = DGBLOCK::read(&stream[next_dg as usize..], little_endian);
+        next_dg = dg_block.next;
+        let mut next_cg = dg_block.first;
+
+        dg.push(dg_block);
+
+        while next_cg != 0 {
+            let (cg_block, _position) = CGBLOCK::read(&stream[next_cg as usize..], little_endian);
+            next_cg = cg_block.next;
+            let mut next_cn = cg_block.first;
+            cg.push(cg_block);
+
+            while next_cn != 0 {
+                let (cn_block, _position) =
+                    CNBLOCK::read(&stream[next_cn as usize..], little_endian);
+                next_cn = cn_block.next;
+
+                ch.push(cn_block);
+            }
+        }
+    }
+
+    return ch;
 }
 
 pub struct IDBLOCK {
@@ -223,6 +268,16 @@ impl TXBLOCK {
             },
             position,
         );
+    }
+
+    pub fn name(self) -> String {
+        //let mut name = "".to_string();
+
+        //let (tx, _pos) = Self::read(stream, little_endian);
+
+        let name = utils::extract_name(&self.text);
+
+        return name;
     }
 }
 
@@ -506,6 +561,7 @@ impl CGBLOCK {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct CNBLOCK {
     pub block_type: [CHAR; 2],
     pub block_size: UINT16,
@@ -589,6 +645,20 @@ impl CNBLOCK {
             },
             position,
         );
+    }
+
+    pub fn name(self, stream: &[u8], little_endian: bool) -> String {
+        let mut name = "".to_string();
+
+        if self.channel_type == 1 {
+            name = "time".to_string();
+        } else if self.comment != 0 {
+            let (tx, _pos) = TXBLOCK::read(&stream[self.comment as usize..], little_endian);
+
+            name = tx.name();
+        }
+
+        return name;
     }
 }
 
