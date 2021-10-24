@@ -9,9 +9,15 @@ fn main() {
 
     println!("Number of channels: {}", channels.len());
 
-    for (i, channel) in channels.iter().enumerate() {
-        println!("Channel {} Name: {}", i, channel.name(&file, true));
+	let mut channel_names = Vec::new();
+    for (_i, channel) in channels.iter().enumerate() {
+		channel_names.push(channel.name(&file, true));
+        //println!("Channel {} Name: {}", i, channel.name(&file, true));
     }
+
+	for name in channel_names {
+		println!("{}", name);
+	}
 }
 
 #[cfg(test)]
