@@ -7,16 +7,16 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug unit tests in library 'mdf_rust'",
+			"name": "Debug unit tests in library 'rsmdf'",
 			"cargo": {
 				"args": [
 					"test",
 					"--no-run",
 					"--lib",
-					"--package=mdf_rust"
+					"--package=rsmdf"
 				],
 				"filter": {
-					"name": "mdf_rust",
+					"name": "rsmdf",
 					"kind": "lib"
 				}
 			},
@@ -26,15 +26,15 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug executable 'mdf_rust'",
+			"name": "Debug executable 'rsmdf'",
 			"cargo": {
 				"args": [
 					"build",
-					"--bin=mdf_rust",
-					"--package=mdf_rust"
+					"--bin=rsmdf",
+					"--package=rsmdf"
 				],
 				"filter": {
-					"name": "mdf_rust",
+					"name": "rsmdf",
 					"kind": "bin"
 				}
 			},
@@ -44,16 +44,16 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug unit tests in executable 'mdf_rust'",
+			"name": "Debug unit tests in executable 'rsmdf'",
 			"cargo": {
 				"args": [
 					"test",
 					"--no-run",
-					"--bin=mdf_rust",
-					"--package=mdf_rust"
+					"--bin=rsmdf",
+					"--package=rsmdf"
 				],
 				"filter": {
-					"name": "mdf_rust",
+					"name": "rsmdf",
 					"kind": "bin"
 				}
 			},
