@@ -6,5 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-byteorder = "1.4"
-xml-rs = "0.8"
+byteorder = "1"
+xml-rs = "0"
+itertools = "0"
+byte-slice-cast = "1"
+num-traits = "0"
