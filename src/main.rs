@@ -1,23 +1,35 @@
-use rsmdf::mdf3;
+use rsmdf::{mdf3, utils};
 use std::fs;
 
 fn main() {
-    let file = fs::read("example3.30.mdf").expect("msg");
+    let file = fs::read("Single_Channel.mdf").expect("msg");
 
     //let dg = mdf3::list(&file);
-    let channels = mdf3::list_channels(&file);
+    let (channels, channel_groups, datagroups) = mdf3::list_channels(&file);
+
+    println!("Number of data groups: {}", datagroups.len());
+    println!("Data group start: {}", datagroups[0].data_block);
 
     println!("Number of channels: {}", channels.len());
 
-	let mut channel_names = Vec::new();
-    for (_i, channel) in channels.iter().enumerate() {
-		channel_names.push(channel.name(&file, true));
-        //println!("Channel {} Name: {}", i, channel.name(&file, true));
+    println!(
+        "Channel Group: {}, Data Length: {}",
+        channel_groups[0].record_number, channel_groups[0].record_size
+    );
+
+    //let mut channel_names = Vec::new();
+    for (i, channel) in channels.iter().enumerate() {
+        //channel_names.push(channel.name(&file, true));
+        println!("Channel {} Name: {}, Data Type: {:?}, Byte Offset: {}, Bit No: {}, Additional Offset: {}",
+			i,
+			channel.name(&file, true),
+			channel.data_type,
+			channel.addition_byte_offset,
+			channel.bit_number,
+			channel.addition_byte_offset,);
     }
 
-	for name in channel_names {
-		println!("{}", name);
-	}
+    mdf3::read(&file, &datagroups[0], &channel_groups[0], &channels[1]);
 }
 
 #[cfg(test)]
@@ -25,6 +37,14 @@ mod tests {
 
     use rsmdf::mdf3;
     use rsmdf::utils;
+
+    #[test]
+    fn testing() {
+        let input: [u8; 8] = [0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F];
+        let out: f64 = utils::read_be(&input);
+        println!("{}", out);
+    }
+
     #[test]
     fn idblock() {
         let id_data = [
@@ -97,7 +117,7 @@ mod tests {
             0x6F, 0x6E, 0x3A, 0x20, 0x41, 0x53, 0x41, 0x50, 0x32, 0x5F,
         ];
 
-        let (hd_block, position) = mdf3::HDBLOCK::read(&hd_data, true);
+        let (hd_block, position) = mdf3::HDBLOCK::read(&hd_data, 0, true);
 
         println!("Length {}", position);
         assert_eq!(position, 208);
@@ -237,7 +257,7 @@ mod tests {
 
         let _text_bytes = text.as_bytes();
 
-        let (_tx_block, position) = mdf3::TXBLOCK::read(&tx_data, true);
+        let (_tx_block, position) = mdf3::TXBLOCK::read(&tx_data, 0, true);
 
         //println!("Pos: {}", position);
         //println!("String: {}END", str::from_utf8(&tx_block.text).expect(""));
@@ -569,7 +589,7 @@ mod tests {
             0xCE, 0x9C, 0x24, 0x81, 0xAB, 0x1A, 0x29, 0x40, 0x11, 0x40, 0xCB, 0x99,
         ];
 
-        let (_pr_block, _position) = mdf3::PRBLOCK::read(&pr_data, true);
+        let (_pr_block, _position) = mdf3::PRBLOCK::read(&pr_data, 0, true);
 
         //assert_eq!(position, 4349);
     }
@@ -603,7 +623,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x54, 0x58,
         ];
 
-        let (tr_block, position) = mdf3::TRBLOCK::read(&tr_data, true);
+        let (tr_block, position) = mdf3::TRBLOCK::read(&tr_data, true, 0);
 
         assert_eq!(position, 58);
         assert_eq!(tr_block.block_size, 58);
@@ -624,7 +644,7 @@ mod tests {
             0x10, 0x00, 0xDC, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let (dg_block, position) = mdf3::DGBLOCK::read(&dg_data, true);
+        let (dg_block, position) = mdf3::DGBLOCK::read(&dg_data, true, 0);
 
         assert_eq!(position, 28);
         assert_eq!(dg_block.next, 1105908);
@@ -644,7 +664,7 @@ mod tests {
             0x00, 0x00,
         ];
 
-        let (cg_block, position) = mdf3::CGBLOCK::read(&cg_data, true);
+        let (cg_block, position) = mdf3::CGBLOCK::read(&cg_data, true, 0);
 
         assert_eq!(position, 30);
 
@@ -683,7 +703,7 @@ mod tests {
             0x52, 0x45, 0x54, 0x45, 0x00, 0x54, 0x58, 0xBB,
         ];
 
-        let (cn_block, _position) = mdf3::CNBLOCK::read(&cn_data, true);
+        let (cn_block, _position) = mdf3::CNBLOCK::read(&cn_data, true, 0);
 
         //assert_eq!(position, 228);
         assert_eq!(cn_block.block_size, 228);
@@ -719,11 +739,11 @@ mod tests {
         ));
         assert_eq!(cn_block.start_offset, 0);
         assert_eq!(cn_block.bit_number, 64);
-        assert_eq!(cn_block.data_type, 3);
+        // assert_eq!(cn_block.data_type, mdf3::DataType::Float64);
         assert_eq!(cn_block.value_range_valid, 1);
         assert_eq!(
             cn_block.signal_min,
-            utils::read_f64(
+            utils::read(
                 &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F,],
                 true,
                 &mut (0 as usize)
@@ -731,7 +751,7 @@ mod tests {
         );
         assert_eq!(
             cn_block.signal_max,
-            utils::read_f64(
+            utils::read(
                 &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40,],
                 true,
                 &mut (0 as usize)
@@ -771,7 +791,7 @@ mod tests {
         assert_eq!(cc_block.physical_range_valid, 1);
         assert_eq!(
             cc_block.physical_min,
-            utils::read_f64(
+            utils::read(
                 &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F],
                 true,
                 &mut (0 as usize)
@@ -779,7 +799,7 @@ mod tests {
         );
         assert_eq!(
             cc_block.physical_max,
-            utils::read_f64(
+            utils::read(
                 &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40],
                 true,
                 &mut (0 as usize)

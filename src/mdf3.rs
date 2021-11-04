@@ -37,17 +37,17 @@ impl MDF3 {
         }
     }
 
-	pub fn read_all(self, stream: &[u8] ){
-		let mut channel_groups = Vec::new();
-		for group in self.data_groups {
-			channel_groups.append(&mut group.read_channel_groups(stream, self.little_endian));
-		}
+    pub fn read_all(self, stream: &[u8]) {
+        let mut channel_groups = Vec::new();
+        for group in self.data_groups {
+            channel_groups.append(&mut group.read_channel_groups(stream, self.little_endian));
+        }
 
-		let mut channels = Vec::new();
-		for grp in channel_groups {
-			channels.append(&mut grp.channels(stream, self.little_endian));
-		}
-	}
+        let mut channels = Vec::new();
+        for grp in channel_groups {
+            channels.append(&mut grp.channels(stream, self.little_endian));
+        }
+    }
 }
 
 pub fn list(stream: &[u8]) -> Vec<DGBLOCK> {
@@ -116,7 +116,7 @@ pub fn read(stream: &[u8], datagroup: &DGBLOCK, channel_grp: &CGBLOCK, channel: 
     // }
 
     let byte_offset = (channel.start_offset / 8) as usize;
-    let bit_offset = channel.start_offset % 8;
+    // let bit_offset = channel.start_offset % 8;
 
     let mut records = Vec::new();
     let mut pos = 0_usize;
@@ -191,21 +191,17 @@ impl IDBLOCK {
         position += program_id.len();
 
         let default_byte_order = utils::read(&stream, true, &mut position);
-        position += 2;
 
         let little_endian = if default_byte_order == 0 { true } else { false };
 
         let default_float_format = utils::read(&stream, little_endian, &mut position);
-        position += 2;
 
         let version_number = utils::read(&stream, little_endian, &mut position);
-        position += 2;
 
         let code_page_number = utils::read(&stream, little_endian, &mut position);
-        position += 2;
 
         let reserved1: [u8; 2] = [stream[position], stream[position + 1]];
-        position += 2;
+        position += reserved1.len();
         let reserved2: [u8; 30] = stream[position..position + 30].try_into().expect("msg");
         position += reserved2.len();
 
@@ -251,7 +247,7 @@ pub struct HDBLOCK {
 impl HDBLOCK {
     pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (HDBLOCK, usize) {
         let mut pos = position;
-        let block_type: [u8; 2] = stream[0..2].try_into().expect("");
+        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("");
 
         if !utils::eq(&block_type, &['H' as u8, 'D' as u8]) {
             panic!("Incorrect type for HDBLOCK");
@@ -418,7 +414,7 @@ pub struct TRBLOCK {
 }
 
 impl TRBLOCK {
-    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (TRBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (TRBLOCK, usize) {
         let mut pos = position;
 
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
@@ -593,16 +589,16 @@ impl DGBLOCK {
         return all;
     }
 
-	pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
-		let mut channel_grps = Vec::new();
-		let mut next = self.first as usize;
-		while next != 0 {
-			let (cg_block, _pos) = CGBLOCK::read(stream, little_endian, next);
-			next = cg_block.next as usize;
-			channel_grps.push(cg_block);
-		}
-		return channel_grps;
-	}
+    pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
+        let mut channel_grps = Vec::new();
+        let mut next = self.first as usize;
+        while next != 0 {
+            let (cg_block, _pos) = CGBLOCK::read(stream, little_endian, next);
+            next = cg_block.next as usize;
+            channel_grps.push(cg_block);
+        }
+        return channel_grps;
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
