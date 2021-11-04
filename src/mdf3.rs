@@ -36,6 +36,18 @@ impl MDF3 {
             little_endian,
         }
     }
+
+	pub fn read_all(self, stream: &[u8] ){
+		let mut channel_groups = Vec::new();
+		for group in self.data_groups {
+			channel_groups.append(&mut group.read_channel_groups(stream, self.little_endian));
+		}
+
+		let mut channels = Vec::new();
+		for grp in channel_groups {
+			channels.append(&mut grp.channels(stream, self.little_endian));
+		}
+	}
 }
 
 pub fn list(stream: &[u8]) -> Vec<DGBLOCK> {
@@ -544,19 +556,12 @@ impl DGBLOCK {
         pos += block_type.len();
 
         let block_size = utils::read(&stream, little_endian, &mut pos);
-
         let next = utils::read(&stream, little_endian, &mut pos);
-
         let first = utils::read(&stream, little_endian, &mut pos);
-
         let trigger_block = utils::read(&stream, little_endian, &mut pos);
-
         let data_block = utils::read(&stream, little_endian, &mut pos);
-
         let group_number = utils::read(&stream, little_endian, &mut pos);
-
         let id_number = utils::read(&stream, little_endian, &mut pos);
-
         let reserved = utils::read(&stream, little_endian, &mut pos);
 
         return (
@@ -587,6 +592,17 @@ impl DGBLOCK {
 
         return all;
     }
+
+	pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
+		let mut channel_grps = Vec::new();
+		let mut next = self.first as usize;
+		while next != 0 {
+			let (cg_block, _pos) = CGBLOCK::read(stream, little_endian, next);
+			next = cg_block.next as usize;
+			channel_grps.push(cg_block);
+		}
+		return channel_grps;
+	}
 }
 
 #[derive(Debug, Clone, Copy)]
