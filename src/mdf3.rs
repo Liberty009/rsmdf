@@ -722,7 +722,7 @@ impl<T: FromBytes> RecordedData<T> {
             DataType::Float32 => (record.push(utils::read(stream, datatype.little_endian, &mut 0))),
             DataType::Float64 => (record.push(utils::read(stream, datatype.little_endian, &mut 0))),
             DataType::StringNullTerm => {
-                record.push(utils::from_be_bytes(stream))
+                record.push(utils::read_be(stream))
             }
             DataType::ByteArray => (record.push(stream)),
             _ => (),
