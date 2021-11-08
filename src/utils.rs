@@ -1,7 +1,4 @@
 use std::mem;
-
-use byteorder::{BigEndian, ByteOrder, LittleEndian};
-
 use xml::reader::{EventReader, XmlEvent};
 
 pub fn extract_name(text: &[u8]) -> String {
@@ -123,7 +120,6 @@ impl FromBytes for i16 {
         Self::from_le_bytes(FromBytes::from_le_bytes(a))
     }
 }
-
 impl FromBytes for i8 {
     fn from_be_bytes(a: &[u8]) -> Self {
         Self::from_be_bytes(FromBytes::from_be_bytes(a))
@@ -135,12 +131,21 @@ impl FromBytes for i8 {
 
 impl FromBytes for f64 {
     fn from_be_bytes(a: &[u8]) -> Self {
-        f64::from_be_bytes(FromBytes::from_be_bytes(a))
+        Self::from_be_bytes(FromBytes::from_be_bytes(a))
     }
     fn from_le_bytes(a: &[u8]) -> Self {
         Self::from_le_bytes(FromBytes::from_le_bytes(a))
     }
 }
+impl FromBytes for f32 {
+    fn from_be_bytes(a: &[u8]) -> Self {
+        Self::from_be_bytes(FromBytes::from_be_bytes(a))
+    }
+    fn from_le_bytes(a: &[u8]) -> Self {
+        Self::from_le_bytes(FromBytes::from_le_bytes(a))
+    }
+}
+
 
 pub fn read_be<T: FromBytes>(input: &[u8]) -> T {
     T::from_be_bytes(input)
@@ -155,6 +160,23 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
         return read_le(&input[old..]);
     } else {
         return read_be(&input[old..]);
+    }
+}
+
+impl FromBytes for &str {
+    fn from_be_bytes(a: &[u8]) -> Self {
+		let mut arr = Vec::new();
+		arr.clone_from_slice(a);
+        let nul_range_end = a.iter().position(|&c| c == b'\0').unwrap_or(a.len()); // default to length if no `\0` present
+        let strings = std::str::from_utf8(&arr[0..nul_range_end]).expect("Failed to convert to string");
+		return strings
+    }
+ fn from_le_bytes(a: &[u8]) -> Self {
+		let mut arr = Vec::new();
+		arr.clone_from_slice(a);
+        let nul_range_end = a.iter().position(|&c| c == b'\0').unwrap_or(a.len()); // default to length if no `\0` present
+        let strings = std::str::from_utf8(&arr[0..nul_range_end]).expect("Failed to convert to string");
+		return strings
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::utils;
+use crate::utils::{self, FromBytes};
 use itertools::izip;
 use std::{convert::TryInto, mem};
 
@@ -697,14 +697,39 @@ pub enum DataType {
     DFloat,
     StringNullTerm,
     ByteArray,
-    UnsignedIntBE,
-    SignedIntBE,
-    Float32BE,
-    Float64BE,
-    UnsignedIntLE,
-    SignedIntLE,
-    Float32LE,
-    Float64LE,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DataTypeRead {
+    data_type: DataType,
+    little_endian: bool,
+}
+
+struct RecordedData<T> {
+    record: Vec<T>,
+}
+
+impl<T: FromBytes> RecordedData<T> {
+    pub fn new(stream: &[u8], datatype: DataTypeRead) -> Self {
+        let mut record: Vec<T> = Vec::new();
+        match datatype.data_type {
+            DataType::UnsignedInt => {
+                (record.push(utils::read(stream, datatype.little_endian, &mut 0)))
+            }
+            DataType::SignedInt => {
+                (record.push(utils::read(stream, datatype.little_endian, &mut 0)))
+            }
+            DataType::Float32 => (record.push(utils::read(stream, datatype.little_endian, &mut 0))),
+            DataType::Float64 => (record.push(utils::read(stream, datatype.little_endian, &mut 0))),
+            DataType::StringNullTerm => {
+                record.push(utils::from_be_bytes(stream))
+            }
+            DataType::ByteArray => (record.push(stream)),
+            _ => (),
+        }
+
+        return RecordedData { record };
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -721,7 +746,7 @@ pub struct CNBLOCK {
     pub desc: [CHAR; 128],
     pub start_offset: UINT16,
     pub bit_number: UINT16,
-    pub data_type: DataType,
+    pub data_type: DataTypeRead,
     pub value_range_valid: BOOL,
     pub signal_min: REAL,
     pub signal_max: REAL,
@@ -737,7 +762,7 @@ impl CNBLOCK {
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
         pos += block_type.len();
         if !utils::eq(&block_type, &['C' as u8, 'N' as u8]) {
-            panic!("CNBLOCK");
+            panic!("CNBLOCK not found.");
         }
 
         let block_size = utils::read(&stream, little_endian, &mut pos);
@@ -757,26 +782,80 @@ impl CNBLOCK {
         let start_offset = utils::read(&stream, little_endian, &mut pos);
         let bit_number = utils::read(&stream, little_endian, &mut pos);
 
-        let datatype = utils::read(&stream, little_endian, &mut pos);
+        let datatype: u16 = utils::read(&stream, little_endian, &mut pos);
         let data_type = match datatype {
-            0 => DataType::UnsignedInt,
-            1 => DataType::SignedInt,
-            2 => DataType::Float32,
-            3 => DataType::Float64,
-            4 => DataType::FFloat,
-            5 => DataType::GFloat,
-            6 => DataType::DFloat,
-            7 => DataType::StringNullTerm,
-            8 => DataType::ByteArray,
-            9 => DataType::UnsignedInt,
-            10 => DataType::SignedInt,
-            11 => DataType::Float32,
-            12 => DataType::Float64,
-            13 => DataType::UnsignedInt,
-            14 => DataType::SignedInt,
-            15 => DataType::Float32,
-            16 => DataType::Float64,
-            _ => panic!("Data type not found"),
+            0 => DataTypeRead {
+                data_type: DataType::UnsignedInt,
+                little_endian,
+            },
+            1 => DataTypeRead {
+                data_type: DataType::SignedInt,
+                little_endian: little_endian,
+            },
+            2 => DataTypeRead {
+                data_type: DataType::Float32,
+                little_endian: little_endian,
+            },
+            3 => DataTypeRead {
+                data_type: DataType::Float64,
+                little_endian: little_endian,
+            },
+            4 => DataTypeRead {
+                data_type: DataType::FFloat,
+                little_endian: little_endian,
+            },
+            5 => DataTypeRead {
+                data_type: DataType::GFloat,
+                little_endian: little_endian,
+            },
+            6 => DataTypeRead {
+                data_type: DataType::DFloat,
+                little_endian: little_endian,
+            },
+            7 => DataTypeRead {
+                data_type: DataType::StringNullTerm,
+                little_endian: little_endian,
+            },
+            8 => DataTypeRead {
+                data_type: DataType::ByteArray,
+                little_endian: little_endian,
+            },
+            9 => DataTypeRead {
+                data_type: DataType::UnsignedInt,
+                little_endian: false,
+            },
+            10 => DataTypeRead {
+                data_type: DataType::SignedInt,
+                little_endian: false,
+            },
+            11 => DataTypeRead {
+                data_type: DataType::Float32,
+                little_endian: false,
+            },
+            12 => DataTypeRead {
+                data_type: DataType::Float64,
+                little_endian: false,
+            },
+            13 => DataTypeRead {
+                data_type: DataType::UnsignedInt,
+                little_endian: true,
+            },
+            14 => DataTypeRead {
+                data_type: DataType::SignedInt,
+                little_endian: true,
+            },
+            15 => DataTypeRead {
+                data_type: DataType::Float32,
+                little_endian: true,
+            },
+            16 => DataTypeRead {
+                data_type: DataType::Float64,
+                little_endian: true,
+            },
+            _ => {
+                println!("Found data type: {}", datatype);
+                panic!("Data type not found. Type was:")
+            }
         };
 
         let value_range_valid = utils::read(&stream, little_endian, &mut pos);
