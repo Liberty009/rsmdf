@@ -146,7 +146,6 @@ impl FromBytes for f32 {
     }
 }
 
-
 pub fn read_be<T: FromBytes>(input: &[u8]) -> T {
     T::from_be_bytes(input)
 }
@@ -165,18 +164,20 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
 
 impl FromBytes for &str {
     fn from_be_bytes(a: &[u8]) -> Self {
-		let mut arr = Vec::new();
-		arr.clone_from_slice(a);
+        let mut arr = Vec::new();
+        arr.clone_from_slice(a);
         let nul_range_end = a.iter().position(|&c| c == b'\0').unwrap_or(a.len()); // default to length if no `\0` present
-        let strings = std::str::from_utf8(&arr[0..nul_range_end]).expect("Failed to convert to string");
-		return strings
+        let strings =
+            std::str::from_utf8(&arr[0..nul_range_end]).expect("Failed to convert to string");
+        return strings;
     }
- fn from_le_bytes(a: &[u8]) -> Self {
-		let mut arr = Vec::new();
-		arr.clone_from_slice(a);
+    fn from_le_bytes(a: &[u8]) -> Self {
+        let mut arr = Vec::new();
+        arr.clone_from_slice(a);
         let nul_range_end = a.iter().position(|&c| c == b'\0').unwrap_or(a.len()); // default to length if no `\0` present
-        let strings = std::str::from_utf8(&arr[0..nul_range_end]).expect("Failed to convert to string");
-		return strings
+        let strings =
+            std::str::from_utf8(&arr[0..nul_range_end]).expect("Failed to convert to string");
+        return strings;
     }
 }
 
