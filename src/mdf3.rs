@@ -2,6 +2,9 @@ use crate::utils::{self, FromBytes};
 use itertools::izip;
 use std::{convert::TryInto, mem};
 
+// use strum::IntoEnumIterator;
+// use strum_macros::EnumIter; 
+
 // Define types from standard
 type CHAR = u8;
 type BYTE = u8;
@@ -134,26 +137,35 @@ pub fn read(stream: &[u8], datagroup: &DGBLOCK, channel_grp: &CGBLOCK, channel: 
     // }
     let little_endian = true;
 
+	println!("Data Length: {}", channels[0].data_type.len());
+
     let mut time_raw = Vec::new();
     for rec in &records {
-        time_raw.push(&rec[0..mem::size_of::<f64>() / mem::size_of::<u8>()])
+        time_raw.push(&rec[0..channels[0].data_type.len()])
     }
     let mut some_raw = Vec::new();
     for rec in &records {
-        some_raw.push(&rec[byte_offset..])
+        some_raw.push(&rec[byte_offset..byte_offset + channels[1].data_type.len()])
     }
 
-    let mut time: Vec<f64> = Vec::new();
-    for t in time_raw {
-        time.push(utils::read(t, little_endian, &mut 0));
-    }
-    let mut some: Vec<i8> = Vec::new();
-    for s in some_raw {
-        some.push(utils::read(s, little_endian, &mut 0));
-    }
+	let mut time = Vec::new();
+	for raw in time_raw {
+		time.push(Record::new(raw, channels[0].data_type));
+	}
+
+    // let mut time: Vec<f64> = Vec::new();
+    // for t in time_raw {
+    //     time.push(utils::read(t, little_endian, &mut 0));
+    // }
+	let mut some = Vec::new();
+	for raw in some_raw {
+		some.push(Record::new(raw, channels[1].data_type));
+	}
 
     for (t, s) in izip!(time, some) {
-        println!("{}, {}", t, s);
+        print_record(t);
+		print_record(s);
+		println!();
     }
 }
 
@@ -314,8 +326,6 @@ impl TXBLOCK {
         let mut pos = position;
 
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
-        pos += 2;
-
         if !utils::eq(&block_type, &['T' as u8, 'X' as u8]) {
             panic!(
                 "TXBLOCK type incorrect. Found : {}, {}",
@@ -324,7 +334,7 @@ impl TXBLOCK {
         }
 
         pos += block_type.len();
-        let block_size = utils::read(&stream[pos..], little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, &mut pos);
 
         let mut text: Vec<u8> = stream[pos..pos + block_size as usize - 5]
             .try_into()
@@ -686,6 +696,74 @@ impl CGBLOCK {
 
 // }
 
+// fn read_record<T: utils::FromBytes>(value: Record) -> T {
+// 	let val: T = match value {
+// 		Record::Uint(number) => number, 
+// 		Record::Int(number) => number, 
+// 		Record::Float32(number) => number, 
+// 		Record::Float64(number) => number, 
+// 		_ => panic!("Help!")
+// 	};
+
+// 	return val;
+// }
+
+fn print_record(value: Record){
+	match value {
+		Record::Uint(number) => print!("{}", number), 
+		Record::Int(number) => print!("{}", number), 
+		Record::Float32(number) => print!("{}", number), 
+		Record::Float64(number) => print!("{}", number), 
+		_ => panic!("Help!")
+	};
+}
+
+pub enum Record{
+	Uint(u16), 
+	Int(i16), 
+	Float32(f32), 
+	Float64(f64),
+}
+
+impl Record {
+	pub fn new(stream: &[u8], dtype: DataTypeRead) -> Self{
+		let rec = match dtype.data_type {
+			DataType::UnsignedInt => (
+				Self::unsigned_int(stream, dtype)
+			),
+			DataType::SignedInt => Self::signedInt(stream, dtype),
+			DataType::Float32 => Self::float32(stream, dtype),
+			DataType::Float64 => Self::float64(stream, dtype),
+			_ => (panic!("Incorrect or not implemented type!"))
+		};
+
+		return rec;
+	}
+
+	fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
+		let mut records: u16 = utils::read(stream, dtype.little_endian, &mut 0);
+
+		return Self::Uint(records);
+	}
+
+	fn signedInt(stream: &[u8], dtype: DataTypeRead) -> Self {
+		let mut records: i16 = utils::read(stream, dtype.little_endian, &mut 0);
+
+		return Self::Int(records);
+	}
+
+	fn float32(stream: &[u8], dtype: DataTypeRead) -> Self {
+		let mut records: f32 = utils::read(stream, dtype.little_endian, &mut 0);
+
+		return Self::Float32(records);
+	}
+	fn float64(stream: &[u8], dtype: DataTypeRead) -> Self {
+		let mut records: f64 = utils::read(stream, dtype.little_endian, &mut 0);
+
+		return Self::Float64(records);
+	}
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum DataType {
     UnsignedInt,
@@ -701,36 +779,77 @@ pub enum DataType {
 
 #[derive(Debug, Clone, Copy)]
 pub struct DataTypeRead {
-    data_type: DataType,
-    little_endian: bool,
+    pub data_type: DataType,
+    pub little_endian: bool,
 }
 
-struct RecordedData<T> {
-    record: Vec<T>,
+impl DataTypeRead {
+	fn len(self) -> usize {
+		let length = match self.data_type {
+			DataType::UnsignedInt => mem::size_of::<u16>()/mem::size_of::<u8>(),
+			DataType::SignedInt => mem::size_of::<i16>()/mem::size_of::<u8>(),
+			DataType::Float32 => mem::size_of::<f32>()/mem::size_of::<u8>(),
+			DataType::Float64 => mem::size_of::<f64>()/mem::size_of::<u8>(),
+			DataType::FFloat => 0,
+			DataType::GFloat => 0,
+			DataType::DFloat => 0,
+			DataType::StringNullTerm => 0,
+			DataType::ByteArray => 0,
+			_ => panic!("")
+		};
+		return length;
+	}
 }
 
-impl<T: FromBytes> RecordedData<T> {
-    pub fn new(stream: &[u8], datatype: DataTypeRead) -> Self {
-        let mut record: Vec<T> = Vec::new();
-        match datatype.data_type {
-            DataType::UnsignedInt => {
-                (record.push(utils::read(stream, datatype.little_endian, &mut 0)))
-            }
-            DataType::SignedInt => {
-                (record.push(utils::read(stream, datatype.little_endian, &mut 0)))
-            }
-            DataType::Float32 => (record.push(utils::read(stream, datatype.little_endian, &mut 0))),
-            DataType::Float64 => (record.push(utils::read(stream, datatype.little_endian, &mut 0))),
-            DataType::StringNullTerm => {
-                record.push(utils::read_be(stream))
-            }
-            DataType::ByteArray => (record.push(stream)),
-            _ => (),
-        }
 
-        return RecordedData { record };
-    }
-}
+// pub struct RecordedData<T: utils::FromBytes> {
+//     data: Vec<T>,
+// }
+
+// impl<T: utils::FromBytes> RecordedData<T> {
+//     fn new(stream: &[&[u8]], dtype: DataTypeRead) -> Self {
+//         let mut result = Vec::new();
+
+// 		for value in stream {
+//             result.push(utils::read(value, dtype.little_endian, &mut 0))
+//         }
+
+//         return RecordedData{ data: result};
+//     }
+
+// }
+
+// struct Number<T: utils::FromBytes> {
+//     data: Vec<T>,
+// }
+
+// impl<T: utils::FromBytes> Number<T> {
+//     fn new(stream: &[&[u8]], dtype: DataTypeRead) -> Self {
+//         let mut converted: Vec<T> = Vec::new();
+//         for value in stream {
+//             converted.push(utils::read(value, dtype.little_endian, &mut 0));
+//         }
+
+//         return Number { data: converted };
+//     }
+// }
+// struct StringNull {
+//     StringNull: String,
+// }
+// impl StringNull {
+//     fn new() -> Self {
+//         return StringNull {
+//             StringNull: "".to_string(),
+//         };
+//     }
+// }
+// struct Array {}
+
+// impl Array {
+//     fn new() -> Self {
+//         Array {}
+//     }
+// }
 
 #[derive(Debug, Clone, Copy)]
 pub struct CNBLOCK {
