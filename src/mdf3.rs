@@ -144,8 +144,9 @@ pub fn read(stream: &[u8], datagroup: &DGBLOCK, channel_grp: &CGBLOCK, channel: 
         time_raw.push(&rec[0..channels[0].data_type.len()])
     }
     let mut some_raw = Vec::new();
+	let end = byte_offset + channels[1].data_type.len();
     for rec in &records {
-        some_raw.push(&rec[byte_offset..byte_offset + channels[1].data_type.len()])
+        some_raw.push(&rec[byte_offset..end])
     }
 
 	let mut time = Vec::new();
@@ -164,6 +165,7 @@ pub fn read(stream: &[u8], datagroup: &DGBLOCK, channel_grp: &CGBLOCK, channel: 
 
     for (t, s) in izip!(time, some) {
         print_record(t);
+		print!(" ");
 		print_record(s);
 		println!();
     }
@@ -719,8 +721,8 @@ fn print_record(value: Record){
 }
 
 pub enum Record{
-	Uint(u16), 
-	Int(i16), 
+	Uint(u8), 
+	Int(i8), 
 	Float32(f32), 
 	Float64(f64),
 }
@@ -731,7 +733,7 @@ impl Record {
 			DataType::UnsignedInt => (
 				Self::unsigned_int(stream, dtype)
 			),
-			DataType::SignedInt => Self::signedInt(stream, dtype),
+			DataType::SignedInt => Self::signed_int(stream, dtype),
 			DataType::Float32 => Self::float32(stream, dtype),
 			DataType::Float64 => Self::float64(stream, dtype),
 			_ => (panic!("Incorrect or not implemented type!"))
@@ -741,24 +743,24 @@ impl Record {
 	}
 
 	fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
-		let mut records: u16 = utils::read(stream, dtype.little_endian, &mut 0);
+		let records = utils::read(stream, dtype.little_endian, &mut 0);
 
 		return Self::Uint(records);
 	}
 
-	fn signedInt(stream: &[u8], dtype: DataTypeRead) -> Self {
-		let mut records: i16 = utils::read(stream, dtype.little_endian, &mut 0);
+	fn signed_int(stream: &[u8], dtype: DataTypeRead) -> Self {
+		let records = utils::read(stream, dtype.little_endian, &mut 0);
 
 		return Self::Int(records);
 	}
 
 	fn float32(stream: &[u8], dtype: DataTypeRead) -> Self {
-		let mut records: f32 = utils::read(stream, dtype.little_endian, &mut 0);
+		let records = utils::read(stream, dtype.little_endian, &mut 0);
 
 		return Self::Float32(records);
 	}
 	fn float64(stream: &[u8], dtype: DataTypeRead) -> Self {
-		let mut records: f64 = utils::read(stream, dtype.little_endian, &mut 0);
+		let records = utils::read(stream, dtype.little_endian, &mut 0);
 
 		return Self::Float64(records);
 	}
@@ -786,8 +788,8 @@ pub struct DataTypeRead {
 impl DataTypeRead {
 	fn len(self) -> usize {
 		let length = match self.data_type {
-			DataType::UnsignedInt => mem::size_of::<u16>()/mem::size_of::<u8>(),
-			DataType::SignedInt => mem::size_of::<i16>()/mem::size_of::<u8>(),
+			DataType::UnsignedInt => mem::size_of::<u8>()/mem::size_of::<u8>(),
+			DataType::SignedInt => mem::size_of::<i8>()/mem::size_of::<u8>(),
 			DataType::Float32 => mem::size_of::<f32>()/mem::size_of::<u8>(),
 			DataType::Float64 => mem::size_of::<f64>()/mem::size_of::<u8>(),
 			DataType::FFloat => 0,
