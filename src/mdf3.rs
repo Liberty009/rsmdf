@@ -1,6 +1,7 @@
-use crate::utils::{self, FromBytes};
-use itertools::izip;
+use crate::utils::{self,};
 use std::{convert::TryInto, mem};
+use std::io::{prelude::*};
+use std::fs::File;
 
 // use strum::IntoEnumIterator;
 // use strum_macros::EnumIter; 
@@ -18,158 +19,151 @@ type REAL = f64;
 type LINK = u32;
 
 pub struct MDF3 {
-    id: IDBLOCK,
-    header: HDBLOCK,
-    comment: TXBLOCK,
-    data_groups: Vec<DGBLOCK>,
-    little_endian: bool,
+    pub id: IDBLOCK,
+    pub header: HDBLOCK,
+    pub comment: TXBLOCK,
+    pub data_groups: Vec<DGBLOCK>,
+	pub channels: Vec<CNBLOCK>, 
+	pub channel_groups: Vec<CGBLOCK>,
+    pub little_endian: bool,
+	pub file: Vec<u8>,
 }
 
 impl MDF3 {
-    pub fn new(stream: &[u8]) -> Self {
-        let (id, pos, little_endian) = IDBLOCK::read(stream);
+    pub fn new(filepath: &str) -> Self {
+		let mut file = File::open(filepath).expect("Could not read file");
+		let mut stream = Vec::new();
+		let _ = file.read_to_end(&mut stream);
+        let (id, pos, little_endian) = IDBLOCK::read(&stream);
         let (header, _pos) = HDBLOCK::read(&stream, pos, little_endian);
-        let (comment, _pos) = TXBLOCK::read(stream, header.file_comment as usize, little_endian);
-
-        MDF3 {
+        let (comment, _pos) = TXBLOCK::read(&stream, header.file_comment as usize, little_endian);
+        let mut mdf = MDF3 {
             id: id,
             header: header,
             comment: comment,
-            data_groups: DGBLOCK::read_all(stream, little_endian, header.data_group_block as usize),
+            data_groups: DGBLOCK::read_all(&stream, little_endian, header.data_group_block as usize),
+			channels: Vec::new(), 
+			channel_groups: Vec::new(),
             little_endian,
-        }
+			file: stream,
+        };
+
+		mdf.read_all();
+
+		return mdf;
     }
 
-    pub fn read_all(self, stream: &[u8]) {
+    pub fn read_all(&mut self) {
         let mut channel_groups = Vec::new();
-        for group in self.data_groups {
-            channel_groups.append(&mut group.read_channel_groups(stream, self.little_endian));
+        for group in &self.data_groups {
+        	channel_groups.append(&mut group.read_channel_groups(&self.file, self.little_endian));
         }
 
         let mut channels = Vec::new();
-        for grp in channel_groups {
-            channels.append(&mut grp.channels(stream, self.little_endian));
+        for grp in &channel_groups {
+            channels.append(&mut grp.channels(&self.file, self.little_endian));
         }
-    }
-}
 
-pub fn list(stream: &[u8]) -> Vec<DGBLOCK> {
-    let (_id_block, position, little_endian) = IDBLOCK::read(stream);
-    let (hd_block, _pos) = HDBLOCK::read(&stream, position, little_endian);
-    //position += pos;
-
-    let dg = DGBLOCK::read_all(stream, little_endian, hd_block.data_group_block as usize);
-    return dg;
-}
-
-pub fn list_channels(stream: &[u8]) -> (Vec<CNBLOCK>, Vec<CGBLOCK>, Vec<DGBLOCK>) {
-    let mut dg = Vec::new();
-    let mut cg = Vec::new();
-    let mut ch = Vec::new();
-
-    let (_id_block, position, little_endian) = IDBLOCK::read(stream);
-    let (hd_block, _pos) = HDBLOCK::read(&stream, position, little_endian);
-    //position += pos;
-
-    let mut next_dg = hd_block.data_group_block;
-
-    while next_dg != 0 {
-        let (dg_block, _position) = DGBLOCK::read(&stream, little_endian, next_dg as usize);
-        next_dg = dg_block.next;
-        let mut next_cg = dg_block.first;
-
-        dg.push(dg_block);
-
-        while next_cg != 0 {
-            let (cg_block, _position) = CGBLOCK::read(stream, little_endian, next_cg as usize);
-            next_cg = cg_block.next;
-            let mut next_cn = cg_block.first;
-            cg.push(cg_block);
-
-            while next_cn != 0 {
-                let (cn_block, _position) = CNBLOCK::read(stream, little_endian, next_cn as usize);
-                next_cn = cn_block.next;
-
-                ch.push(cn_block);
-            }
-        }
+		self.channel_groups = channel_groups;
+		self.channels = channels;
     }
 
-    return (ch, cg, dg);
-}
-
-pub fn read(stream: &[u8], datagroup: &DGBLOCK, channel_grp: &CGBLOCK, channel: &CNBLOCK) {
-    let channels: Vec<CNBLOCK> = channel_grp.channels(stream, true);
-    let data_length = (channel_grp.record_number * channel_grp.record_size as u32) as usize;
-    let data =
-        &stream[datagroup.data_block as usize..(datagroup.data_block as usize + data_length)];
-
-    let mut data_blocks = Vec::new();
-    for i in 0..channel_grp.record_number {
-        data_blocks.push(
-            &data[(i * channel_grp.record_size as u32) as usize
-                ..((i + 1) * channel_grp.record_size as u32) as usize],
-        );
-    }
-
-    // let mut data_series = Vec::new();
-    // for channel in channels {
-
-    // 	data_series.push()
-    // }
-
-    let byte_offset = (channel.start_offset / 8) as usize;
-    // let bit_offset = channel.start_offset % 8;
-
-    let mut records = Vec::new();
-    let mut pos = 0_usize;
-    for _i in 0..channel_grp.record_number {
-        records.push(&data[pos..pos + channel_grp.record_size as usize]);
-        pos += channel_grp.record_size as usize;
-    }
-
-    // let mut time_raw: Vec<&[u8]> = Vec::new();
-    // let mut some_raw: Vec<&[u8]> = Vec::new();
-
-    // for record in records{
-    // 	time_raw.push(&record[0..mem::size_of::<f64>() / mem::size_of::<u8>()]);
-    // 	some_raw.push(&record[mem::size_of::<f64>() / mem::size_of::<u8>()..]);
-    // }
-    let little_endian = true;
-
-	println!("Data Length: {}", channels[0].data_type.len());
-
-    let mut time_raw = Vec::new();
-    for rec in &records {
-        time_raw.push(&rec[0..channels[0].data_type.len()])
-    }
-    let mut some_raw = Vec::new();
-	let end = byte_offset + channels[1].data_type.len();
-    for rec in &records {
-        some_raw.push(&rec[byte_offset..end])
-    }
-
-	let mut time = Vec::new();
-	for raw in time_raw {
-		time.push(Record::new(raw, channels[0].data_type));
+	pub fn list(&self) -> Vec<DGBLOCK> {
+		let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
+		let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
+		//position += pos;
+	
+		let dg = DGBLOCK::read_all(&self.file, little_endian, hd_block.data_group_block as usize);
+		return dg;
 	}
 
-    // let mut time: Vec<f64> = Vec::new();
-    // for t in time_raw {
-    //     time.push(utils::read(t, little_endian, &mut 0));
-    // }
-	let mut some = Vec::new();
-	for raw in some_raw {
-		some.push(Record::new(raw, channels[1].data_type));
+	pub fn list_channels(&self) -> (Vec<CNBLOCK>, Vec<CGBLOCK>, Vec<DGBLOCK>) {
+		let mut dg = Vec::new();
+		let mut cg = Vec::new();
+		let mut ch = Vec::new();
+	
+		let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
+		let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
+		//position += pos;
+	
+		let mut next_dg = hd_block.data_group_block;
+	
+		while next_dg != 0 {
+			let (dg_block, _position) = DGBLOCK::read(&self.file, little_endian, next_dg as usize);
+			next_dg = dg_block.next;
+			let mut next_cg = dg_block.first;
+	
+			dg.push(dg_block);
+	
+			while next_cg != 0 {
+				let (cg_block, _position) = CGBLOCK::read(&self.file, little_endian, next_cg as usize);
+				next_cg = cg_block.next;
+				let mut next_cn = cg_block.first;
+				cg.push(cg_block);
+	
+				while next_cn != 0 {
+					let (cn_block, _position) = CNBLOCK::read(&self.file, little_endian, next_cn as usize);
+					next_cn = cn_block.next;
+	
+					ch.push(cn_block);
+				}
+			}
+		}
+	
+		return (ch, cg, dg);
 	}
 
-    for (t, s) in izip!(time, some) {
-        print_record(t);
-		print!(" ");
-		print_record(s);
-		println!();
-    }
+	pub fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) {
+		let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
+		let data_length = (&self.channel_groups[channel_grp].record_number * self.channel_groups[channel_grp].record_size as u32) as usize;
+		let data =
+			&self.file[self.data_groups[datagroup].data_block as usize..(self.data_groups[datagroup].data_block as usize + data_length)];
+	
+		let mut data_blocks = Vec::new();
+		for i in 0..self.channel_groups[channel_grp].record_number {
+			data_blocks.push(
+				&data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
+					..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
+			);
+		}
+	
+		let byte_offset = (self.channels[channel].start_offset / 8) as usize;
+		let _bit_offset = self.channels[channel].start_offset % 8;
+	
+		let mut records = Vec::new();
+		let mut pos = 0_usize;
+		for _i in 0..self.channel_groups[channel_grp].record_number {
+			records.push(&data[pos..pos + self.channel_groups[channel_grp].record_size as usize]);
+			pos += self.channel_groups[channel_grp].record_size as usize;
+		}
+	
+		let mut time_raw = Vec::new();
+		for rec in &records {
+			time_raw.push(&rec[0..channels[0].data_type.len()])
+		}
+		let mut some_raw = Vec::new();
+		let end = byte_offset + channels[1].data_type.len();
+		for rec in &records {
+			some_raw.push(&rec[byte_offset..end])
+		}
+	
+		let mut time = Vec::new();
+		for raw in time_raw {
+			time.push(Record::new(raw, channels[0].data_type));
+		}
+	
+		let mut some = Vec::new();
+		for raw in some_raw {
+			some.push(Record::new(raw, channels[1].data_type));
+		}
+	}
 }
+
+
+
+
+
+
 
 #[derive(Debug, Clone, Copy)]
 pub struct IDBLOCK {
@@ -710,13 +704,13 @@ impl CGBLOCK {
 // 	return val;
 // }
 
-fn print_record(value: Record){
+pub fn print_record(value: Record){
 	match value {
 		Record::Uint(number) => print!("{}", number), 
 		Record::Int(number) => print!("{}", number), 
 		Record::Float32(number) => print!("{}", number), 
 		Record::Float64(number) => print!("{}", number), 
-		_ => panic!("Help!")
+		// _ => panic!("Help!")
 	};
 }
 
@@ -797,7 +791,7 @@ impl DataTypeRead {
 			DataType::DFloat => 0,
 			DataType::StringNullTerm => 0,
 			DataType::ByteArray => 0,
-			_ => panic!("")
+			// _ => panic!("")
 		};
 		return length;
 	}

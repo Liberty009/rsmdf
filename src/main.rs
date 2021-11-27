@@ -1,35 +1,41 @@
-use rsmdf::{mdf3, utils};
-use std::fs;
+use rsmdf::mdf3::MDF3;
+use std::time::{ Instant};
 
 fn main() {
-    let file = fs::read("Single_Channel.mdf").expect("msg");
+    // let file = fs::read("Single_Channel.mdf").expect("msg");
+	// let file = fs::read("Larger_Test.mdf").expect("msg");
 
+	let mdf = MDF3::new("Larger_Test.mdf");	
     //let dg = mdf3::list(&file);
-    let (channels, channel_groups, datagroups) = mdf3::list_channels(&file);
+    let (channels, _channel_groups, _datagroups) = mdf.list_channels();
 
-    println!("Number of data groups: {}", datagroups.len());
-    println!("Data group start: {}", datagroups[0].data_block);
+    // println!("Number of data groups: {}", datagroups.len());
+    // println!("Data group start: {}", datagroups[0].data_block);
 
-    println!("Number of channels: {}", channels.len());
+    // println!("Number of channels: {}", channels.len());
 
-    println!(
-        "Channel Group: {}, Data Length: {}",
-        channel_groups[0].record_number, channel_groups[0].record_size
-    );
+    // println!(
+    //     "Channel Group: {}, Data Length: {}",
+    //     channel_groups[0].record_number, channel_groups[0].record_size
+    // );
 
     //let mut channel_names = Vec::new();
+
+	let start = Instant::now();
     for (i, channel) in channels.iter().enumerate() {
         //channel_names.push(channel.name(&file, true));
         println!("Channel {} Name: {}, Data Type: {:?}, Byte Offset: {}, Bit No: {}, Additional Offset: {}",
 			i,
-			channel.name(&file, true),
+			channel.name(&mdf.file, true),
 			channel.data_type,
 			channel.addition_byte_offset,
 			channel.bit_number,
 			channel.addition_byte_offset,);
     }
 
-    mdf3::read(&file, &datagroups[0], &channel_groups[0], &channels[1]);
+    mdf.read(0, 0, 1);
+	
+	println!("Took: {:?}", start.elapsed());
 }
 
 #[cfg(test)]
