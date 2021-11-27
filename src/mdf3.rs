@@ -155,7 +155,7 @@ impl mdf::MDF for MDF3 {
             some.push(Record::new(raw, channels[1].data_type));
         }
 
-        return mdf::TimeChannel {};
+        return mdf::TimeChannel::new(time, some);
     }
 }
 
@@ -714,7 +714,7 @@ pub enum Record {
 impl Record {
     pub fn new(stream: &[u8], dtype: DataTypeRead) -> Self {
         let rec = match dtype.data_type {
-            DataType::UnsignedInt => (Self::unsigned_int(stream, dtype)),
+            DataType::UnsignedInt => Self::unsigned_int(stream, dtype),
             DataType::SignedInt => Self::signed_int(stream, dtype),
             DataType::Float32 => Self::float32(stream, dtype),
             DataType::Float64 => Self::float64(stream, dtype),
@@ -723,6 +723,18 @@ impl Record {
 
         return rec;
     }
+
+	pub fn extract(&self) -> f64 {
+		let value = match self {
+			Record::Uint(number) => *number as f64,
+			Record::Int(number) => *number as f64,
+			Record::Float32(number) => *number as f64,
+			Record::Float64(number) => *number as f64,
+			// _ => panic!("Help!")
+		};
+
+		return value;
+	}
 
     fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
         let records = utils::read(stream, dtype.little_endian, &mut 0);

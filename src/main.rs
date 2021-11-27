@@ -21,8 +21,8 @@ fn main() {
     // 		channel.addition_byte_offset,);
     // }
 
-    mdf.read(0, 0, 1);
-
+    let test = mdf.read(0, 0, 1);
+	println!("Max Time: {}", test.max_time());
     println!("Took: {:?}", start.elapsed());
 }
 
