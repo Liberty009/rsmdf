@@ -1,41 +1,29 @@
-use rsmdf::mdf3::MDF3;
-use std::time::{ Instant};
+use rsmdf::{mdf::MDF, mdf3::MDF3};
+use std::time::Instant;
 
 fn main() {
     // let file = fs::read("Single_Channel.mdf").expect("msg");
-	// let file = fs::read("Larger_Test.mdf").expect("msg");
+    // let file = fs::read("Larger_Test.mdf").expect("msg");
 
-	let mdf = MDF3::new("Larger_Test.mdf");	
+    let mdf = MDF3::new("Larger_Test.mdf");
     //let dg = mdf3::list(&file);
-    let (channels, _channel_groups, _datagroups) = mdf.list_channels();
+    mdf.list_channels();
 
-    // println!("Number of data groups: {}", datagroups.len());
-    // println!("Data group start: {}", datagroups[0].data_block);
-
-    // println!("Number of channels: {}", channels.len());
-
-    // println!(
-    //     "Channel Group: {}, Data Length: {}",
-    //     channel_groups[0].record_number, channel_groups[0].record_size
-    // );
-
-    //let mut channel_names = Vec::new();
-
-	let start = Instant::now();
-    for (i, channel) in channels.iter().enumerate() {
-        //channel_names.push(channel.name(&file, true));
-        println!("Channel {} Name: {}, Data Type: {:?}, Byte Offset: {}, Bit No: {}, Additional Offset: {}",
-			i,
-			channel.name(&mdf.file, true),
-			channel.data_type,
-			channel.addition_byte_offset,
-			channel.bit_number,
-			channel.addition_byte_offset,);
-    }
+    let start = Instant::now();
+    // for (i, channel) in channels.iter().enumerate() {
+    //     //channel_names.push(channel.name(&file, true));
+    //     println!("Channel {} Name: {}, Data Type: {:?}, Byte Offset: {}, Bit No: {}, Additional Offset: {}",
+    // 		i,
+    // 		channel.name(&mdf.file, true),
+    // 		channel.data_type,
+    // 		channel.addition_byte_offset,
+    // 		channel.bit_number,
+    // 		channel.addition_byte_offset,);
+    // }
 
     mdf.read(0, 0, 1);
-	
-	println!("Took: {:?}", start.elapsed());
+
+    println!("Took: {:?}", start.elapsed());
 }
 
 #[cfg(test)]
@@ -650,7 +638,8 @@ mod tests {
             0x10, 0x00, 0xDC, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let (dg_block, position) = mdf3::DGBLOCK::read(&dg_data, true, 0);
+        let mut position = 0;
+        let dg_block = mdf3::DGBLOCK::read(&dg_data, true, &mut position);
 
         assert_eq!(position, 28);
         assert_eq!(dg_block.next, 1105908);
