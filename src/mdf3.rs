@@ -1,5 +1,5 @@
 use crate::mdf::{self};
-use crate::utils::{self};
+use crate::utils;
 use std::fs::File;
 use std::io::prelude::*;
 use std::{convert::TryInto, mem};
@@ -87,7 +87,9 @@ impl mdf::MDF for MDF3 {
             next_dg = dg_block.next;
             let mut next_cg = dg_block.first;
 
+
             dg.push(dg_block);
+			
 
             while next_cg != 0 {
                 let (cg_block, _position) =
@@ -95,6 +97,8 @@ impl mdf::MDF for MDF3 {
                 next_cg = cg_block.next;
                 let mut next_cn = cg_block.first;
                 cg.push(cg_block);
+
+				println!("Channel Group: {}", cg_block.comment);
 
                 while next_cn != 0 {
                     let (cn_block, _position) =

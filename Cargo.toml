@@ -5,6 +5,11 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+#[lib]
+#crate-type = ["cdylib"]      # Creates dynamic lib
+# crate-type = ["staticlib"] # Creates static lib
+
+
 [dependencies]
 byteorder = "1"
 xml-rs = "0"
@@ -13,3 +18,7 @@ byte-slice-cast = "1"
 num-traits = "0"
 strum = "0"
 strum_macros = "0"
+cbindgen = "0.20"
+
+[build-dependencies]
+cbindgen = "0.20.0"

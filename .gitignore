@@ -1,3 +1,4 @@
 /target
 /old-src
 Cargo.lock
+bindings.h
