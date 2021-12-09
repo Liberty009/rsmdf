@@ -1,4 +1,4 @@
-use crate::mdf::{self};
+use crate::{mdf, signal::Signal};
 use crate::utils;
 use std::fs::File;
 use std::io::prelude::*;
@@ -87,9 +87,7 @@ impl mdf::MDF for MDF3 {
             next_dg = dg_block.next;
             let mut next_cg = dg_block.first;
 
-
             dg.push(dg_block);
-			
 
             while next_cg != 0 {
                 let (cg_block, _position) =
@@ -98,7 +96,7 @@ impl mdf::MDF for MDF3 {
                 let mut next_cn = cg_block.first;
                 cg.push(cg_block);
 
-				println!("Channel Group: {}", cg_block.comment);
+                println!("Channel Group: {}", cg_block.comment);
 
                 while next_cn != 0 {
                     let (cn_block, _position) =
@@ -161,6 +159,25 @@ impl mdf::MDF for MDF3 {
 
         return mdf::TimeChannel::new(time, some);
     }
+
+    fn cut(&mut self) {}
+    fn export(&self, format: &str, filename: &str) {}
+    fn filter(&self, channels: &str) {}
+    fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self {
+        return *self.clone();
+    }
+	fn select(
+        &self,
+        channels: ChannelsType,
+        record_offset: isize,
+        raw: bool,
+        copy_master: bool,
+        ignore_value2text_conversions: bool,
+        record_count: isize,
+        validate: bool,
+    ) -> Vec<Signal> {
+		return Vec::new();
+	}
 }
 
 pub struct IDBLOCK {
@@ -728,17 +745,17 @@ impl Record {
         return rec;
     }
 
-	pub fn extract(&self) -> f64 {
-		let value = match self {
-			Record::Uint(number) => *number as f64,
-			Record::Int(number) => *number as f64,
-			Record::Float32(number) => *number as f64,
-			Record::Float64(number) => *number as f64,
-			// _ => panic!("Help!")
-		};
+    pub fn extract(&self) -> f64 {
+        let value = match self {
+            Record::Uint(number) => *number as f64,
+            Record::Int(number) => *number as f64,
+            Record::Float32(number) => *number as f64,
+            Record::Float64(number) => *number as f64,
+            // _ => panic!("Help!")
+        };
 
-		return value;
-	}
+        return value;
+    }
 
     fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
         let records = utils::read(stream, dtype.little_endian, &mut 0);

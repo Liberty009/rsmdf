@@ -1,4 +1,5 @@
 use crate::mdf3;
+use crate::signal::Signal;
 
 pub trait MDF {
     fn new(filepath: &str) -> Self;
@@ -10,36 +11,47 @@ pub trait MDF {
     fn list_channels(&self);
 
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> TimeChannel;
+
+    fn cut(&mut self);
+    fn export(&self, format: &str, filename: &str);
+    fn filter(&self, channels: &str);
+    fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self;
+    fn select(
+        &self,
+        channels: ChannelsType,
+        record_offset: isize,
+        raw: bool,
+        copy_master: bool,
+        ignore_value2text_conversions: bool,
+        record_count: isize,
+        validate: bool,
+    ) -> Vec<Signal>;
 }
 
 pub struct TimeChannel {
-	pub time: Vec<f64>, 
-	pub data: Vec<f64>,
+    pub time: Vec<f64>,
+    pub data: Vec<f64>,
 }
 
 impl TimeChannel {
-	pub fn new(times: Vec<mdf3::Record>, datas: Vec<mdf3::Record>) -> Self {
-		let mut t = Vec::new();
-		let mut d = Vec::new();
+    pub fn new(times: Vec<mdf3::Record>, datas: Vec<mdf3::Record>) -> Self {
+        let mut t = Vec::new();
+        let mut d = Vec::new();
 
-		for time in times  {
-			t.push(time.extract());
-		}
+        for time in times {
+            t.push(time.extract());
+        }
 
-		for data in datas {
-			d.push(data.extract());
-		}
+        for data in datas {
+            d.push(data.extract());
+        }
 
-		Self{
-			time: t, 
-			data: d,
-		}
-	}
+        Self { time: t, data: d }
+    }
 
-	pub fn max_time(&self) -> f64 {
-		return *self.time.last().expect("Error reading time");
-	}
-	
+    pub fn max_time(&self) -> f64 {
+        return *self.time.last().expect("Error reading time");
+    }
 }
 
 // pub trait IDBLOCK {
