@@ -1,9 +1,10 @@
-use crate::{mdf, signal::Signal};
 use crate::utils;
+use crate::{mdf, signal::Signal};
 use std::fs::File;
 use std::io::prelude::*;
 use std::{convert::TryInto, mem};
 
+#[derive(Debug, Clone)]
 pub struct MDF3 {
     pub id: IDBLOCK,
     pub header: HDBLOCK,
@@ -160,15 +161,18 @@ impl mdf::MDF for MDF3 {
         return mdf::TimeChannel::new(time, some);
     }
 
-    fn cut(&mut self) {}
+    fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
+        let delta = if time_from_zero { start } else { 0.0 };
+    }
+
     fn export(&self, format: &str, filename: &str) {}
     fn filter(&self, channels: &str) {}
-    fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self {
-        return *self.clone();
+    fn resample(&self, raster: mdf::RasterType, version: &str, time_from_zero: bool) -> Self {
+        return self.clone();
     }
-	fn select(
+    fn select(
         &self,
-        channels: ChannelsType,
+        channels: mdf::ChannelsType,
         record_offset: isize,
         raw: bool,
         copy_master: bool,
@@ -176,10 +180,11 @@ impl mdf::MDF for MDF3 {
         record_count: isize,
         validate: bool,
     ) -> Vec<Signal> {
-		return Vec::new();
-	}
+        return Vec::new();
+    }
 }
 
+#[derive(Debug, Clone)]
 pub struct IDBLOCK {
     pub file_id: [u8; 8],
     pub format_id: [u8; 8],
@@ -1508,7 +1513,7 @@ impl CDBLOCK {
         let mut groups = Vec::new();
 
         for _i in 0..signal_number - 1 {
-            let (temp, pos) = Signal::read(&stream, little_endian);
+            let (temp, pos) = Signals::read(&stream, little_endian);
             groups.push(temp);
             position += pos;
         }

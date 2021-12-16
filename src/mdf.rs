@@ -12,7 +12,8 @@ pub trait MDF {
 
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> TimeChannel;
 
-    fn cut(&mut self);
+    fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool);
+
     fn export(&self, format: &str, filename: &str);
     fn filter(&self, channels: &str);
     fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self;
@@ -28,11 +29,9 @@ pub trait MDF {
     ) -> Vec<Signal>;
 }
 
-pub struct RasterType {
+pub struct RasterType {}
 
-}
-
-pub struct ChannelsType{}
+pub struct ChannelsType {}
 
 pub struct TimeChannel {
     pub time: Vec<f64>,
