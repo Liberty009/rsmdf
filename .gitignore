@@ -2,3 +2,6 @@
 /old-src
 Cargo.lock
 bindings.h
+*.mdf
+*.pdf
+*.csv
