@@ -1492,7 +1492,7 @@ pub struct CDBLOCK {
     pub block_size: u16,
     pub dependency_type: u16,
     pub signal_number: u16,
-    pub groups: Vec<Signal>,
+    pub groups: Vec<Signals>,
     pub dims: Vec<u16>,
 }
 
@@ -1538,22 +1538,22 @@ impl CDBLOCK {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Signal {
+#[derive(Debug, Clone)]
+pub struct Signals {
     pub data_group: u32,
     pub channel_group: u32,
     pub channel: u32,
 }
 
-impl Signal {
-    pub fn read(stream: &[u8], little_endian: bool) -> (Signal, usize) {
+impl Signals {
+    pub fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
         let mut position = 0;
         let data_group = utils::read(&stream, little_endian, &mut position);
         let channel_group = utils::read(&stream, little_endian, &mut position);
         let channel = utils::read(&stream, little_endian, &mut position);
 
         return (
-            Signal {
+            Self {
                 data_group,
                 channel_group,
                 channel,

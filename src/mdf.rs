@@ -28,6 +28,12 @@ pub trait MDF {
     ) -> Vec<Signal>;
 }
 
+pub struct RasterType {
+
+}
+
+pub struct ChannelsType{}
+
 pub struct TimeChannel {
     pub time: Vec<f64>,
     pub data: Vec<f64>,

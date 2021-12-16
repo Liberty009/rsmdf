@@ -1,3 +1,5 @@
+use crate::utils;
+
 
 pub struct Signal{
 	samples: Vec<f64>, 
@@ -6,9 +8,11 @@ pub struct Signal{
 	name: String,
 	comment: String, 
 	raw: bool, 
+
 }
 
 impl Signal {
+
 	pub fn len(&self) -> usize {
 		return self.samples.len();
 	}
@@ -60,6 +64,46 @@ impl Signal {
 }
 
 	pub fn extend(&self, other: Self) -> Self {
+		let last_stamp = if self.len() != 0 {
+			*self.timestamps.last().unwrap()
+		} else {
+			0.0
+		};
 
+		if other.len() != 0 {
+			let other_first_sample = other.timestamps[0];
+			let timestamps = if other_first_sample <= last_stamp {
+				other.timestamps.into_iter().map(|x| x + last_stamp).collect()
+			} else {
+				other.timestamps
+			};
+			
+			let mut new_samples = Vec::new();
+			new_samples.append(&mut self.samples.clone());
+			new_samples.append(&mut other.samples.clone());
+			let mut new_timestamps = Vec::new();
+			new_timestamps.append(&mut self.timestamps.clone());
+			new_timestamps.append(&mut timestamps);
+
+
+			return Self {
+				samples: new_samples, 
+				timestamps: new_timestamps,
+				unit: self.unit,
+				name: self.name,
+				comment: self.comment, 
+				raw: self.raw,
+			}
+		} else {
+			return *self;
+		}
+	}
+
+	pub fn interp(){}
+	pub fn as_type(){}
+	pub fn physical(){}
+	pub fn validate(){}
+	pub fn copy(&self) -> Self{
+		return *self.clone()
 	}
 }
