@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone)]
 pub struct Signal {
     pub samples: Vec<f64>,
@@ -134,9 +133,9 @@ impl Signal {
         return self.clone();
     }
 
-	pub fn max_time(&self) -> f64 {
-		return *self.timestamps.last().unwrap();
-	}
+    pub fn max_time(&self) -> f64 {
+        return *self.timestamps.last().unwrap();
+    }
 }
 
 pub enum Interpolation {

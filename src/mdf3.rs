@@ -1,5 +1,5 @@
-use crate::{utils, signal};
 use crate::{mdf, signal::Signal};
+use crate::{signal, utils};
 use std::fs::File;
 use std::io::prelude::*;
 use std::{convert::TryInto, mem};
@@ -158,7 +158,14 @@ impl mdf::MDF for MDF3 {
             some.push(Record::new(raw, channels[1].data_type));
         }
 
-        return signal::Signal::new(time.iter().map(|x| x.extract()).collect(), some.iter().map(|x| x.extract()).collect(), "Unit".to_string(), "Measurement".to_string(), "This is some measurement".to_string(), false);
+        return signal::Signal::new(
+            time.iter().map(|x| x.extract()).collect(),
+            some.iter().map(|x| x.extract()).collect(),
+            "Unit".to_string(),
+            "Measurement".to_string(),
+            "This is some measurement".to_string(),
+            false,
+        );
     }
 
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
