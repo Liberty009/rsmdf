@@ -22,8 +22,8 @@ pub extern "C" fn read_series(filepath: *const c_char, channel: *const c_char) -
     let data_channel = mdf3::MDF3::new("filepath");
     let series = data_channel.read(0, 0, 1);
 
-    let mut tv = series.time;
-    let mut dv = series.data;
+    let mut tv = series.timestamps;
+    let mut dv = series.samples;
 
     TimeSeries {
         time_values: tv.as_mut_ptr(),

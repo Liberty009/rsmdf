@@ -10,7 +10,7 @@ pub trait MDF {
 
     fn list_channels(&self);
 
-    fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> TimeChannel;
+    fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal;
 
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool);
 

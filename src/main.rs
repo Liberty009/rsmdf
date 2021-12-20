@@ -1,17 +1,17 @@
 use std::time::Instant;
 
-// use rsmdf::{mdf3, mdf::MDF};
+use rsmdf::{mdf3, mdf::MDF};
 
 fn main() {
 
-    // let mdf = mdf3::MDF3::new("Larger_Test.mdf");
+    let mdf = mdf3::MDF3::new("Larger_Test.mdf");
 
-    // mdf.list_channels();
+    mdf.list_channels();
 
-    // let start = Instant::now();
-    // let test = mdf.read(0, 0, 1);
-    // println!("Max Time: {}", test.max_time());
-    // println!("Took: {:?}", start.elapsed());
+    let start = Instant::now();
+    let test = mdf.read(0, 0, 1);
+    println!("Max Time: {}", test.max_time());
+    println!("Took: {:?}", start.elapsed());
 }
 
 // #[cfg(test)]

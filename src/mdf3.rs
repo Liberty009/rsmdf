@@ -1,4 +1,4 @@
-use crate::utils;
+use crate::{utils, signal};
 use crate::{mdf, signal::Signal};
 use std::fs::File;
 use std::io::prelude::*;
@@ -112,7 +112,7 @@ impl mdf::MDF for MDF3 {
         // return (ch, cg, dg);
     }
 
-    fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> mdf::TimeChannel {
+    fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> signal::Signal {
         let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
         let data_length = (&self.channel_groups[channel_grp].record_number
             * self.channel_groups[channel_grp].record_size as u32)
@@ -158,7 +158,7 @@ impl mdf::MDF for MDF3 {
             some.push(Record::new(raw, channels[1].data_type));
         }
 
-        return mdf::TimeChannel::new(time, some);
+        return signal::Signal::new(time.iter().map(|x| x.extract()).collect(), some.iter().map(|x| x.extract()).collect(), "Unit".to_string(), "Measurement".to_string(), "This is some measurement".to_string(), false);
     }
 
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
