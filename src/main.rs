@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use rsmdf::{mdf::MDFFile, mdf::MDF, mdf3};
+use rsmdf::{mdf::MDFFile, mdf::MDF};
 
 fn main() {
     let mdf = MDF::new("Larger_Test.mdf");

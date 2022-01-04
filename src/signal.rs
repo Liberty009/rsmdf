@@ -10,7 +10,7 @@ pub struct Signal {
 
 impl Signal {
     pub fn len(&self) -> usize {
-        return self.samples.len();
+        self.samples.len()
     }
     pub fn new(
         timestamps: Vec<f64>,
@@ -70,7 +70,7 @@ impl Signal {
         adjusted.timestamps = adjusted.timestamps[start_index..end_index].to_vec();
         adjusted.samples = adjusted.samples[start_index..end_index].to_vec();
 
-        return adjusted;
+        adjusted
     }
 
     pub fn extend(&self, other: Self) -> Self {
@@ -99,42 +99,42 @@ impl Signal {
             new_timestamps.append(&mut self.timestamps.clone());
             new_timestamps.append(&mut timestamps.clone());
 
-            return Self {
+            Self {
                 samples: new_samples,
                 timestamps: new_timestamps,
                 unit: self.unit.clone(),
                 name: self.name.clone(),
                 comment: self.comment.clone(),
                 raw: self.raw,
-            };
+            }
         } else {
-            return self.clone();
+            self.clone()
         }
     }
 
     pub fn interp(&self, new_timestamps: Vec<f64>, interpolation_mode: Interpolation) -> Self {
         if self.samples.len() == 0 || new_timestamps.len() == 0 {
-            return self.clone();
+            self.clone();
         }
 
-        let mut signal = self.clone();
+        let signal = self.clone();
         match interpolation_mode {
             Interpolation::RepeatPreviousSample => {}
             Interpolation::LinearInterpolation => {}
         }
 
-        return signal;
+        signal
     }
 
     pub fn as_type() {}
     pub fn physical() {}
     pub fn validate() {}
     pub fn copy(&self) -> Self {
-        return self.clone();
+        self.clone()
     }
 
     pub fn max_time(&self) -> f64 {
-        return *self.timestamps.last().unwrap();
+        *self.timestamps.last().unwrap()
     }
 }
 

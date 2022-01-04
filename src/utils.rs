@@ -34,7 +34,7 @@ pub fn extract_name(text: &[u8]) -> String {
         }
     }
 
-    return display_name;
+    display_name
 }
 
 pub trait FromBytes {
@@ -156,9 +156,9 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
     let old = *position;
     *position += mem::size_of::<T>() / mem::size_of::<u8>();
     if little_endian {
-        return read_le(&input[old..]);
+        read_le(&input[old..])
     } else {
-        return read_be(&input[old..]);
+        read_be(&input[old..])
     }
 }
 
@@ -168,45 +168,45 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
 
 // 	*position += mem::size_of::<T>() / mem::size_of::<u8>();
 //     // if little_endian {
-//     //     return LittleEndian::read::<T>(stream);
+//     //     LittleEndian::read::<T>(stream);
 //     // } else {
-//     //     return BigEndian::read::<T>>(stream);
+//     //     BigEndian::read::<T>>(stream);
 //     // }
 
 // 	let values = T::from_byte_slice(&stream).expect("");
 
 // 	// if little_endian {
-// 		return values;
+// 		values;
 // 	// } else {
-// 	// 	return T::from_be_bytes(stream).expect("");
+// 	// 	T::from_be_bytes(stream).expect("");
 // 	// }
 // }
 
 // pub fn read_u8(stream: &[u8], _little_endian: bool, position: &mut usize) -> u8 {
 //     *position += 1;
-//     return stream[0];
+//     stream[0];
 // }
 
 // pub fn read_i8(stream: &[u8], _little_endian: bool, position: &mut usize) -> i8 {
 //     *position += 1;
-//     return unsafe { std::mem::transmute::<u8, i8>(stream[0]) };
+//     unsafe { std::mem::transmute::<u8, i8>(stream[0]) };
 // }
 
 // pub fn read_u16(stream: &[u8], little_endian: bool, position: &mut usize) -> u16 {
 //     *position += mem::size_of::<u16>() / mem::size_of::<u8>();
 //     if little_endian {
-//         return LittleEndian::read_u16(stream);
+//         LittleEndian::read_u16(stream);
 //     } else {
-//         return BigEndian::read_u16(stream);
+//         BigEndian::read_u16(stream);
 //     }
 // }
 
 // pub fn read_i16(stream: &[u8], little_endian: bool, position: &mut usize) -> i16 {
 //     *position += mem::size_of::<i16>() / mem::size_of::<u8>();
 //     if little_endian {
-//         return LittleEndian::read_i16(stream);
+//         LittleEndian::read_i16(stream);
 //     } else {
-//         return BigEndian::read_i16(stream);
+//         BigEndian::read_i16(stream);
 //     }
 // }
 
@@ -214,9 +214,9 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
 //     *position += mem::size_of::<u32>() / mem::size_of::<u8>();
 
 //     if little_endian {
-//         return LittleEndian::read_u32(stream);
+//         LittleEndian::read_u32(stream);
 //     } else {
-//         return BigEndian::read_u32(stream);
+//         BigEndian::read_u32(stream);
 //     }
 // }
 
@@ -224,18 +224,18 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
 //     *position += mem::size_of::<u64>() / mem::size_of::<u8>();
 
 //     if little_endian {
-//         return LittleEndian::read_u64(stream);
+//         LittleEndian::read_u64(stream);
 //     } else {
-//         return BigEndian::read_u64(stream);
+//         BigEndian::read_u64(stream);
 //     }
 // }
 
 // pub fn read_f64(stream: &[u8], little_endian: bool, position: &mut usize) -> f64 {
 //     *position += mem::size_of::<f64>() / mem::size_of::<u8>();
 //     if little_endian {
-//         return LittleEndian::read_f64(stream);
+//         LittleEndian::read_f64(stream);
 //     } else {
-//         return BigEndian::read_f64(stream);
+//         BigEndian::read_f64(stream);
 //     }
 // }
 

@@ -41,7 +41,7 @@ impl mdf::MDFFile for MDF3 {
 
         mdf.read_all();
 
-        return mdf;
+        mdf
     }
 
     fn read_all(&mut self) {
@@ -109,7 +109,7 @@ impl mdf::MDFFile for MDF3 {
             }
         }
 
-        // return (ch, cg, dg);
+        // (ch, cg, dg);
     }
 
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> signal::Signal {
@@ -158,14 +158,14 @@ impl mdf::MDFFile for MDF3 {
             some.push(Record::new(raw, channels[1].data_type));
         }
 
-        return signal::Signal::new(
+        signal::Signal::new(
             time.iter().map(|x| x.extract()).collect(),
             some.iter().map(|x| x.extract()).collect(),
             "Unit".to_string(),
             "Measurement".to_string(),
             "This is some measurement".to_string(),
             false,
-        );
+        )
     }
 
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
@@ -175,7 +175,7 @@ impl mdf::MDFFile for MDF3 {
     fn export(&self, format: &str, filename: &str) {}
     fn filter(&self, channels: &str) {}
     fn resample(&self, raster: mdf::RasterType, version: &str, time_from_zero: bool) -> Self {
-        return self.clone();
+        self.clone()
     }
     fn select(
         &self,
@@ -187,7 +187,7 @@ impl mdf::MDFFile for MDF3 {
         record_count: isize,
         validate: bool,
     ) -> Vec<Signal> {
-        return Vec::new();
+        Vec::new()
     }
 }
 
@@ -239,7 +239,7 @@ impl IDBLOCK {
         let reserved2: [u8; 30] = stream[position..position + 30].try_into().expect("msg");
         position += reserved2.len();
 
-        return (
+        (
             IDBLOCK {
                 file_id,
                 format_id,
@@ -253,7 +253,7 @@ impl IDBLOCK {
             },
             position,
             little_endian,
-        );
+        )
     }
 }
 
@@ -311,7 +311,7 @@ impl HDBLOCK {
         let timer_id: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
         pos += timer_id.len();
 
-        return (
+        (
             HDBLOCK {
                 position,
                 block_type,
@@ -332,7 +332,7 @@ impl HDBLOCK {
                 timer_id,
             },
             pos,
-        );
+        )
     }
 }
 
@@ -370,14 +370,14 @@ impl TXBLOCK {
         }
         pos += text.len();
 
-        return (
+       (
             TXBLOCK {
                 block_type,
                 block_size,
                 text,
             },
             pos,
-        );
+        )
     }
 
     pub fn name(self) -> String {
@@ -387,7 +387,7 @@ impl TXBLOCK {
 
         let name = utils::extract_name(&self.text);
 
-        return name;
+        name
     }
 }
 
@@ -425,14 +425,14 @@ impl PRBLOCK {
             }
         }
 
-        return (
+        (
             PRBLOCK {
                 block_type,
                 block_size,
                 program_data,
             },
             pos,
-        );
+        )
     }
 }
 
@@ -465,7 +465,7 @@ impl TRBLOCK {
         let (events, pos) =
             TRBLOCK::read_events(&stream, pos, little_endian, trigger_events_number);
 
-        return (
+        (
             TRBLOCK {
                 block_type,
                 block_size,
@@ -474,7 +474,7 @@ impl TRBLOCK {
                 events,
             },
             pos,
-        );
+        )
     }
 
     fn read_events(
@@ -491,7 +491,7 @@ impl TRBLOCK {
             pos1 += pos;
         }
 
-        return (events, position);
+        (events, position)
     }
 }
 
@@ -508,14 +508,14 @@ impl Event {
         let trigger_time = utils::read(&stream, little_endian, &mut pos);
         let pre_trigger_time = utils::read(&stream, little_endian, &mut pos);
         let post_trigger_time = utils::read(&stream, little_endian, &mut pos);
-        return (
+        (
             Event {
                 trigger_time,
                 pre_trigger_time,
                 post_trigger_time,
             },
             position,
-        );
+        )
     }
 }
 
@@ -540,7 +540,7 @@ impl SRBLOCK {
         let samples_reduced_number = utils::read(&stream, little_endian, &mut position);
         let time_interval_length = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             SRBLOCK {
                 block_type,
                 block_size,
@@ -550,7 +550,7 @@ impl SRBLOCK {
                 time_interval_length,
             },
             position,
-        );
+        )
     }
 }
 
@@ -568,7 +568,7 @@ pub struct DGBLOCK {
 }
 
 impl DGBLOCK {
-    // Read the data stream in to a DGBLOCK type, return position reached
+    // Read the data stream in to a DGBLOCK type, position reached
     pub fn read(stream: &[u8], little_endian: bool, position: &mut usize) -> Self {
         let mut pos = position;
 
@@ -592,7 +592,7 @@ impl DGBLOCK {
         let id_number = utils::read(&stream, little_endian, &mut pos);
         let reserved = utils::read(&stream, little_endian, &mut pos);
 
-        return DGBLOCK {
+        DGBLOCK {
             block_type,
             block_size,
             next,
@@ -602,7 +602,7 @@ impl DGBLOCK {
             group_number,
             id_number,
             reserved,
-        };
+        }
     }
 
     pub fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {
@@ -615,7 +615,7 @@ impl DGBLOCK {
             all.push(dg_block);
         }
 
-        return all;
+        all
     }
 
     pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
@@ -626,7 +626,7 @@ impl DGBLOCK {
             next = cg_block.next as usize;
             channel_grps.push(cg_block);
         }
-        return channel_grps;
+        channel_grps
     }
 }
 
@@ -668,7 +668,7 @@ impl CGBLOCK {
         let record_number = utils::read(&stream, little_endian, &mut pos);
         let first_sample_reduction_block = utils::read(&stream, little_endian, &mut pos);
 
-        return (
+        (
             CGBLOCK {
                 block_type,
                 block_size,
@@ -682,7 +682,7 @@ impl CGBLOCK {
                 first_sample_reduction_block,
             },
             pos,
-        );
+        )
     }
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<CNBLOCK> {
         //let (group, _) = Self::read(stream, little_endian, position);
@@ -695,7 +695,7 @@ impl CGBLOCK {
             ch.push(cn_block);
         }
 
-        return ch;
+        ch
     }
 }
 
@@ -724,7 +724,7 @@ impl CGBLOCK {
 // 		_ => panic!("Help!")
 // 	};
 
-// 	return val;
+// 	val;
 // }
 
 pub fn print_record(value: Record) {
@@ -754,7 +754,7 @@ impl Record {
             _ => (panic!("Incorrect or not implemented type!")),
         };
 
-        return rec;
+        rec
     }
 
     pub fn extract(&self) -> f64 {
@@ -766,30 +766,30 @@ impl Record {
             // _ => panic!("Help!")
         };
 
-        return value;
+        value
     }
 
     fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
         let records = utils::read(stream, dtype.little_endian, &mut 0);
 
-        return Self::Uint(records);
+        Self::Uint(records)
     }
 
     fn signed_int(stream: &[u8], dtype: DataTypeRead) -> Self {
         let records = utils::read(stream, dtype.little_endian, &mut 0);
 
-        return Self::Int(records);
+        Self::Int(records)
     }
 
     fn float32(stream: &[u8], dtype: DataTypeRead) -> Self {
         let records = utils::read(stream, dtype.little_endian, &mut 0);
 
-        return Self::Float32(records);
+        Self::Float32(records)
     }
     fn float64(stream: &[u8], dtype: DataTypeRead) -> Self {
         let records = utils::read(stream, dtype.little_endian, &mut 0);
 
-        return Self::Float64(records);
+        Self::Float64(records)
     }
 }
 
@@ -826,7 +826,7 @@ impl DataTypeRead {
             DataType::ByteArray => 0,
             // _ => panic!("")
         };
-        return length;
+        length
     }
 }
 
@@ -842,7 +842,7 @@ impl DataTypeRead {
 //             result.push(utils::read(value, dtype.little_endian, &mut 0))
 //         }
 
-//         return RecordedData{ data: result};
+//         RecordedData{ data: result};
 //     }
 
 // }
@@ -858,7 +858,7 @@ impl DataTypeRead {
 //             converted.push(utils::read(value, dtype.little_endian, &mut 0));
 //         }
 
-//         return Number { data: converted };
+//         Number { data: converted };
 //     }
 // }
 // struct StringNull {
@@ -866,7 +866,7 @@ impl DataTypeRead {
 // }
 // impl StringNull {
 //     fn new() -> Self {
-//         return StringNull {
+//         StringNull {
 //             StringNull: "".to_string(),
 //         };
 //     }
@@ -1013,7 +1013,7 @@ impl CNBLOCK {
         let display_name = utils::read(&stream, little_endian, &mut pos);
         let addition_byte_offset = utils::read(&stream, little_endian, &mut pos);
 
-        return (
+        (
             CNBLOCK {
                 block_type,
                 block_size,
@@ -1037,7 +1037,7 @@ impl CNBLOCK {
                 addition_byte_offset,
             },
             pos,
-        );
+        )
     }
 
     pub fn name(self, stream: &[u8], little_endian: bool) -> String {
@@ -1051,7 +1051,7 @@ impl CNBLOCK {
             name = tx.name();
         }
 
-        return name;
+        name
     }
 }
 
@@ -1092,7 +1092,7 @@ impl CCBLOCK {
         let (conversion_data, pos) = ConversionData::read(&stream, little_endian, datatype);
         position += pos;
 
-        return (
+        (
             CCBLOCK {
                 block_type,
                 block_size,
@@ -1105,7 +1105,7 @@ impl CCBLOCK {
                 conversion_data,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1119,9 +1119,9 @@ pub enum ConversionData {
 impl ConversionData {
     pub fn read(_data: &[u8], _little_endian: bool, datatype: u8) -> (ConversionData, usize) {
         if datatype == 1 {
-            return (ConversionData::Parameters, 1);
+            (ConversionData::Parameters, 1)
         } else {
-            return (ConversionData::Table, 1);
+            (ConversionData::Table, 1)
         }
     }
 }
@@ -1137,7 +1137,7 @@ pub enum Parameters {
 
 impl Parameters {
     pub fn read(_data: &[u8], _little_endian: bool) -> (Parameters, usize) {
-        return (Parameters::ConversionLinear, 10);
+        (Parameters::ConversionLinear, 10)
     }
 }
 
@@ -1153,7 +1153,7 @@ impl ConversionLinear {
         let p1 = utils::read(stream, little_endian, &mut position);
         let p2 = utils::read(&stream, little_endian, &mut position);
 
-        return (ConversionLinear { p1, p2 }, position);
+        (ConversionLinear { p1, p2 }, position)
     }
 }
 
@@ -1177,7 +1177,7 @@ impl ConversionPoly {
         let p5: f64 = utils::read(&stream, little_endian, &mut position);
         let p6: f64 = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             ConversionPoly {
                 p1,
                 p2,
@@ -1187,7 +1187,7 @@ impl ConversionPoly {
                 p6,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1213,7 +1213,7 @@ impl ConversionExponetial {
         let p6: f64 = utils::read(&stream, little_endian, &mut position);
         let p7: f64 = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             ConversionExponetial {
                 p1,
                 p2,
@@ -1224,7 +1224,7 @@ impl ConversionExponetial {
                 p7,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1250,7 +1250,7 @@ impl ConversionLog {
         let p6: f64 = utils::read(&stream, little_endian, &mut position);
         let p7: f64 = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             ConversionLog {
                 p1,
                 p2,
@@ -1261,7 +1261,7 @@ impl ConversionLog {
                 p7,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1285,7 +1285,7 @@ impl ConversionRational {
         let p5: f64 = utils::read(&stream, little_endian, &mut position);
         let p6: f64 = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             ConversionRational {
                 p1,
                 p2,
@@ -1295,7 +1295,7 @@ impl ConversionRational {
                 p6,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1319,7 +1319,7 @@ impl ConversionTabular {
             value.push(temp);
         }
 
-        return (ConversionTabular { value }, position);
+        (ConversionTabular { value }, position)
     }
 }
 
@@ -1335,7 +1335,7 @@ impl TableEntry {
         let internal = utils::read(&stream, little_endian, &mut position);
         let physical = utils::read(&stream, little_endian, &mut position);
 
-        return (TableEntry { internal, physical }, position);
+        (TableEntry { internal, physical }, position)
     }
 }
 
@@ -1356,7 +1356,7 @@ impl ConversionTextFormula {
         let formula: [u8; 256] = stream.try_into().expect("msg");
         position += formula.len();
 
-        return (ConversionTextFormula { formula }, position);
+        (ConversionTextFormula { formula }, position)
     }
 }
 
@@ -1375,7 +1375,7 @@ impl ConversionTextTable {
             position += pos;
         }
 
-        return (ConversionTextTable { table }, position);
+        (ConversionTextTable { table }, position)
     }
 }
 
@@ -1391,7 +1391,7 @@ impl TextTableEntry {
         let internal = utils::read(stream, little_endian, &mut position);
         let text: [u8; 32] = stream.try_into().expect("msg");
 
-        return (TextTableEntry { internal, text }, position);
+        (TextTableEntry { internal, text }, position)
     }
 }
 
@@ -1411,7 +1411,7 @@ impl ConversionTextRangeTable {
         let txblock = utils::read(&stream, little_endian, &mut position);
         let entry = Vec::new();
 
-        return (
+        (
             ConversionTextRangeTable {
                 undef1,
                 undef2,
@@ -1419,7 +1419,7 @@ impl ConversionTextRangeTable {
                 entry,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1437,14 +1437,14 @@ impl TextRange {
         let upper = utils::read(&stream, little_endian, &mut position);
         let txblock = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             TextRange {
                 lower,
                 upper,
                 txblock,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1468,7 +1468,7 @@ impl DateStruct {
         let month = utils::read(&stream, little_endian, &mut position);
         let year = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             DateStruct {
                 ms,
                 min,
@@ -1478,7 +1478,7 @@ impl DateStruct {
                 year,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1494,7 +1494,7 @@ impl TimeStruct {
         let ms = utils::read(&stream, little_endian, &mut position);
         let days = utils::read(&stream, little_endian, &mut position);
 
-        return (TimeStruct { ms, days }, position);
+        (TimeStruct { ms, days }, position)
     }
 }
 
@@ -1536,7 +1536,7 @@ impl CDBLOCK {
             dims.push(utils::read(&stream, little_endian, &mut position))
         }
 
-        return (
+        (
             CDBLOCK {
                 block_type,
                 block_size,
@@ -1546,7 +1546,7 @@ impl CDBLOCK {
                 dims,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1564,14 +1564,14 @@ impl Signals {
         let channel_group = utils::read(&stream, little_endian, &mut position);
         let channel = utils::read(&stream, little_endian, &mut position);
 
-        return (
+        (
             Self {
                 data_group,
                 channel_group,
                 channel,
             },
             position,
-        );
+        )
     }
 }
 
@@ -1593,7 +1593,7 @@ impl CEBLOCK {
 
         let additional = stream[position..block_size as usize].to_vec();
 
-        return (
+        (
             CEBLOCK {
                 block_type,
                 block_size,
@@ -1601,6 +1601,6 @@ impl CEBLOCK {
                 additional,
             },
             position,
-        );
+        )
     }
 }
