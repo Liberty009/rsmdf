@@ -28,6 +28,10 @@ impl MDF {
 		
 		Err("Channel not found")
 	}
+
+	pub fn read_channel(self, channel: MdfChannel) -> Signal {
+		self.file.read(channel.data_group as usize, channel.channel_group as usize, channel.channel as usize)
+	}
 }
 
 
