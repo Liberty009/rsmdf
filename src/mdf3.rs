@@ -16,7 +16,7 @@ pub struct MDF3 {
     pub file: Vec<u8>,
 }
 
-impl mdf::MDF for MDF3 {
+impl mdf::MDFFile for MDF3 {
     fn new(filepath: &str) -> Self {
         let mut file = File::open(filepath).expect("Could not read file");
         let mut stream = Vec::new();
@@ -1604,74 +1604,3 @@ impl CEBLOCK {
         );
     }
 }
-
-// pub enum Supplement {
-//     DIMBlock,
-//     VectorBlock,
-// }
-
-// impl Supplement {
-//     pub fn read(_stream: &[u8], _little_endian: bool) -> Supplement {
-//         return Supplement::DIMBlock;
-//     }
-// }
-
-// pub struct DIMBlock {
-//     pub module_number: u16,
-//     pub address: u32,
-//     pub desc: [u8; 80],
-//     pub ecu_id: [u8; 32],
-// }
-
-// impl DIMBlock {
-//     pub fn read(stream: &[u8], little_endian: bool) -> (DIMBlock, usize) {
-//         let mut position = 0;
-//         let module_number: u16 =
-//             utils::read(&stream[position..], little_endian, &mut position);
-//         let address: u32 = utils::read(&stream[position..], little_endian, &mut position);
-//         let desc: [u8; 80] = stream[position..position+80].try_into().expect("msg");
-//         position += desc.len();
-//         let ecu_id: [u8; 32] = stream[position..position+32].try_into().expect("msg");
-//         position += ecu_id.len();
-
-//         return (
-//             DIMBlock {
-//                 module_number,
-//                 address,
-//                 desc,
-//                 ecu_id,
-//             },
-//             position,
-//         );
-//     }
-// }
-
-// pub struct VectorBlock {
-//     pub can_id: u32,
-//     pub can_channel: u32,
-//     pub message_name: [u8; 36],
-//     pub sender_name: [u8; 36],
-// }
-
-// impl VectorBlock {
-//     pub fn read(stream: &[u8], little_endian: bool) -> (VectorBlock, usize) {
-//         let mut position = 0;
-//         let can_id: u32 = utils::read(&stream[position..], little_endian, &mut position);
-//         let can_channel: u32 =
-//             utils::read(&stream[position..], little_endian, &mut position);
-//         let message_name: [u8; 36] = stream[position..].try_into().expect("msg");
-//         position += message_name.len();
-//         let sender_name: [u8; 36] = stream[position..].try_into().expect("msg");
-//         position += sender_name.len();
-
-//         return (
-//             VectorBlock {
-//                 can_id,
-//                 can_channel,
-//                 message_name,
-//                 sender_name,
-//             },
-//             position,
-//         );
-//     }
-// }

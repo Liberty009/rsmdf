@@ -1,4 +1,4 @@
-use crate::mdf::{self, TimeChannel, MDF};
+use crate::mdf::{self, TimeChannel, MDFFile};
 use crate::mdf3;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;

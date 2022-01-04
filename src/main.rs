@@ -1,9 +1,9 @@
 use std::time::Instant;
 
-use rsmdf::{mdf::MDF, mdf3};
+use rsmdf::{mdf::MDFFile, mdf3, mdf::MDF};
 
 fn main() {
-    let mdf = mdf3::MDF3::new("Larger_Test.mdf");
+    let mdf = MDF::new("Larger_Test.mdf");
 
     mdf.list_channels();
 

@@ -1,7 +1,76 @@
-use crate::mdf3;
+use crate::mdf3::{self, MDF3};
+// use crate::mdf4;
 use crate::signal::Signal;
 
-pub trait MDF {
+pub struct MDF{
+	filepath: String, 
+	file: MDF3,
+}
+
+
+impl MDFFile for MDF {
+	fn new(filepath: &str) -> Self{
+		Self{
+			filepath: filepath.to_string(), 
+			file: MDF3::new(filepath)
+		}
+	}
+
+    fn read_all(&mut self){
+		self.file.read_all();
+	}
+
+    fn list(&mut self){
+		self.file.list();
+	}
+
+    fn list_channels(&self){
+		self.file.list_channels();
+	}
+
+    fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal{
+		self.file.read(datagroup, channel_grp, channel)
+	}
+
+    fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool){
+		self.file.cut(start, end, include_ends, time_from_zero)
+	}
+
+    fn export(&self, format: &str, filename: &str){
+		self.file.export(format, filename)
+	}
+    fn filter(&self, channels: &str){
+		self.file.filter(channels)
+	}
+    fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self{
+		Self {
+			filepath: self.filepath.clone(),
+			file: self.file.resample(raster, version, time_from_zero),
+		}
+		
+	}
+    fn select(
+        &self,
+        channels: ChannelsType,
+        record_offset: isize,
+        raw: bool,
+        copy_master: bool,
+        ignore_value2text_conversions: bool,
+        record_count: isize,
+        validate: bool,
+    ) -> Vec<Signal>{
+		self.file.select(channels, record_offset, raw, copy_master, ignore_value2text_conversions, record_count, validate)
+	}
+}
+
+
+pub enum File {
+	MDF3, 
+	// v4: MDF4,
+}
+
+
+pub trait MDFFile {
     fn new(filepath: &str) -> Self;
 
     fn read_all(&mut self);
