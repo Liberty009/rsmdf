@@ -5,7 +5,7 @@ use std::io::prelude::*;
 use std::{convert::TryInto, mem};
 
 #[derive(Debug, Clone)]
-pub (crate) struct MDF3 {
+pub(crate) struct MDF3 {
     id: IDBLOCK,
     header: HDBLOCK,
     comment: TXBLOCK,
