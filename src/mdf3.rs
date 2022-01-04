@@ -5,15 +5,15 @@ use std::io::prelude::*;
 use std::{convert::TryInto, mem};
 
 #[derive(Debug, Clone)]
-pub struct MDF3 {
-    pub id: IDBLOCK,
-    pub header: HDBLOCK,
-    pub comment: TXBLOCK,
-    pub data_groups: Vec<DGBLOCK>,
-    pub channels: Vec<CNBLOCK>,
-    pub channel_groups: Vec<CGBLOCK>,
-    pub little_endian: bool,
-    pub file: Vec<u8>,
+pub (crate) struct MDF3 {
+    id: IDBLOCK,
+    header: HDBLOCK,
+    comment: TXBLOCK,
+    data_groups: Vec<DGBLOCK>,
+    channels: Vec<CNBLOCK>,
+    channel_groups: Vec<CGBLOCK>,
+    little_endian: bool,
+    file: Vec<u8>,
 }
 
 impl mdf::MDFFile for MDF3 {
