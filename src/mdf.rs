@@ -5,6 +5,29 @@ use crate::signal::Signal;
 pub struct MDF{
 	filepath: String, 
 	file: MDF3,
+	channels: Vec<MdfChannel>,
+}
+
+impl MDF {
+	pub fn search_channels(self, channel_name: &str) -> Result<MdfChannel, &'static str>{
+		
+		let mut channels_match = Vec::new();
+
+		for channel in self.channels {
+			if channel.name.contains(&channel_name) {
+				channels_match.push(channel.clone());
+			}
+		}
+
+		if channels_match.len() == 1 {
+			return Ok(channels_match[0].clone());
+		} else if 1 < channels_match.len() {
+			return Err("Multiple matches found");
+		}
+		
+		
+		Err("Channel not found")
+	}
 }
 
 
@@ -12,7 +35,8 @@ impl MDFFile for MDF {
 	fn new(filepath: &str) -> Self{
 		Self{
 			filepath: filepath.to_string(), 
-			file: MDF3::new(filepath)
+			file: MDF3::new(filepath), 
+			channels: Vec::new(),
 		}
 	}
 
@@ -46,6 +70,7 @@ impl MDFFile for MDF {
 		Self {
 			filepath: self.filepath.clone(),
 			file: self.file.resample(raster, version, time_from_zero),
+			channels: Vec::new(),
 		}
 		
 	}
@@ -128,11 +153,11 @@ impl TimeChannel {
     }
 }
 
-// pub trait IDBLOCK {
-// 	fn read(stream: &[u8]) ->  (usize, bool, (dyn IDBLOCK + 'static), );
-// }
-// pub trait DGBLOCK {
-// 	fn read(stream: &[u8]) -> Self;
-// }
-// pub trait CNBLOCK {}
-// pub trait CGBLOCK {}
+#[derive(Debug, Clone)]
+pub struct MdfChannel{
+	pub name: String, 
+	pub data_group: u64, 
+	pub channel: u64, 
+	pub channel_group: u64,
+}
+
