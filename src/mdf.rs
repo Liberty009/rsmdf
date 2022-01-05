@@ -18,13 +18,12 @@ impl MDF {
             }
         }
 
-        if channels_match.len() == 1 {
-            return Ok(channels_match[0].clone());
-        } else if 1 < channels_match.len() {
-            return Err("Multiple matches found");
+        match channels_match.len() {
+            0 => Err("Channel not found"),
+            1 => Ok(channels_match[0].clone()),
+            l if 1 < l => Err("Multiple matches found"),
+            _ => Err(r#"Unknown error measuring length of matching channels"#),
         }
-
-        Err("Channel not found")
     }
 
     pub fn read_channel(self, channel: MdfChannel) -> Signal {
@@ -78,26 +77,26 @@ impl MDFFile for MDF {
             channels: Vec::new(),
         }
     }
-    fn select(
-        &self,
-        channels: ChannelsType,
-        record_offset: isize,
-        raw: bool,
-        copy_master: bool,
-        ignore_value2text_conversions: bool,
-        record_count: isize,
-        validate: bool,
-    ) -> Vec<Signal> {
-        self.file.select(
-            channels,
-            record_offset,
-            raw,
-            copy_master,
-            ignore_value2text_conversions,
-            record_count,
-            validate,
-        )
-    }
+    // fn select(
+    //     &self,
+    //     channels: ChannelsType,
+    //     record_offset: isize,
+    //     raw: bool,
+    //     copy_master: bool,
+    //     ignore_value2text_conversions: bool,
+    //     record_count: isize,
+    //     validate: bool,
+    // ) -> Vec<Signal> {
+    //     self.file.select(
+    //         channels,
+    //         record_offset,
+    //         raw,
+    //         copy_master,
+    //         ignore_value2text_conversions,
+    //         record_count,
+    //         validate,
+    //     )
+    // }
 }
 
 pub enum File {
@@ -106,6 +105,7 @@ pub enum File {
 }
 
 pub trait MDFFile {
+    #[must_use]
     fn new(filepath: &str) -> Self;
 
     fn read_all(&mut self);
@@ -114,23 +114,26 @@ pub trait MDFFile {
 
     fn list_channels(&self);
 
+    #[must_use]
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal;
 
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool);
 
     fn export(&self, format: &str, filename: &str);
     fn filter(&self, channels: &str);
+    #[must_use]
     fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self;
-    fn select(
-        &self,
-        channels: ChannelsType,
-        record_offset: isize,
-        raw: bool,
-        copy_master: bool,
-        ignore_value2text_conversions: bool,
-        record_count: isize,
-        validate: bool,
-    ) -> Vec<Signal>;
+    // #[must_use]
+    // fn select(
+    //     &self,
+    //     channels: ChannelsType,
+    //     record_offset: isize,
+    //     raw: bool,
+    //     copy_master: bool,
+    //     ignore_value2text_conversions: bool,
+    //     record_count: isize,
+    //     validate: bool,
+    // ) -> Vec<Signal>;
 }
 
 pub struct RasterType {}

@@ -1,4 +1,4 @@
-use crate::{mdf, signal::Signal};
+use crate::mdf;
 use crate::{signal, utils};
 use std::fs::File;
 use std::io::prelude::*;
@@ -6,8 +6,11 @@ use std::{convert::TryInto, mem};
 
 #[derive(Debug, Clone)]
 pub(crate) struct MDF3 {
+    #[allow(dead_code)]
     id: IDBLOCK,
+    #[allow(dead_code)]
     header: HDBLOCK,
+    #[allow(dead_code)]
     comment: TXBLOCK,
     data_groups: Vec<DGBLOCK>,
     channels: Vec<CNBLOCK>,
@@ -25,9 +28,9 @@ impl mdf::MDFFile for MDF3 {
         let (header, _pos) = HDBLOCK::read(&stream, pos, little_endian);
         let (comment, _pos) = TXBLOCK::read(&stream, header.file_comment as usize, little_endian);
         let mut mdf = MDF3 {
-            id: id,
-            header: header,
-            comment: comment,
+            id,
+            header,
+            comment,
             data_groups: DGBLOCK::read_all(
                 &stream,
                 little_endian,
@@ -114,7 +117,7 @@ impl mdf::MDFFile for MDF3 {
 
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> signal::Signal {
         let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
-        let data_length = (&self.channel_groups[channel_grp].record_number
+        let data_length = (self.channel_groups[channel_grp].record_number
             * self.channel_groups[channel_grp].record_size as u32)
             as usize;
         let data = &self.file[self.data_groups[datagroup].data_block as usize
@@ -168,27 +171,27 @@ impl mdf::MDFFile for MDF3 {
         )
     }
 
-    fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
-        let delta = if time_from_zero { start } else { 0.0 };
+    fn cut(&self, start: f64, _end: f64, _include_ends: bool, time_from_zero: bool) {
+        let _delta = if time_from_zero { start } else { 0.0 };
     }
 
-    fn export(&self, format: &str, filename: &str) {}
-    fn filter(&self, channels: &str) {}
-    fn resample(&self, raster: mdf::RasterType, version: &str, time_from_zero: bool) -> Self {
+    fn export(&self, _format: &str, _filename: &str) {}
+    fn filter(&self, _channels: &str) {}
+    fn resample(&self, _raster: mdf::RasterType, _version: &str, _time_from_zero: bool) -> Self {
         self.clone()
     }
-    fn select(
-        &self,
-        channels: mdf::ChannelsType,
-        record_offset: isize,
-        raw: bool,
-        copy_master: bool,
-        ignore_value2text_conversions: bool,
-        record_count: isize,
-        validate: bool,
-    ) -> Vec<Signal> {
-        Vec::new()
-    }
+    // fn select(
+    //     &self,
+    //     _channels: mdf::ChannelsType,
+    //     _record_offset: isize,
+    //     _raw: bool,
+    //     _copy_master: bool,
+    //     _ignore_value2text_conversions: bool,
+    //     _record_count: isize,
+    //     _validate: bool,
+    // ) -> Vec<Signal> {
+    //     Vec::new()
+    // }
 }
 
 #[derive(Debug, Clone)]
@@ -224,15 +227,15 @@ impl IDBLOCK {
         let program_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
         position += program_id.len();
 
-        let default_byte_order = utils::read(&stream, true, &mut position);
+        let default_byte_order = utils::read(stream, true, &mut position);
 
-        let little_endian = if default_byte_order == 0 { true } else { false };
+        let little_endian = default_byte_order == 0;
 
-        let default_float_format = utils::read(&stream, little_endian, &mut position);
+        let default_float_format = utils::read(stream, little_endian, &mut position);
 
-        let version_number = utils::read(&stream, little_endian, &mut position);
+        let version_number = utils::read(stream, little_endian, &mut position);
 
-        let code_page_number = utils::read(&stream, little_endian, &mut position);
+        let code_page_number = utils::read(stream, little_endian, &mut position);
 
         let reserved1: [u8; 2] = [stream[position], stream[position + 1]];
         position += reserved1.len();
@@ -283,16 +286,16 @@ impl HDBLOCK {
         let mut pos = position;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("");
 
-        if !utils::eq(&block_type, &['H' as u8, 'D' as u8]) {
+        if !utils::eq(&block_type, &[b'H', b'D']) {
             panic!("Incorrect type for HDBLOCK");
         }
 
         pos += block_type.len();
-        let block_size = utils::read(&stream, little_endian, &mut pos);
-        let data_group_block = utils::read(&stream, little_endian, &mut pos);
-        let file_comment = utils::read(&stream, little_endian, &mut pos);
-        let program_block = utils::read(&stream, little_endian, &mut pos);
-        let data_group_number = utils::read(&stream, little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let data_group_block = utils::read(stream, little_endian, &mut pos);
+        let file_comment = utils::read(stream, little_endian, &mut pos);
+        let program_block = utils::read(stream, little_endian, &mut pos);
+        let data_group_number = utils::read(stream, little_endian, &mut pos);
         let date: [u8; 10] = stream[pos..pos + 10].try_into().expect("msg");
         pos += date.len();
         let time: [u8; 8] = stream[pos..pos + 8].try_into().expect("msg");
@@ -305,9 +308,9 @@ impl HDBLOCK {
         pos += project.len();
         let subject: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
         pos += subject.len();
-        let timestamp = utils::read(&stream, little_endian, &mut pos);
-        let utc_time_offset = utils::read(&stream, little_endian, &mut pos);
-        let time_quality = utils::read(&stream, little_endian, &mut pos);
+        let timestamp = utils::read(stream, little_endian, &mut pos);
+        let utc_time_offset = utils::read(stream, little_endian, &mut pos);
+        let time_quality = utils::read(stream, little_endian, &mut pos);
         let timer_id: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
         pos += timer_id.len();
 
@@ -348,7 +351,7 @@ impl TXBLOCK {
         let mut pos = position;
 
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
-        if !utils::eq(&block_type, &['T' as u8, 'X' as u8]) {
+        if !utils::eq(&block_type, &[b'T', b'X']) {
             panic!(
                 "TXBLOCK type incorrect. Found : {}, {}",
                 block_type[0], block_type[1]
@@ -370,7 +373,7 @@ impl TXBLOCK {
         }
         pos += text.len();
 
-       (
+        (
             TXBLOCK {
                 block_type,
                 block_size,
@@ -385,9 +388,7 @@ impl TXBLOCK {
 
         //let (tx, _pos) = Self::read(stream, little_endian);
 
-        let name = utils::extract_name(&self.text);
-
-        name
+        utils::extract_name(&self.text)
     }
 }
 
@@ -402,13 +403,13 @@ impl PRBLOCK {
     pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (PRBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
-        if !utils::eq(&block_type, &['P' as u8, 'R' as u8]) {
+        if !utils::eq(&block_type, &[b'P', b'R']) {
             panic!("PR Block not found");
         }
 
         pos += block_type.len();
 
-        let block_size = utils::read(&stream, little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, &mut pos);
         pos += 2;
 
         //let mut program_data = vec![0; block_size as usize];
@@ -450,7 +451,7 @@ impl TRBLOCK {
         let mut pos = position;
 
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
-        if !utils::eq(&block_type, &['T' as u8, 'R' as u8]) {
+        if !utils::eq(&block_type, &[b'T', b'R']) {
             panic!(
                 "TRBLOCK not found. Found: {}, {}",
                 block_type[0], block_type[1]
@@ -461,9 +462,8 @@ impl TRBLOCK {
 
         let block_size = utils::read(&stream[pos..], little_endian, &mut pos);
         let trigger_comment = utils::read(&stream[pos..], little_endian, &mut pos);
-        let trigger_events_number = utils::read(&stream, little_endian, &mut pos);
-        let (events, pos) =
-            TRBLOCK::read_events(&stream, pos, little_endian, trigger_events_number);
+        let trigger_events_number = utils::read(stream, little_endian, &mut pos);
+        let (events, pos) = TRBLOCK::read_events(stream, pos, little_endian, trigger_events_number);
 
         (
             TRBLOCK {
@@ -486,7 +486,7 @@ impl TRBLOCK {
         let mut events = Vec::new();
         let mut pos1 = position;
         for _i in 0..no_events {
-            let (event, pos) = Event::read(&stream, pos1, little_endian);
+            let (event, pos) = Event::read(stream, pos1, little_endian);
             events.push(event);
             pos1 += pos;
         }
@@ -505,9 +505,9 @@ pub struct Event {
 impl Event {
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (Event, usize) {
         let mut pos = position;
-        let trigger_time = utils::read(&stream, little_endian, &mut pos);
-        let pre_trigger_time = utils::read(&stream, little_endian, &mut pos);
-        let post_trigger_time = utils::read(&stream, little_endian, &mut pos);
+        let trigger_time = utils::read(stream, little_endian, &mut pos);
+        let pre_trigger_time = utils::read(stream, little_endian, &mut pos);
+        let post_trigger_time = utils::read(stream, little_endian, &mut pos);
         (
             Event {
                 trigger_time,
@@ -534,11 +534,11 @@ impl SRBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream.try_into().expect("msg");
         position += block_type.len();
-        let block_size = utils::read(&stream, little_endian, &mut position);
-        let next = utils::read(&stream, little_endian, &mut position);
-        let data_block = utils::read(&stream, little_endian, &mut position);
-        let samples_reduced_number = utils::read(&stream, little_endian, &mut position);
-        let time_interval_length = utils::read(&stream, little_endian, &mut position);
+        let block_size = utils::read(stream, little_endian, &mut position);
+        let next = utils::read(stream, little_endian, &mut position);
+        let data_block = utils::read(stream, little_endian, &mut position);
+        let samples_reduced_number = utils::read(stream, little_endian, &mut position);
+        let time_interval_length = utils::read(stream, little_endian, &mut position);
 
         (
             SRBLOCK {
@@ -570,11 +570,11 @@ pub struct DGBLOCK {
 impl DGBLOCK {
     // Read the data stream in to a DGBLOCK type, position reached
     pub fn read(stream: &[u8], little_endian: bool, position: &mut usize) -> Self {
-        let mut pos = position;
+        let pos = position;
 
         // Read block type to confirm
         let block_type: [u8; 2] = stream[*pos..*pos + 2].try_into().expect("msg");
-        if !utils::eq(&block_type, &['D' as u8, 'G' as u8]) {
+        if !utils::eq(&block_type, &[b'D', b'G']) {
             panic!(
                 "DGBLOCK not found. Found: {}, {}",
                 block_type[0], block_type[1]
@@ -583,14 +583,14 @@ impl DGBLOCK {
 
         *pos += block_type.len();
 
-        let block_size = utils::read(&stream, little_endian, &mut pos);
-        let next = utils::read(&stream, little_endian, &mut pos);
-        let first = utils::read(&stream, little_endian, &mut pos);
-        let trigger_block = utils::read(&stream, little_endian, &mut pos);
-        let data_block = utils::read(&stream, little_endian, &mut pos);
-        let group_number = utils::read(&stream, little_endian, &mut pos);
-        let id_number = utils::read(&stream, little_endian, &mut pos);
-        let reserved = utils::read(&stream, little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, pos);
+        let next = utils::read(stream, little_endian, pos);
+        let first = utils::read(stream, little_endian, pos);
+        let trigger_block = utils::read(stream, little_endian, pos);
+        let data_block = utils::read(stream, little_endian, pos);
+        let group_number = utils::read(stream, little_endian, pos);
+        let id_number = utils::read(stream, little_endian, pos);
+        let reserved = utils::read(stream, little_endian, pos);
 
         DGBLOCK {
             block_type,
@@ -610,7 +610,7 @@ impl DGBLOCK {
         let mut next_dg = position;
 
         while next_dg != 0 {
-            let dg_block = DGBLOCK::read(&stream, little_endian, &mut next_dg);
+            let dg_block = DGBLOCK::read(stream, little_endian, &mut next_dg);
             next_dg = dg_block.next as usize;
             all.push(dg_block);
         }
@@ -649,7 +649,7 @@ impl CGBLOCK {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
 
-        if !utils::eq(&block_type, &['C' as u8, 'G' as u8]) {
+        if !utils::eq(&block_type, &[b'C', b'G']) {
             panic!(
                 "CGBLOCK not found. Found: {}, {}",
                 block_type[0] as char, block_type[1] as char
@@ -658,15 +658,15 @@ impl CGBLOCK {
 
         pos += block_type.len();
 
-        let block_size = utils::read(&stream, little_endian, &mut pos);
-        let next = utils::read(&stream, little_endian, &mut pos);
-        let first = utils::read(&stream, little_endian, &mut pos);
-        let comment = utils::read(&stream, little_endian, &mut pos);
-        let record_id = utils::read(&stream, little_endian, &mut pos);
-        let channel_number = utils::read(&stream, little_endian, &mut pos);
-        let record_size = utils::read(&stream, little_endian, &mut pos);
-        let record_number = utils::read(&stream, little_endian, &mut pos);
-        let first_sample_reduction_block = utils::read(&stream, little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let next = utils::read(stream, little_endian, &mut pos);
+        let first = utils::read(stream, little_endian, &mut pos);
+        let comment = utils::read(stream, little_endian, &mut pos);
+        let record_id = utils::read(stream, little_endian, &mut pos);
+        let channel_number = utils::read(stream, little_endian, &mut pos);
+        let record_size = utils::read(stream, little_endian, &mut pos);
+        let record_number = utils::read(stream, little_endian, &mut pos);
+        let first_sample_reduction_block = utils::read(stream, little_endian, &mut pos);
 
         (
             CGBLOCK {
@@ -699,34 +699,6 @@ impl CGBLOCK {
     }
 }
 
-// pub enum Types{
-// 	u8,
-// 	u16,
-// 	u32,
-// 	u64,
-// 	i8,
-// 	i16,
-// 	i32,
-// 	i64,
-// }
-
-// pub struct DataType {
-// 	pub t: Types,
-
-// }
-
-// fn read_record<T: utils::FromBytes>(value: Record) -> T {
-// 	let val: T = match value {
-// 		Record::Uint(number) => number,
-// 		Record::Int(number) => number,
-// 		Record::Float32(number) => number,
-// 		Record::Float64(number) => number,
-// 		_ => panic!("Help!")
-// 	};
-
-// 	val;
-// }
-
 pub fn print_record(value: Record) {
     match value {
         Record::Uint(number) => print!("{}", number),
@@ -758,15 +730,13 @@ impl Record {
     }
 
     pub fn extract(&self) -> f64 {
-        let value = match self {
+        match self {
             Record::Uint(number) => *number as f64,
             Record::Int(number) => *number as f64,
             Record::Float32(number) => *number as f64,
             Record::Float64(number) => *number as f64,
             // _ => panic!("Help!")
-        };
-
-        value
+        }
     }
 
     fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
@@ -814,7 +784,7 @@ pub struct DataTypeRead {
 
 impl DataTypeRead {
     fn len(self) -> usize {
-        let length = match self.data_type {
+        match self.data_type {
             DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),
             DataType::SignedInt => mem::size_of::<i8>() / mem::size_of::<u8>(),
             DataType::Float32 => mem::size_of::<f32>() / mem::size_of::<u8>(),
@@ -825,8 +795,7 @@ impl DataTypeRead {
             DataType::StringNullTerm => 0,
             DataType::ByteArray => 0,
             // _ => panic!("")
-        };
-        length
+        }
     }
 }
 
@@ -908,17 +877,17 @@ impl CNBLOCK {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
         pos += block_type.len();
-        if !utils::eq(&block_type, &['C' as u8, 'N' as u8]) {
+        if !utils::eq(&block_type, &[b'C', b'N']) {
             panic!("CNBLOCK not found.");
         }
 
-        let block_size = utils::read(&stream, little_endian, &mut pos);
-        let next = utils::read(&stream, little_endian, &mut pos);
-        let conversion_formula = utils::read(&stream, little_endian, &mut pos);
-        let source_ext = utils::read(&stream, little_endian, &mut pos);
-        let dependency = utils::read(&stream, little_endian, &mut pos);
-        let comment = utils::read(&stream, little_endian, &mut pos);
-        let channel_type = utils::read(&stream, little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let next = utils::read(stream, little_endian, &mut pos);
+        let conversion_formula = utils::read(stream, little_endian, &mut pos);
+        let source_ext = utils::read(stream, little_endian, &mut pos);
+        let dependency = utils::read(stream, little_endian, &mut pos);
+        let comment = utils::read(stream, little_endian, &mut pos);
+        let channel_type = utils::read(stream, little_endian, &mut pos);
 
         let short_name: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
         pos += short_name.len();
@@ -926,10 +895,10 @@ impl CNBLOCK {
         let desc: [u8; 128] = stream[pos..pos + 128].try_into().expect("msg");
         pos += desc.len();
 
-        let start_offset = utils::read(&stream, little_endian, &mut pos);
-        let bit_number = utils::read(&stream, little_endian, &mut pos);
+        let start_offset = utils::read(stream, little_endian, &mut pos);
+        let bit_number = utils::read(stream, little_endian, &mut pos);
 
-        let datatype: u16 = utils::read(&stream, little_endian, &mut pos);
+        let datatype: u16 = utils::read(stream, little_endian, &mut pos);
         let data_type = match datatype {
             0 => DataTypeRead {
                 data_type: DataType::UnsignedInt,
@@ -937,35 +906,35 @@ impl CNBLOCK {
             },
             1 => DataTypeRead {
                 data_type: DataType::SignedInt,
-                little_endian: little_endian,
+                little_endian,
             },
             2 => DataTypeRead {
                 data_type: DataType::Float32,
-                little_endian: little_endian,
+                little_endian,
             },
             3 => DataTypeRead {
                 data_type: DataType::Float64,
-                little_endian: little_endian,
+                little_endian,
             },
             4 => DataTypeRead {
                 data_type: DataType::FFloat,
-                little_endian: little_endian,
+                little_endian,
             },
             5 => DataTypeRead {
                 data_type: DataType::GFloat,
-                little_endian: little_endian,
+                little_endian,
             },
             6 => DataTypeRead {
                 data_type: DataType::DFloat,
-                little_endian: little_endian,
+                little_endian,
             },
             7 => DataTypeRead {
                 data_type: DataType::StringNullTerm,
-                little_endian: little_endian,
+                little_endian,
             },
             8 => DataTypeRead {
                 data_type: DataType::ByteArray,
-                little_endian: little_endian,
+                little_endian,
             },
             9 => DataTypeRead {
                 data_type: DataType::UnsignedInt,
@@ -1005,13 +974,13 @@ impl CNBLOCK {
             }
         };
 
-        let value_range_valid = utils::read(&stream, little_endian, &mut pos);
-        let signal_min = utils::read(&stream, little_endian, &mut pos);
-        let signal_max = utils::read(&stream, little_endian, &mut pos);
-        let sample_rate = utils::read(&stream, little_endian, &mut pos);
-        let long_name = utils::read(&stream, little_endian, &mut pos);
-        let display_name = utils::read(&stream, little_endian, &mut pos);
-        let addition_byte_offset = utils::read(&stream, little_endian, &mut pos);
+        let value_range_valid = utils::read(stream, little_endian, &mut pos);
+        let signal_min = utils::read(stream, little_endian, &mut pos);
+        let signal_max = utils::read(stream, little_endian, &mut pos);
+        let sample_rate = utils::read(stream, little_endian, &mut pos);
+        let long_name = utils::read(stream, little_endian, &mut pos);
+        let display_name = utils::read(stream, little_endian, &mut pos);
+        let addition_byte_offset = utils::read(stream, little_endian, &mut pos);
 
         (
             CNBLOCK {
@@ -1046,7 +1015,7 @@ impl CNBLOCK {
         if self.channel_type == 1 {
             name = "time".to_string();
         } else if self.comment != 0 {
-            let (tx, _pos) = TXBLOCK::read(&stream, self.comment as usize, little_endian);
+            let (tx, _pos) = TXBLOCK::read(stream, self.comment as usize, little_endian);
 
             name = tx.name();
         }
@@ -1074,22 +1043,22 @@ impl CCBLOCK {
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
 
-        if !utils::eq(&block_type, &['C' as u8, 'C' as u8]) {
+        if !utils::eq(&block_type, &[b'C', b'C']) {
             panic!("CC not found");
         }
 
-        let block_size: u16 = utils::read(&stream, little_endian, &mut position);
-        let physical_range_valid: u16 = utils::read(&stream, little_endian, &mut position);
-        let physical_min: f64 = utils::read(&stream, little_endian, &mut position);
-        let physical_max: f64 = utils::read(&stream, little_endian, &mut position);
+        let block_size: u16 = utils::read(stream, little_endian, &mut position);
+        let physical_range_valid: u16 = utils::read(stream, little_endian, &mut position);
+        let physical_min: f64 = utils::read(stream, little_endian, &mut position);
+        let physical_max: f64 = utils::read(stream, little_endian, &mut position);
         let unit: [u8; 20] = stream[position..position + 20].try_into().expect("msg");
         position += unit.len();
-        let conversion_type: u16 = utils::read(&stream, little_endian, &mut position);
-        let size_info: u16 = utils::read(&stream, little_endian, &mut position);
+        let conversion_type: u16 = utils::read(stream, little_endian, &mut position);
+        let size_info: u16 = utils::read(stream, little_endian, &mut position);
 
         let datatype = 1;
 
-        let (conversion_data, pos) = ConversionData::read(&stream, little_endian, datatype);
+        let (conversion_data, pos) = ConversionData::read(stream, little_endian, datatype);
         position += pos;
 
         (
@@ -1151,7 +1120,7 @@ impl ConversionLinear {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLinear, usize) {
         let mut position = 0;
         let p1 = utils::read(stream, little_endian, &mut position);
-        let p2 = utils::read(&stream, little_endian, &mut position);
+        let p2 = utils::read(stream, little_endian, &mut position);
 
         (ConversionLinear { p1, p2 }, position)
     }
@@ -1170,12 +1139,12 @@ pub struct ConversionPoly {
 impl ConversionPoly {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionPoly, usize) {
         let mut position = 0;
-        let p1: f64 = utils::read(&stream, little_endian, &mut position);
-        let p2: f64 = utils::read(&stream, little_endian, &mut position);
-        let p3: f64 = utils::read(&stream, little_endian, &mut position);
-        let p4: f64 = utils::read(&stream, little_endian, &mut position);
-        let p5: f64 = utils::read(&stream, little_endian, &mut position);
-        let p6: f64 = utils::read(&stream, little_endian, &mut position);
+        let p1: f64 = utils::read(stream, little_endian, &mut position);
+        let p2: f64 = utils::read(stream, little_endian, &mut position);
+        let p3: f64 = utils::read(stream, little_endian, &mut position);
+        let p4: f64 = utils::read(stream, little_endian, &mut position);
+        let p5: f64 = utils::read(stream, little_endian, &mut position);
+        let p6: f64 = utils::read(stream, little_endian, &mut position);
 
         (
             ConversionPoly {
@@ -1205,13 +1174,13 @@ pub struct ConversionExponetial {
 impl ConversionExponetial {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionExponetial, usize) {
         let mut position = 0;
-        let p1: f64 = utils::read(&stream, little_endian, &mut position);
-        let p2: f64 = utils::read(&stream, little_endian, &mut position);
-        let p3: f64 = utils::read(&stream, little_endian, &mut position);
-        let p4: f64 = utils::read(&stream, little_endian, &mut position);
-        let p5: f64 = utils::read(&stream, little_endian, &mut position);
-        let p6: f64 = utils::read(&stream, little_endian, &mut position);
-        let p7: f64 = utils::read(&stream, little_endian, &mut position);
+        let p1: f64 = utils::read(stream, little_endian, &mut position);
+        let p2: f64 = utils::read(stream, little_endian, &mut position);
+        let p3: f64 = utils::read(stream, little_endian, &mut position);
+        let p4: f64 = utils::read(stream, little_endian, &mut position);
+        let p5: f64 = utils::read(stream, little_endian, &mut position);
+        let p6: f64 = utils::read(stream, little_endian, &mut position);
+        let p7: f64 = utils::read(stream, little_endian, &mut position);
 
         (
             ConversionExponetial {
@@ -1242,13 +1211,13 @@ pub struct ConversionLog {
 impl ConversionLog {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLog, usize) {
         let mut position = 0;
-        let p1: f64 = utils::read(&stream, little_endian, &mut position);
-        let p2: f64 = utils::read(&stream, little_endian, &mut position);
-        let p3: f64 = utils::read(&stream, little_endian, &mut position);
-        let p4: f64 = utils::read(&stream, little_endian, &mut position);
-        let p5: f64 = utils::read(&stream, little_endian, &mut position);
-        let p6: f64 = utils::read(&stream, little_endian, &mut position);
-        let p7: f64 = utils::read(&stream, little_endian, &mut position);
+        let p1: f64 = utils::read(stream, little_endian, &mut position);
+        let p2: f64 = utils::read(stream, little_endian, &mut position);
+        let p3: f64 = utils::read(stream, little_endian, &mut position);
+        let p4: f64 = utils::read(stream, little_endian, &mut position);
+        let p5: f64 = utils::read(stream, little_endian, &mut position);
+        let p6: f64 = utils::read(stream, little_endian, &mut position);
+        let p7: f64 = utils::read(stream, little_endian, &mut position);
 
         (
             ConversionLog {
@@ -1278,12 +1247,12 @@ pub struct ConversionRational {
 impl ConversionRational {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionRational, usize) {
         let mut position = 0;
-        let p1: f64 = utils::read(&stream, little_endian, &mut position);
-        let p2: f64 = utils::read(&stream, little_endian, &mut position);
-        let p3: f64 = utils::read(&stream, little_endian, &mut position);
-        let p4: f64 = utils::read(&stream, little_endian, &mut position);
-        let p5: f64 = utils::read(&stream, little_endian, &mut position);
-        let p6: f64 = utils::read(&stream, little_endian, &mut position);
+        let p1: f64 = utils::read(stream, little_endian, &mut position);
+        let p2: f64 = utils::read(stream, little_endian, &mut position);
+        let p3: f64 = utils::read(stream, little_endian, &mut position);
+        let p4: f64 = utils::read(stream, little_endian, &mut position);
+        let p5: f64 = utils::read(stream, little_endian, &mut position);
+        let p6: f64 = utils::read(stream, little_endian, &mut position);
 
         (
             ConversionRational {
@@ -1314,7 +1283,7 @@ impl ConversionTabular {
         let mut position = 0;
         let mut value = Vec::new();
         for _i in 0..1 {
-            let (temp, pos) = TableEntry::read(&stream, little_endian);
+            let (temp, pos) = TableEntry::read(stream, little_endian);
             position += pos;
             value.push(temp);
         }
@@ -1332,8 +1301,8 @@ pub struct TableEntry {
 impl TableEntry {
     pub fn read(stream: &[u8], little_endian: bool) -> (TableEntry, usize) {
         let mut position = 0;
-        let internal = utils::read(&stream, little_endian, &mut position);
-        let physical = utils::read(&stream, little_endian, &mut position);
+        let internal = utils::read(stream, little_endian, &mut position);
+        let physical = utils::read(stream, little_endian, &mut position);
 
         (TableEntry { internal, physical }, position)
     }
@@ -1370,7 +1339,7 @@ impl ConversionTextTable {
         let mut position = 0;
         let mut table = Vec::new();
         for _i in 0..number - 1 {
-            let (table_entry, pos) = TextTableEntry::read(&stream, little_endian);
+            let (table_entry, pos) = TextTableEntry::read(stream, little_endian);
             table.push(table_entry);
             position += pos;
         }
@@ -1406,9 +1375,9 @@ pub struct ConversionTextRangeTable {
 impl ConversionTextRangeTable {
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTextRangeTable, usize) {
         let mut position = 0;
-        let undef1 = utils::read(&stream, little_endian, &mut position);
-        let undef2 = utils::read(&stream, little_endian, &mut position);
-        let txblock = utils::read(&stream, little_endian, &mut position);
+        let undef1 = utils::read(stream, little_endian, &mut position);
+        let undef2 = utils::read(stream, little_endian, &mut position);
+        let txblock = utils::read(stream, little_endian, &mut position);
         let entry = Vec::new();
 
         (
@@ -1433,9 +1402,9 @@ pub struct TextRange {
 impl TextRange {
     pub fn read(stream: &[u8], little_endian: bool) -> (TextRange, usize) {
         let mut position = 0;
-        let lower = utils::read(&stream, little_endian, &mut position);
-        let upper = utils::read(&stream, little_endian, &mut position);
-        let txblock = utils::read(&stream, little_endian, &mut position);
+        let lower = utils::read(stream, little_endian, &mut position);
+        let upper = utils::read(stream, little_endian, &mut position);
+        let txblock = utils::read(stream, little_endian, &mut position);
 
         (
             TextRange {
@@ -1461,12 +1430,12 @@ pub struct DateStruct {
 impl DateStruct {
     pub fn read(stream: &[u8], little_endian: bool) -> (DateStruct, usize) {
         let mut position = 0;
-        let ms = utils::read(&stream, little_endian, &mut position);
-        let min = utils::read(&stream, little_endian, &mut position);
-        let hour = utils::read(&stream, little_endian, &mut position);
-        let day = utils::read(&stream, little_endian, &mut position);
-        let month = utils::read(&stream, little_endian, &mut position);
-        let year = utils::read(&stream, little_endian, &mut position);
+        let ms = utils::read(stream, little_endian, &mut position);
+        let min = utils::read(stream, little_endian, &mut position);
+        let hour = utils::read(stream, little_endian, &mut position);
+        let day = utils::read(stream, little_endian, &mut position);
+        let month = utils::read(stream, little_endian, &mut position);
+        let year = utils::read(stream, little_endian, &mut position);
 
         (
             DateStruct {
@@ -1491,8 +1460,8 @@ pub struct TimeStruct {
 impl TimeStruct {
     pub fn read(stream: &[u8], little_endian: bool) -> (TimeStruct, usize) {
         let mut position = 0;
-        let ms = utils::read(&stream, little_endian, &mut position);
-        let days = utils::read(&stream, little_endian, &mut position);
+        let ms = utils::read(stream, little_endian, &mut position);
+        let days = utils::read(stream, little_endian, &mut position);
 
         (TimeStruct { ms, days }, position)
     }
@@ -1513,14 +1482,14 @@ impl CDBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
-        let block_size: u16 = utils::read(&stream, little_endian, &mut position);
-        let dependency_type: u16 = utils::read(&stream, little_endian, &mut position);
-        let signal_number: u16 = utils::read(&stream, little_endian, &mut position);
+        let block_size: u16 = utils::read(stream, little_endian, &mut position);
+        let dependency_type: u16 = utils::read(stream, little_endian, &mut position);
+        let signal_number: u16 = utils::read(stream, little_endian, &mut position);
 
         let mut groups = Vec::new();
 
         for _i in 0..signal_number - 1 {
-            let (temp, pos) = Signals::read(&stream, little_endian);
+            let (temp, pos) = Signals::read(stream, little_endian);
             groups.push(temp);
             position += pos;
         }
@@ -1533,7 +1502,7 @@ impl CDBLOCK {
             dependency_type - 255
         };
         for _i in 0..no_dependencies - 1 {
-            dims.push(utils::read(&stream, little_endian, &mut position))
+            dims.push(utils::read(stream, little_endian, &mut position))
         }
 
         (
@@ -1560,9 +1529,9 @@ pub struct Signals {
 impl Signals {
     pub fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
         let mut position = 0;
-        let data_group = utils::read(&stream, little_endian, &mut position);
-        let channel_group = utils::read(&stream, little_endian, &mut position);
-        let channel = utils::read(&stream, little_endian, &mut position);
+        let data_group = utils::read(stream, little_endian, &mut position);
+        let channel_group = utils::read(stream, little_endian, &mut position);
+        let channel = utils::read(stream, little_endian, &mut position);
 
         (
             Self {
@@ -1588,8 +1557,8 @@ impl CEBLOCK {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
-        let block_size: u16 = utils::read(&stream, little_endian, &mut position);
-        let extension_type: u16 = utils::read(&stream, little_endian, &mut position);
+        let block_size: u16 = utils::read(stream, little_endian, &mut position);
+        let extension_type: u16 = utils::read(stream, little_endian, &mut position);
 
         let additional = stream[position..block_size as usize].to_vec();
 

@@ -9,9 +9,17 @@ pub struct Signal {
 }
 
 impl Signal {
+    #[must_use]
     pub fn len(&self) -> usize {
         self.samples.len()
     }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.samples.is_empty()
+    }
+
+    #[must_use]
     pub fn new(
         timestamps: Vec<f64>,
         samples: Vec<f64>,
@@ -29,9 +37,10 @@ impl Signal {
             raw,
         }
     }
+    #[must_use]
     pub fn cut(&self, start: f64, end: f64, include_ends: bool) -> Self {
         let mut adjusted = self.clone();
-        if adjusted.len() == 0 {
+        if adjusted.is_empty() {
             return adjusted;
         }
 
@@ -73,16 +82,17 @@ impl Signal {
         adjusted
     }
 
+    #[must_use]
     pub fn extend(&self, other: Self) -> Self {
-        let last_stamp = if self.len() != 0 {
+        let last_stamp = if !self.is_empty() {
             *self.timestamps.last().unwrap()
         } else {
             0.0
         };
 
-        if other.len() != 0 {
+        if !other.is_empty() {
             let other_first_sample = other.timestamps[0];
-            let timestamps = if other_first_sample <= last_stamp {
+            let mut timestamps = if other_first_sample <= last_stamp {
                 other
                     .timestamps
                     .into_iter()
@@ -94,10 +104,11 @@ impl Signal {
 
             let mut new_samples = Vec::new();
             new_samples.append(&mut self.samples.clone());
+            #[allow(clippy::redundant_clone)]
             new_samples.append(&mut other.samples.clone());
             let mut new_timestamps = Vec::new();
             new_timestamps.append(&mut self.timestamps.clone());
-            new_timestamps.append(&mut timestamps.clone());
+            new_timestamps.append(&mut timestamps);
 
             Self {
                 samples: new_samples,
@@ -112,9 +123,10 @@ impl Signal {
         }
     }
 
+    #[must_use]
     pub fn interp(&self, new_timestamps: Vec<f64>, interpolation_mode: Interpolation) -> Self {
-        if self.samples.len() == 0 || new_timestamps.len() == 0 {
-            self.clone();
+        if self.samples.is_empty() || new_timestamps.is_empty() {
+            return self.clone();
         }
 
         let signal = self.clone();
@@ -127,12 +139,17 @@ impl Signal {
     }
 
     pub fn as_type() {}
+
     pub fn physical() {}
+
     pub fn validate() {}
+
+    #[must_use]
     pub fn copy(&self) -> Self {
         self.clone()
     }
 
+    #[must_use]
     pub fn max_time(&self) -> f64 {
         *self.timestamps.last().unwrap()
     }
