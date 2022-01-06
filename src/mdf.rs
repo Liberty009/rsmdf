@@ -9,10 +9,10 @@ pub struct MDF {
 }
 
 impl MDF {
-    pub fn search_channels(self, channel_name: &str) -> Result<MdfChannel, &'static str> {
+    pub fn search_channels(&self, channel_name: &str) -> Result<MdfChannel, &'static str> {
         let mut channels_match = Vec::new();
 
-        for channel in self.channels {
+        for channel in &self.channels {
             if channel.name.contains(&channel_name) {
                 channels_match.push(channel.clone());
             }
@@ -23,6 +23,12 @@ impl MDF {
             1 => Ok(channels_match[0].clone()),
             l if 1 < l => Err("Multiple matches found"),
             _ => Err(r#"Unknown error measuring length of matching channels"#),
+        }
+    }
+
+    pub fn list_channels(&self) {
+        for channel in &self.channels {
+            println!("Channel: {}", channel.name);
         }
     }
 
@@ -37,10 +43,11 @@ impl MDF {
 
 impl MDFFile for MDF {
     fn new(filepath: &str) -> Self {
+        let file = MDF3::new(filepath);
         Self {
             filepath: filepath.to_string(),
-            file: MDF3::new(filepath),
-            channels: Vec::new(),
+            channels: file.channels(),
+            file,
         }
     }
 

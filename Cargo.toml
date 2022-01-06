@@ -16,8 +16,8 @@ xml-rs = "0"
 itertools = "0"
 byte-slice-cast = "1"
 num-traits = "0"
-strum = "0"
-strum_macros = "0"
+#strum = "0"
+#strum_macros = "0"
 
 [build-dependencies]
 cbindgen = "0.20.0"

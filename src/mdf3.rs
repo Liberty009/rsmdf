@@ -1,4 +1,4 @@
-use crate::mdf;
+use crate::mdf::{self, MdfChannel};
 use crate::{signal, utils};
 use std::fs::File;
 use std::io::prelude::*;
@@ -17,6 +17,56 @@ pub(crate) struct MDF3 {
     channel_groups: Vec<CGBLOCK>,
     little_endian: bool,
     file: Vec<u8>,
+}
+
+impl MDF3 {
+    pub fn channels(&self) -> Vec<MdfChannel> {
+        let mut channels = Vec::new();
+
+        let mut dg = Vec::new();
+        let mut cg = Vec::new();
+        let mut ch = Vec::new();
+
+        let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
+        let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
+
+        let mut next_dg = hd_block.data_group_block;
+
+        while next_dg != 0 {
+            let dg_block = DGBLOCK::read(&self.file, little_endian, &mut (next_dg as usize));
+            next_dg = dg_block.next;
+            let mut next_cg = dg_block.first;
+
+            dg.push(dg_block);
+
+            while next_cg != 0 {
+                let (cg_block, _position) =
+                    CGBLOCK::read(&self.file, little_endian, next_cg as usize);
+                next_cg = cg_block.next;
+                let mut next_cn = cg_block.first;
+                cg.push(cg_block);
+
+                println!("Channel Group: {}", cg_block.comment);
+
+                while next_cn != 0 {
+                    let (cn_block, _position) =
+                        CNBLOCK::read(&self.file, little_endian, next_cn as usize);
+                    next_cn = cn_block.next;
+                    ch.push(cn_block);
+
+					let name = cn_block.name(&self.file, little_endian);
+                    channels.push(mdf::MdfChannel {
+                        name,
+                        data_group: (dg.len() -1)  as u64,
+                        channel_group: (cg.len() -1) as u64,
+                        channel: (ch.len() -1) as u64,
+                    });
+                }
+            }
+        }
+
+        channels
+    }
 }
 
 impl mdf::MDFFile for MDF3 {
@@ -1014,10 +1064,13 @@ impl CNBLOCK {
 
         if self.channel_type == 1 {
             name = "time".to_string();
-        } else if self.comment != 0 {
-            let (tx, _pos) = TXBLOCK::read(stream, self.comment as usize, little_endian);
+        } else if self.long_name != 0 {
+            let (tx, _pos) = TXBLOCK::read(stream, self.long_name as usize, little_endian);
 
-            name = tx.name();
+			name = match std::str::from_utf8(&tx.text) {
+				Ok(v) => v.to_string(),
+				Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+			};
         }
 
         name
