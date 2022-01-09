@@ -28,7 +28,7 @@ impl MDF {
 
     pub fn list_channels(&self) {
         for channel in &self.channels {
-            println!("Channel: {}", channel.name);
+            println!("Channel: {}, DG: {}, CG: {}, CN: {}", channel.name, channel.data_group, channel.channel_group, channel.channel);
         }
     }
 

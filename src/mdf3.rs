@@ -4,6 +4,9 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::{convert::TryInto, mem};
 
+// Define constants that are used
+const TIME_CHANNEL_TYPE: u16 = 1;
+
 #[derive(Debug, Clone)]
 pub(crate) struct MDF3 {
     #[allow(dead_code)]
@@ -67,6 +70,57 @@ impl MDF3 {
 
         channels
     }
+
+	fn find_time_channel(&self, _datagroup: usize, channel_grp: usize,) -> usize{
+		let channel_group = self.channel_groups[channel_grp].channels(&self.file, self.little_endian);
+		for (i, channel) in channel_group.iter().enumerate(){
+			if channel.channel_type == TIME_CHANNEL_TYPE {
+				return i;
+			}
+		}
+		println!("Testing");
+		return 0;
+	}
+
+	fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
+		let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
+        let data_length = (self.channel_groups[channel_grp].record_number
+            * self.channel_groups[channel_grp].record_size as u32)
+            as usize;
+        let data = &self.file[self.data_groups[datagroup].data_block as usize
+            ..(self.data_groups[datagroup].data_block as usize + data_length)];
+
+        let mut data_blocks = Vec::new();
+        for i in 0..self.channel_groups[channel_grp].record_number {
+            data_blocks.push(
+                &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
+                    ..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
+            );
+        }
+
+        let byte_offset = (self.channels[channel].start_offset / 8) as usize;
+        let _bit_offset = self.channels[channel].start_offset % 8;
+
+        let mut records = Vec::new();
+        let mut pos = 0_usize;
+        for _i in 0..self.channel_groups[channel_grp].record_number {
+            records.push(&data[pos..pos + self.channel_groups[channel_grp].record_size as usize]);
+            pos += self.channel_groups[channel_grp].record_size as usize;
+        }
+
+		let mut raw_data = Vec::new();
+        let end = byte_offset + channels[channel].data_type.len();
+        for rec in &records {
+            raw_data.push(&rec[byte_offset..end])
+        }
+
+		let mut extracted_data = Vec::new();
+        for raw in raw_data {
+            extracted_data.push(Record::new(raw, channels[channel].data_type));
+        }
+
+		extracted_data
+	}
 }
 
 impl mdf::MDFFile for MDF3 {
@@ -166,50 +220,57 @@ impl mdf::MDFFile for MDF3 {
     }
 
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> signal::Signal {
-        let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
-        let data_length = (self.channel_groups[channel_grp].record_number
-            * self.channel_groups[channel_grp].record_size as u32)
-            as usize;
-        let data = &self.file[self.data_groups[datagroup].data_block as usize
-            ..(self.data_groups[datagroup].data_block as usize + data_length)];
+        // let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
+        // let data_length = (self.channel_groups[channel_grp].record_number
+        //     * self.channel_groups[channel_grp].record_size as u32)
+        //     as usize;
+        // let data = &self.file[self.data_groups[datagroup].data_block as usize
+        //     ..(self.data_groups[datagroup].data_block as usize + data_length)];
 
-        let mut data_blocks = Vec::new();
-        for i in 0..self.channel_groups[channel_grp].record_number {
-            data_blocks.push(
-                &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
-                    ..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
-            );
-        }
+        // let mut data_blocks = Vec::new();
+        // for i in 0..self.channel_groups[channel_grp].record_number {
+        //     data_blocks.push(
+        //         &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
+        //             ..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
+        //     );
+        // }
 
-        let byte_offset = (self.channels[channel].start_offset / 8) as usize;
-        let _bit_offset = self.channels[channel].start_offset % 8;
+        // let byte_offset = (self.channels[channel].start_offset / 8) as usize;
+        // let _bit_offset = self.channels[channel].start_offset % 8;
 
-        let mut records = Vec::new();
-        let mut pos = 0_usize;
-        for _i in 0..self.channel_groups[channel_grp].record_number {
-            records.push(&data[pos..pos + self.channel_groups[channel_grp].record_size as usize]);
-            pos += self.channel_groups[channel_grp].record_size as usize;
-        }
+        // let mut records = Vec::new();
+        // let mut pos = 0_usize;
+        // for _i in 0..self.channel_groups[channel_grp].record_number {
+        //     records.push(&data[pos..pos + self.channel_groups[channel_grp].record_size as usize]);
+        //     pos += self.channel_groups[channel_grp].record_size as usize;
+        // }
 
-        let mut time_raw = Vec::new();
-        for rec in &records {
-            time_raw.push(&rec[0..channels[0].data_type.len()])
-        }
-        let mut some_raw = Vec::new();
-        let end = byte_offset + channels[1].data_type.len();
-        for rec in &records {
-            some_raw.push(&rec[byte_offset..end])
-        }
+        // let mut time_raw = Vec::new();
+        // for rec in &records {
+        //     time_raw.push(&rec[0..channels[0].data_type.len()])
+        // }
+        // let mut some_raw = Vec::new();
+        // let end = byte_offset + channels[channel].data_type.len();
+        // for rec in &records {
+        //     some_raw.push(&rec[byte_offset..end])
+        // }
 
-        let mut time = Vec::new();
-        for raw in time_raw {
-            time.push(Record::new(raw, channels[0].data_type));
-        }
+        // let mut time = Vec::new();
+        // for raw in time_raw {
+        //     time.push(Record::new(raw, channels[0].data_type));
+        // }
 
-        let mut some = Vec::new();
-        for raw in some_raw {
-            some.push(Record::new(raw, channels[1].data_type));
-        }
+        // let mut some = Vec::new();
+        // for raw in some_raw {
+        //     some.push(Record::new(raw, channels[1].data_type));
+        // }
+
+		// Find the time series in the channel group
+		
+		let time_channel = self.find_time_channel(datagroup, channel_grp);
+		println!("Time Channel: {}", time_channel);
+		let time = self.read_channel(datagroup, channel_grp, time_channel);
+		let some = self.read_channel(datagroup, channel_grp, channel);
 
         signal::Signal::new(
             time.iter().map(|x| x.extract()).collect(),
@@ -220,6 +281,8 @@ impl mdf::MDFFile for MDF3 {
             false,
         )
     }
+
+
 
     fn cut(&self, start: f64, _end: f64, _include_ends: bool, time_from_zero: bool) {
         let _delta = if time_from_zero { start } else { 0.0 };
