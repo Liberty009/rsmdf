@@ -13,7 +13,7 @@ impl MDF {
         let mut channels_match = Vec::new();
 
         for channel in &self.channels {
-            if channel.name.contains(&channel_name) {
+            if channel.name.eq(&channel_name) {
                 channels_match.push(channel.clone());
             }
         }

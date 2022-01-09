@@ -101,7 +101,6 @@ impl MDF3 {
                 return Ok(i);
             }
         }
-        println!("Testing");
 
         Err("No time series found for the channel selected")
     }
