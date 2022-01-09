@@ -12,8 +12,8 @@ fn main() {
 
     let channel = mdf.search_channels("ASAM.M.SCALAR.SBYTE.IDENTICAL.DISCRETE");
     let channel = match channel {
-    	Ok(x) => x,
-    	Err(e) => panic!("{}", e),
+        Ok(x) => x,
+        Err(e) => panic!("{}", e),
     };
     let test = mdf.read_channel(channel);
 
