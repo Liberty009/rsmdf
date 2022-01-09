@@ -6,6 +6,7 @@ use std::{convert::TryInto, mem};
 
 // Define constants that are used
 const TIME_CHANNEL_TYPE: u16 = 1;
+
 const UNSIGNED_INT_DEFAULT: u16 = 0;
 const SIGNED_INT_DEFAULT: u16 = 1;
 const FLOAT32_DEFAULT: u16 = 2;
