@@ -9,6 +9,8 @@ edition = "2021"
 #crate-type = ["cdylib"]      # Creates dynamic lib
 #crate-type = ["staticlib"] # Creates static lib
 
+[profile.release]
+debug = 1
 
 [dependencies]
 byteorder = "1"
