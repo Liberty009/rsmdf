@@ -6,6 +6,23 @@ use std::{convert::TryInto, mem};
 
 // Define constants that are used
 const TIME_CHANNEL_TYPE: u16 = 1;
+const UNSIGNED_INT_DEFAULT: u16 = 0;
+const SIGNED_INT_DEFAULT: u16 = 1;
+const FLOAT32_DEFAULT: u16 = 2;
+const FLOAT64_DEFAULT: u16 = 3;
+const FFLOAT_DEFAULT: u16 = 4;
+const GFLOAT_DEFAULT: u16 = 5;
+const DFLOAT_DEFAULT: u16 = 6;
+const STRING_NULL_TERM: u16 = 7;
+const BYTE_ARRAY: u16 = 8;
+const UNSIGNED_INT_BIGENDIAN: u16 = 9;
+const SIGNED_INT_BIGENDIAN: u16 = 10;
+const FLOAT32_BIGENDIAN: u16 = 11;
+const FLOAT64_BIGENDIAN: u16 = 12;
+const UNSIGNED_INT_LITTLEENDIAN: u16 = 13;
+const SIGNED_INT_LITTLEENDIAN: u16 = 14;
+const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
+const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 
 #[derive(Debug, Clone)]
 pub(crate) struct MDF3 {
@@ -974,71 +991,71 @@ impl CNBLOCK {
 
         let datatype: u16 = utils::read(stream, little_endian, &mut pos);
         let data_type = match datatype {
-            0 => DataTypeRead {
+            UNSIGNED_INT_DEFAULT => DataTypeRead {
                 data_type: DataType::UnsignedInt,
                 little_endian,
             },
-            1 => DataTypeRead {
+            SIGNED_INT_DEFAULT => DataTypeRead {
                 data_type: DataType::SignedInt,
                 little_endian,
             },
-            2 => DataTypeRead {
+            FLOAT32_DEFAULT => DataTypeRead {
                 data_type: DataType::Float32,
                 little_endian,
             },
-            3 => DataTypeRead {
+            FLOAT64_DEFAULT => DataTypeRead {
                 data_type: DataType::Float64,
                 little_endian,
             },
-            4 => DataTypeRead {
+            FFLOAT_DEFAULT => DataTypeRead {
                 data_type: DataType::FFloat,
                 little_endian,
             },
-            5 => DataTypeRead {
+            GFLOAT_DEFAULT => DataTypeRead {
                 data_type: DataType::GFloat,
                 little_endian,
             },
-            6 => DataTypeRead {
+            DFLOAT_DEFAULT => DataTypeRead {
                 data_type: DataType::DFloat,
                 little_endian,
             },
-            7 => DataTypeRead {
+            STRING_NULL_TERM => DataTypeRead {
                 data_type: DataType::StringNullTerm,
                 little_endian,
             },
-            8 => DataTypeRead {
+            BYTE_ARRAY => DataTypeRead {
                 data_type: DataType::ByteArray,
                 little_endian,
             },
-            9 => DataTypeRead {
+            UNSIGNED_INT_BIGENDIAN => DataTypeRead {
                 data_type: DataType::UnsignedInt,
                 little_endian: false,
             },
-            10 => DataTypeRead {
+            SIGNED_INT_BIGENDIAN => DataTypeRead {
                 data_type: DataType::SignedInt,
                 little_endian: false,
             },
-            11 => DataTypeRead {
+            FLOAT32_BIGENDIAN => DataTypeRead {
                 data_type: DataType::Float32,
                 little_endian: false,
             },
-            12 => DataTypeRead {
+            FLOAT64_BIGENDIAN => DataTypeRead {
                 data_type: DataType::Float64,
                 little_endian: false,
             },
-            13 => DataTypeRead {
+            UNSIGNED_INT_LITTLEENDIAN => DataTypeRead {
                 data_type: DataType::UnsignedInt,
                 little_endian: true,
             },
-            14 => DataTypeRead {
+            SIGNED_INT_LITTLEENDIAN => DataTypeRead {
                 data_type: DataType::SignedInt,
                 little_endian: true,
             },
-            15 => DataTypeRead {
+            FLOAT32_INT_LITTLEENDIAN => DataTypeRead {
                 data_type: DataType::Float32,
                 little_endian: true,
             },
-            16 => DataTypeRead {
+            FLOAT64_INT_LITTLEENDIAN => DataTypeRead {
                 data_type: DataType::Float64,
                 little_endian: true,
             },
