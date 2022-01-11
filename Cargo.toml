@@ -5,9 +5,8 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-#[lib]
-#crate-type = ["cdylib"]      # Creates dynamic lib
-#crate-type = ["staticlib"] # Creates static lib
+[lib]
+crate-type = ["cdylib", "rlib", "staticlib"]
 
 [profile.release]
 debug = 1

@@ -19,17 +19,19 @@ pub extern "C" fn read_series(filepath: *const c_char, channel: *const c_char) -
 
     let file = unsafe { CStr::from_ptr(filepath) };
 
-    let data_channel = mdf3::MDF3::new("filepath");
-    let series = data_channel.read(0, 0, 1);
-
-    let mut tv = series.timestamps;
-    let mut dv = series.samples;
+    let data = mdf::MDF::new(file.to_str().expect("msg"));
+	let chan = data.search_channels(channel_name);
+    let channel = match chan {
+		        Ok(x) => x,
+		        Err(e) => panic!("{}", e),
+		    };
+	let mut test = data.read_channel(channel);
 
     TimeSeries {
-        time_values: tv.as_mut_ptr(),
-        time_length: tv.len() as u64,
-        data_values: dv.as_mut_ptr(),
-        data_length: dv.len() as u64,
+        time_values: test.timestamps.as_mut_ptr(),
+        time_length: test.timestamps.len() as u64,
+        data_values: test.samples.as_mut_ptr(),
+        data_length: test.samples.len() as u64,
     }
 }
 
