@@ -13,7 +13,3 @@ debug = 1
 
 [dependencies]
 xml-rs = "0"
-
-
-[build-dependencies]
-cbindgen = "0.20.0"
