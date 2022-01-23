@@ -1,4 +1,4 @@
-use crate::mdf3::{self, MDF3, Record};
+use crate::mdf3::{self, Record, MDF3};
 // use crate::mdf4;
 use crate::signal::Signal;
 
@@ -45,17 +45,21 @@ impl MDF {
 }
 
 impl MDFFile for MDF {
-	fn channels(&self) -> Vec<MdfChannel> {
-		self.file.channels()
-	}
+    fn channels(&self) -> Vec<MdfChannel> {
+        self.file.channels()
+    }
 
-	fn find_time_channel(&self, datagroup: usize, channel_grp: usize) -> Result<usize, &'static str> {
-		self.file.find_time_channel(datagroup, channel_grp)
-	}
+    fn find_time_channel(
+        &self,
+        datagroup: usize,
+        channel_grp: usize,
+    ) -> Result<usize, &'static str> {
+        self.file.find_time_channel(datagroup, channel_grp)
+    }
 
-	fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
-		self.file.read_channel(datagroup, channel_grp, channel)
-	}
+    fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
+        self.file.read_channel(datagroup, channel_grp, channel)
+    }
 
     fn new(filepath: &str) -> Self {
         let file = MDF3::new(filepath);
@@ -122,17 +126,17 @@ impl MDFFile for MDF {
 }
 
 pub trait MDFFile {
-	fn channels(&self) -> Vec<MdfChannel>;
-	fn find_time_channel(
+    fn channels(&self) -> Vec<MdfChannel>;
+    fn find_time_channel(
         &self,
         _datagroup: usize,
         channel_grp: usize,
     ) -> Result<usize, &'static str>;
 
-	fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record>;
+    fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record>;
 
     #[must_use]
-    fn new( filepath: &str) -> Self;
+    fn new(filepath: &str) -> Self;
 
     fn read_all(&mut self);
 

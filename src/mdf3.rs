@@ -41,7 +41,7 @@ pub(crate) struct MDF3 {
 }
 
 impl mdf::MDFFile for MDF3 {
-	fn channels(&self) -> Vec<MdfChannel> {
+    fn channels(&self) -> Vec<MdfChannel> {
         let mut channels = Vec::new();
 
         let mut dg = Vec::new();
