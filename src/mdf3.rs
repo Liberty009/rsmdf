@@ -40,8 +40,8 @@ pub(crate) struct MDF3 {
     file: Vec<u8>,
 }
 
-impl MDF3 {
-    pub fn channels(&self) -> Vec<MdfChannel> {
+impl mdf::MDFFile for MDF3 {
+	fn channels(&self) -> Vec<MdfChannel> {
         let mut channels = Vec::new();
 
         let mut dg = Vec::new();
@@ -144,9 +144,7 @@ impl MDF3 {
 
         extracted_data
     }
-}
 
-impl mdf::MDFFile for MDF3 {
     fn new(filepath: &str) -> Self {
         let mut file = File::open(filepath).expect("Could not read file");
         let mut stream = Vec::new();
