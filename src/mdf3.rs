@@ -297,6 +297,8 @@ pub struct IDBLOCK {
 }
 
 impl IDBLOCK {
+	pub fn write(){}
+
     pub fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
         let mut position = 0;
         let file_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
@@ -371,6 +373,7 @@ pub struct HDBLOCK {
 }
 
 impl HDBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (HDBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("");
@@ -436,6 +439,7 @@ pub struct TXBLOCK {
 }
 
 impl TXBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (TXBLOCK, usize) {
         let mut pos = position;
 
@@ -489,6 +493,7 @@ pub struct PRBLOCK {
 }
 
 impl PRBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (PRBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
@@ -536,6 +541,7 @@ pub struct TRBLOCK {
 }
 
 impl TRBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (TRBLOCK, usize) {
         let mut pos = position;
 
@@ -592,6 +598,7 @@ pub struct Event {
 }
 
 impl Event {
+	pub fn write(){}
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (Event, usize) {
         let mut pos = position;
         let trigger_time = utils::read(stream, little_endian, &mut pos);
@@ -619,6 +626,7 @@ pub struct SRBLOCK {
 }
 
 impl SRBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (SRBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream.try_into().expect("msg");
@@ -657,6 +665,7 @@ pub struct DGBLOCK {
 }
 
 impl DGBLOCK {
+	pub fn write(){}
     // Read the data stream in to a DGBLOCK type, position reached
     pub fn read(stream: &[u8], little_endian: bool, position: &mut usize) -> Self {
         let pos = position;
@@ -734,6 +743,7 @@ pub struct CGBLOCK {
 }
 
 impl CGBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (CGBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
@@ -806,6 +816,7 @@ pub enum Record {
 }
 
 impl Record {
+	pub fn write(){}
     pub fn new(stream: &[u8], dtype: DataTypeRead) -> Self {
         let rec = match dtype.data_type {
             DataType::UnsignedInt => Self::unsigned_int(stream, dtype),
@@ -872,6 +883,7 @@ pub struct DataTypeRead {
 }
 
 impl DataTypeRead {
+	pub fn write(){}
     fn len(self) -> usize {
         match self.data_type {
             DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),
@@ -962,6 +974,7 @@ pub struct CNBLOCK {
 }
 
 impl CNBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (CNBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
@@ -1130,6 +1143,7 @@ pub struct CCBLOCK {
 }
 
 impl CCBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (CCBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
@@ -1178,6 +1192,7 @@ pub enum ConversionData {
 }
 
 impl ConversionData {
+	pub fn write(){}
     pub fn read(_data: &[u8], _little_endian: bool, datatype: u8) -> (ConversionData, usize) {
         if datatype == 1 {
             (ConversionData::Parameters, 1)
@@ -1197,6 +1212,7 @@ pub enum Parameters {
 }
 
 impl Parameters {
+	pub fn write(){}
     pub fn read(_data: &[u8], _little_endian: bool) -> (Parameters, usize) {
         (Parameters::ConversionLinear, 10)
     }
@@ -1209,6 +1225,7 @@ pub struct ConversionLinear {
 }
 
 impl ConversionLinear {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLinear, usize) {
         let mut position = 0;
         let p1 = utils::read(stream, little_endian, &mut position);
@@ -1229,6 +1246,7 @@ pub struct ConversionPoly {
 }
 
 impl ConversionPoly {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionPoly, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -1264,6 +1282,7 @@ pub struct ConversionExponetial {
 }
 
 impl ConversionExponetial {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionExponetial, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -1301,6 +1320,7 @@ pub struct ConversionLog {
 }
 
 impl ConversionLog {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLog, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -1337,6 +1357,7 @@ pub struct ConversionRational {
 }
 
 impl ConversionRational {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionRational, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -1371,6 +1392,7 @@ pub struct ConversionTabular {
 }
 
 impl ConversionTabular {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTabular, usize) {
         let mut position = 0;
         let mut value = Vec::new();
@@ -1391,6 +1413,7 @@ pub struct TableEntry {
 }
 
 impl TableEntry {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (TableEntry, usize) {
         let mut position = 0;
         let internal = utils::read(stream, little_endian, &mut position);
@@ -1412,6 +1435,7 @@ pub struct ConversionTextFormula {
 }
 
 impl ConversionTextFormula {
+	pub fn write(){}
     pub fn read(stream: &[u8], _little_endian: bool) -> (ConversionTextFormula, usize) {
         let mut position = 0;
         let formula: [u8; 256] = stream.try_into().expect("msg");
@@ -1427,6 +1451,7 @@ pub struct ConversionTextTable {
 }
 
 impl ConversionTextTable {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool, number: usize) -> (ConversionTextTable, usize) {
         let mut position = 0;
         let mut table = Vec::new();
@@ -1447,6 +1472,7 @@ pub struct TextTableEntry {
 }
 
 impl TextTableEntry {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (TextTableEntry, usize) {
         let mut position = 0;
         let internal = utils::read(stream, little_endian, &mut position);
@@ -1465,6 +1491,7 @@ pub struct ConversionTextRangeTable {
 }
 
 impl ConversionTextRangeTable {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTextRangeTable, usize) {
         let mut position = 0;
         let undef1 = utils::read(stream, little_endian, &mut position);
@@ -1492,6 +1519,7 @@ pub struct TextRange {
 }
 
 impl TextRange {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (TextRange, usize) {
         let mut position = 0;
         let lower = utils::read(stream, little_endian, &mut position);
@@ -1520,6 +1548,7 @@ pub struct DateStruct {
 }
 
 impl DateStruct {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (DateStruct, usize) {
         let mut position = 0;
         let ms = utils::read(stream, little_endian, &mut position);
@@ -1550,6 +1579,7 @@ pub struct TimeStruct {
 }
 
 impl TimeStruct {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (TimeStruct, usize) {
         let mut position = 0;
         let ms = utils::read(stream, little_endian, &mut position);
@@ -1570,6 +1600,7 @@ pub struct CDBLOCK {
 }
 
 impl CDBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (CDBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
@@ -1619,6 +1650,7 @@ pub struct Signals {
 }
 
 impl Signals {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
         let mut position = 0;
         let data_group = utils::read(stream, little_endian, &mut position);
@@ -1645,6 +1677,7 @@ pub struct CEBLOCK {
 }
 
 impl CEBLOCK {
+	pub fn write(){}
     pub fn read(stream: &[u8], little_endian: bool) -> (CEBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
