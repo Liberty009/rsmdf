@@ -1792,6 +1792,19 @@ impl CDBLOCK {
     }
 }
 
+#[cfg(test)]
+mod CDBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 #[derive(Debug, Clone)]
 pub struct Signals {
     pub data_group: u32,
