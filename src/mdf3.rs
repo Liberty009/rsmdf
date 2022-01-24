@@ -351,6 +351,21 @@ impl IDBLOCK {
     }
 }
 
+#[cfg(test)]
+mod IDBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+
+    }
+
+	#[test]
+	fn write(){}
+}
+
+
+
 #[derive(Debug, Clone, Copy)]
 pub struct HDBLOCK {
     pub position: usize,
@@ -431,6 +446,20 @@ impl HDBLOCK {
     }
 }
 
+#[cfg(test)]
+mod HDBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
+
 #[derive(Debug, Clone)]
 pub struct TXBLOCK {
     pub block_type: [u8; 2],
@@ -485,6 +514,20 @@ impl TXBLOCK {
     }
 }
 
+#[cfg(test)]
+mod TXBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
+
 #[derive(Debug, Clone)]
 pub struct PRBLOCK {
     pub block_type: [u8; 2],
@@ -530,6 +573,20 @@ impl PRBLOCK {
         )
     }
 }
+
+#[cfg(test)]
+mod PRBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 
 #[derive(Debug, Clone)]
 pub struct TRBLOCK {
@@ -590,6 +647,19 @@ impl TRBLOCK {
     }
 }
 
+#[cfg(test)]
+mod TRBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Event {
     pub trigger_time: f64,
@@ -613,6 +683,19 @@ impl Event {
             position,
         )
     }
+}
+
+#[cfg(test)]
+mod EventBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -650,6 +733,20 @@ impl SRBLOCK {
         )
     }
 }
+
+#[cfg(test)]
+mod SRBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 
 #[derive(Debug, Clone, Copy)]
 pub struct DGBLOCK {
@@ -728,6 +825,19 @@ impl DGBLOCK {
     }
 }
 
+#[cfg(test)]
+mod DGBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct CGBLOCK {
     pub block_type: [u8; 2],
@@ -797,6 +907,20 @@ impl CGBLOCK {
         ch
     }
 }
+
+#[cfg(test)]
+mod CGBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 
 pub fn print_record(value: Record) {
     match value {
@@ -1129,6 +1253,19 @@ impl CNBLOCK {
     }
 }
 
+#[cfg(test)]
+mod CNBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
+}
+
 #[derive(Debug, Clone)]
 pub struct CCBLOCK {
     pub block_type: [u8; 2],
@@ -1182,6 +1319,19 @@ impl CCBLOCK {
             position,
         )
     }
+}
+
+#[cfg(test)]
+mod CCBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+		
+    }
+
+	#[test]
+	fn write(){}
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1697,4 +1847,17 @@ impl CEBLOCK {
             position,
         )
     }
+}
+
+
+#[cfg(test)]
+mod CEBLOCK_test {
+    use super::*;
+    
+    #[test]
+    fn read() {
+    }
+
+	#[test]
+	fn write(){}
 }
