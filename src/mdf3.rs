@@ -352,7 +352,7 @@ impl IDBLOCK {
 }
 
 #[cfg(test)]
-mod IDBLOCK_test {
+mod idblock_test {
     use super::*;
 
     #[test]
@@ -475,7 +475,7 @@ impl HDBLOCK {
 }
 
 #[cfg(test)]
-mod HDBLOCK_test {
+mod hdblock_test {
     use super::*;
 
     #[test]
@@ -637,7 +637,7 @@ impl TXBLOCK {
 }
 
 #[cfg(test)]
-mod TXBLOCK_test {
+mod txblock_test {
     use super::*;
 
     #[test]
@@ -778,7 +778,7 @@ impl PRBLOCK {
 }
 
 #[cfg(test)]
-mod PRBLOCK_test {
+mod prblock_test {
     use super::*;
 
     #[test]
@@ -1172,7 +1172,7 @@ impl TRBLOCK {
 }
 
 #[cfg(test)]
-mod TRBLOCK_test {
+mod trblock_test {
     use super::*;
 
     #[test]
@@ -1242,7 +1242,7 @@ impl Event {
 }
 
 #[cfg(test)]
-mod EventBLOCK_test {
+mod event_test {
     use super::*;
 
     #[test]
@@ -1289,7 +1289,7 @@ impl SRBLOCK {
 }
 
 #[cfg(test)]
-mod SRBLOCK_test {
+mod srblock_test {
     use super::*;
 
     #[test]
@@ -1377,7 +1377,7 @@ impl DGBLOCK {
 }
 
 #[cfg(test)]
-mod DGBLOCK_test {
+mod dgblock_test {
     use super::*;
 
     #[test]
@@ -1475,7 +1475,7 @@ impl CGBLOCK {
 }
 
 #[cfg(test)]
-mod CGBLOCK_test {
+mod cgblock_test {
     use super::*;
 
     #[test]
@@ -1787,7 +1787,7 @@ impl CNBLOCK {
 }
 
 #[cfg(test)]
-mod CNBLOCK_test {
+mod cnblock_test {
     use super::*;
 
     #[test]
@@ -1934,7 +1934,7 @@ impl CCBLOCK {
 }
 
 #[cfg(test)]
-mod CCBLOCK_test {
+mod ccblock_test {
     use super::*;
 
     #[test]
@@ -2456,7 +2456,7 @@ impl CDBLOCK {
 }
 
 #[cfg(test)]
-mod CDBLOCK_test {
+mod cdblock_test {
     use super::*;
 
     #[test]
@@ -2540,12 +2540,12 @@ impl CEBLOCK {
 }
 
 #[cfg(test)]
-mod CEBLOCK_test {
+mod ceblock_test {
     use super::*;
 
     #[test]
     fn read() {
-		let ce_data = [
+        let ce_data = [
             0x43, 0x45, 0x80, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x43, 0x68,
             0x61, 0x6E, 0x6E, 0x65, 0x6C, 0x20, 0x69, 0x6E, 0x73, 0x65, 0x72, 0x74, 0x65, 0x64,
             0x20, 0x62, 0x79, 0x20, 0x50, 0x79, 0x74, 0x68, 0x6F, 0x6E, 0x20, 0x53, 0x63, 0x72,
@@ -2568,7 +2568,7 @@ mod CEBLOCK_test {
         // assert_eq!(position, 0);
         assert_eq!(ce_block.block_size, 128);
         assert_eq!(ce_block.extension_type, 2);
-	}
+    }
 
     #[test]
     fn write() {}
