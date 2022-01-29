@@ -298,7 +298,27 @@ pub struct IDBLOCK {
 
 impl IDBLOCK {
     pub fn write() {}
-
+    pub fn new(
+        file_id: [u8; 8],
+        format_id: [u8; 8],
+        program_id: [u8; 8],
+        default_byte_order: u16,
+        default_float_format: u16,
+        version_number: u16,
+        code_page_number: u16,
+    ) -> Self {
+        Self {
+            file_id,
+            format_id,
+            program_id,
+            default_byte_order,
+            default_float_format,
+            version_number,
+            code_page_number,
+            reserved1: [0_u8; 2],
+            reserved2: [0_u8; 30],
+        }
+    }
     pub fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
         let mut position = 0;
         let file_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
@@ -368,7 +388,7 @@ mod idblock_test {
         let (id_block, position, endian) = IDBLOCK::read(&id_data);
 
         assert_eq!(position, 64);
-        assert_eq!(endian, true);
+        assert!(endian);
         assert!(utils::eq(
             &id_block.format_id,
             &[0x33, 0x2E, 0x33, 0x30, 0x00, 0x00, 0x00, 0x00,]
@@ -1243,7 +1263,6 @@ impl Event {
 
 #[cfg(test)]
 mod event_test {
-    use super::*;
 
     #[test]
     fn read() {}
@@ -1290,7 +1309,6 @@ impl SRBLOCK {
 
 #[cfg(test)]
 mod srblock_test {
-    use super::*;
 
     #[test]
     fn read() {}
@@ -1858,7 +1876,7 @@ mod cnblock_test {
             utils::read(
                 &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F,],
                 true,
-                &mut (0 as usize)
+                &mut 0_usize
             )
         );
         assert_eq!(
@@ -1866,7 +1884,7 @@ mod cnblock_test {
             utils::read(
                 &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40,],
                 true,
-                &mut (0 as usize)
+                &mut 0_usize
             )
         );
         assert_eq!(cn_block.sample_rate, 0.0);
@@ -1969,7 +1987,7 @@ mod ccblock_test {
             utils::read(
                 &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F],
                 true,
-                &mut (0 as usize)
+                &mut 0_usize
             )
         );
         assert_eq!(
@@ -1977,7 +1995,7 @@ mod ccblock_test {
             utils::read(
                 &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40],
                 true,
-                &mut (0 as usize)
+                &mut 0_usize
             )
         );
         assert!(utils::eq(
@@ -2417,6 +2435,9 @@ impl CDBLOCK {
     pub fn read(stream: &[u8], little_endian: bool) -> (CDBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
+
+        assert!(utils::eq(&block_type, &[b'C', b'D']));
+
         position += block_type.len();
         let block_size: u16 = utils::read(stream, little_endian, &mut position);
         let dependency_type: u16 = utils::read(stream, little_endian, &mut position);
