@@ -113,14 +113,22 @@ impl mdf::MDFFile for MDF3 {
         let data = &self.file[self.data_groups[datagroup].data_block as usize
             ..(self.data_groups[datagroup].data_block as usize + data_length)];
 
-        let mut data_blocks = Vec::new();
-        let mut data_blocks = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
-        for i in 0..self.channel_groups[channel_grp].record_number {
-            data_blocks.push(
-                &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
-                    ..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
-            );
-        }
+		println!("Record Number: {}", self.channel_groups[channel_grp].record_number);
+
+		let mut data_blocks: Vec<&[u8]> = vec![&[0]; self.channel_groups[channel_grp].record_number as usize];
+        // let mut data_blocks = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
+		println!("Vec len: {}", data_blocks.len());
+
+		for (i, db) in data_blocks.iter_mut().enumerate() {
+			*db = &data[(i * self.channel_groups[channel_grp].record_size as usize) as usize
+			            ..((i + 1) * self.channel_groups[channel_grp].record_size as usize) as usize];
+		}
+        // for i in 0..self.channel_groups[channel_grp].record_number {
+        //     data_blocks.push(
+        //         &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
+        //             ..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
+        //     );
+        // }
 
         let byte_offset = (self.channels[channel].start_offset / 8) as usize;
         let _bit_offset = self.channels[channel].start_offset % 8;
