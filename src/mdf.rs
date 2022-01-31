@@ -10,7 +10,7 @@ pub struct MDF {
 
 impl MDF {
     pub fn search_channels(&self, channel_name: &str) -> Result<MdfChannel, &'static str> {
-        let mut channels_match = Vec::new();
+        let mut channels_match = Vec::with_capacity(self.channels.len());
 
         for channel in &self.channels {
             if channel.name.eq(&channel_name) {
@@ -177,8 +177,8 @@ pub struct TimeChannel {
 
 impl TimeChannel {
     pub fn new(times: Vec<mdf3::Record>, datas: Vec<mdf3::Record>) -> Self {
-        let mut t = Vec::new();
-        let mut d = Vec::new();
+        let mut t = Vec::with_capacity(times.len());
+        let mut d = Vec::with_capacity(datas.len());
 
         for time in times {
             t.push(time.extract());

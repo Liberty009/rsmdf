@@ -102,11 +102,11 @@ impl Signal {
                 other.timestamps
             };
 
-            let mut new_samples = Vec::new();
+            let mut new_samples = Vec::with_capacity(self.samples.len() + other.samples.len());
             new_samples.append(&mut self.samples.clone());
             #[allow(clippy::redundant_clone)]
             new_samples.append(&mut other.samples.clone());
-            let mut new_timestamps = Vec::new();
+            let mut new_timestamps = Vec::with_capacity(self.timestamps.len() + timestamps.len());
             new_timestamps.append(&mut self.timestamps.clone());
             new_timestamps.append(&mut timestamps);
 

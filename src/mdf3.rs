@@ -182,7 +182,7 @@ impl mdf::MDFFile for MDF3 {
     }
 
     fn read_all(&mut self) {
-        let mut channel_groups = Vec::new();
+        let mut channel_groups = Vec::with_capacity(self.data_groups.len());
         for group in &self.data_groups {
             channel_groups.append(&mut group.read_channel_groups(&self.file, self.little_endian));
         }
@@ -581,7 +581,7 @@ impl TRBLOCK {
         little_endian: bool,
         no_events: u16,
     ) -> (Vec<Event>, usize) {
-        let mut events = Vec::new();
+        let mut events = Vec::with_capacity(no_events as usize +1);
         let mut pos1 = position;
         for _i in 0..no_events {
             let (event, pos) = Event::read(stream, pos1, little_endian);
@@ -1587,7 +1587,7 @@ impl CDBLOCK {
         let dependency_type: u16 = utils::read(stream, little_endian, &mut position);
         let signal_number: u16 = utils::read(stream, little_endian, &mut position);
 
-        let mut groups = Vec::new();
+        let mut groups = Vec::with_capacity(signal_number as usize);
 
         for _i in 0..signal_number - 1 {
             let (temp, pos) = Signals::read(stream, little_endian);
