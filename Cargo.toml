@@ -13,3 +13,5 @@ debug = 1
 
 [dependencies]
 xml-rs = "0"
+itertools = "0.10"
+rayon = "1.5"
