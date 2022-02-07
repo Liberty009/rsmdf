@@ -1,0 +1,143 @@
+on:
+  push:
+    branches: ["master", "tokio-*.x"]
+  pull_request:
+    branches: ["master", "tokio-*.x"]
+
+name: CI
+
+env:
+  RUSTFLAGS: -Dwarnings
+  RUST_BACKTRACE: 1
+  # Change to specific Rust release to pin
+  rust_stable: stable
+  rust_nightly: nightly-2022-01-12
+  rust_clippy: 1.52.0
+  rust_min: 1.49.0
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Depends on all action sthat are required for a "successful" CI run.
+  tests-pass:
+    name: all systems go
+    runs-on: ubuntu-latest
+    needs:
+      - cross
+      - features
+      - minrust
+      - fmt
+      - clippy
+    steps:
+      - run: exit 0
+
+
+  cross:
+    name: cross
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - i686-unknown-linux-gnu
+          - powerpc-unknown-linux-gnu
+          - powerpc64-unknown-linux-gnu
+          - mips-unknown-linux-gnu
+          - arm-linux-androideabi
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ env.rust_stable }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.rust_stable }}
+          target: ${{ matrix.target }}
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: check
+          args: --workspace --target ${{ matrix.target }}
+
+  minrust:
+    name: minrust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ env.rust_min }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.rust_min }}
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - name: "test --workspace --all-features"
+        run: cargo check --workspace --all-features
+
+  minimal-versions:
+    name: minimal-versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ env.rust_nightly }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.rust_nightly }}
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - name: Install cargo-hack
+        run: cargo install cargo-hack
+      - name: "check --all-features -Z minimal-versions"
+        run: |
+          # Remove dev-dependencies from Cargo.toml to prevent the next `cargo update`
+          # from determining minimal versions based on dev-dependencies.
+          cargo hack --remove-dev-deps --workspace
+          # Update Cargo.lock to minimal version dependencies.
+          cargo update -Z minimal-versions
+          cargo hack check --all-features --ignore-private
+      - name: "check --all-features --unstable -Z minimal-versions"
+        env:
+          RUSTFLAGS: --cfg tokio_unstable -Dwarnings
+        run: |
+          # Remove dev-dependencies from Cargo.toml to prevent the next `cargo update`
+          # from determining minimal versions based on dev-dependencies.
+          cargo hack --remove-dev-deps --workspace
+          # Update Cargo.lock to minimal version dependencies.
+          cargo update -Z minimal-versions
+          cargo hack check --all-features --ignore-private
+  fmt:
+    name: fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ env.rust_stable }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.rust_stable }}
+          override: true
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v1
+      # Check fmt
+      - name: "rustfmt --check"
+        # Workaround for rust-lang/cargo#7732
+        run: |
+          if ! rustfmt --check --edition 2018 $(git ls-files '*.rs'); then
+            printf "Please run \`rustfmt --edition 2018 \$(git ls-files '*.rs')\` to fix rustfmt errors.\nSee CONTRIBUTING.md for more details.\n" >&2
+            exit 1
+          fi
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust ${{ env.rust_clippy }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.rust_clippy }}
+          override: true
+          components: clippy
+      - uses: Swatinem/rust-cache@v1
+      # Run clippy
+      - name: "clippy --all"
+        run: cargo clippy --all --tests --all-features
+
