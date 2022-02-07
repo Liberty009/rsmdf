@@ -44,7 +44,7 @@ impl Signal {
             return adjusted;
         }
 
-        if start == end {
+        if (start - end).abs() < 0.001 {
             return adjusted;
         }
 
