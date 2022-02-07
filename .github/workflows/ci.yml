@@ -28,7 +28,7 @@ jobs:
       - cross
       - minrust
       - minimal-versions
-      - fmt
+#       - fmt
       - clippy
     steps:
       - run: exit 0
