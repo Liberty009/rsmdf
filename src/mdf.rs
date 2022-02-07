@@ -66,7 +66,7 @@ impl MDFFile for MDF {
         Self {
             filepath: filepath.to_string(),
             channels: file.channels(),
-            file: file,
+            file,
         }
     }
 
