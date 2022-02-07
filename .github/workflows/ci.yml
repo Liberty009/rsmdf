@@ -12,8 +12,8 @@ env:
   # Change to specific Rust release to pin
   rust_stable: stable
   rust_nightly: nightly-2022-01-12
-  rust_clippy: 1.52.0
-  rust_min: 1.49.0
+  rust_clippy: 1.56.0
+  rust_min: 1.56.0
 
 defaults:
   run:
