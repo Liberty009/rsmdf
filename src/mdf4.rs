@@ -1,6 +1,3 @@
-
-
-
 struct AttachmentBlock{
 	id :[u8; 4], 
 	reserved0 :u8, 
