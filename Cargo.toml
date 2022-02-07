@@ -12,4 +12,6 @@ crate-type = ["cdylib", "rlib", "staticlib"]
 debug = 1
 
 [dependencies]
-xml-rs = "0"
+xml-rs = "0.8.4"
+itertools = "0.10.3"
+rayon = "1.5.1"
