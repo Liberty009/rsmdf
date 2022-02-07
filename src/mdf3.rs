@@ -113,16 +113,20 @@ impl mdf::MDFFile for MDF3 {
         let data = &self.file[self.data_groups[datagroup].data_block as usize
             ..(self.data_groups[datagroup].data_block as usize + data_length)];
 
-		println!("Record Number: {}", self.channel_groups[channel_grp].record_number);
+        println!(
+            "Record Number: {}",
+            self.channel_groups[channel_grp].record_number
+        );
 
-		let mut data_blocks: Vec<&[u8]> = vec![&[0]; self.channel_groups[channel_grp].record_number as usize];
+        let mut data_blocks: Vec<&[u8]> =
+            vec![&[0]; self.channel_groups[channel_grp].record_number as usize];
         // let mut data_blocks = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
-		println!("Vec len: {}", data_blocks.len());
+        println!("Vec len: {}", data_blocks.len());
 
-		for (i, db) in data_blocks.iter_mut().enumerate() {
-			*db = &data[(i * self.channel_groups[channel_grp].record_size as usize) as usize
-			            ..((i + 1) * self.channel_groups[channel_grp].record_size as usize) as usize];
-		}
+        for (i, db) in data_blocks.iter_mut().enumerate() {
+            *db = &data[(i * self.channel_groups[channel_grp].record_size as usize) as usize
+                ..((i + 1) * self.channel_groups[channel_grp].record_size as usize) as usize];
+        }
         // for i in 0..self.channel_groups[channel_grp].record_number {
         //     data_blocks.push(
         //         &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
@@ -133,20 +137,23 @@ impl mdf::MDFFile for MDF3 {
         let byte_offset = (self.channels[channel].start_offset / 8) as usize;
         let _bit_offset = self.channels[channel].start_offset % 8;
 
-        let mut records = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
+        let mut records =
+            Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
         let mut pos = 0_usize;
         for _i in 0..self.channel_groups[channel_grp].record_number {
             records.push(&data[pos..pos + self.channel_groups[channel_grp].record_size as usize]);
             pos += self.channel_groups[channel_grp].record_size as usize;
         }
 
-        let mut raw_data = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
+        let mut raw_data =
+            Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
         let end = byte_offset + channels[channel].data_type.len();
         for rec in &records {
             raw_data.push(&rec[byte_offset..end])
         }
 
-        let mut extracted_data = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
+        let mut extracted_data =
+            Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
         for raw in raw_data {
             extracted_data.push(Record::new(raw, channels[channel].data_type));
         }
@@ -581,7 +588,7 @@ impl TRBLOCK {
         little_endian: bool,
         no_events: u16,
     ) -> (Vec<Event>, usize) {
-        let mut events = Vec::with_capacity(no_events as usize +1);
+        let mut events = Vec::with_capacity(no_events as usize + 1);
         let mut pos1 = position;
         for _i in 0..no_events {
             let (event, pos) = Event::read(stream, pos1, little_endian);
