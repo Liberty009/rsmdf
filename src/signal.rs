@@ -1,26 +1,26 @@
 #[derive(Debug, Clone)]
-pub struct Signal {
-    pub samples: Vec<f64>,
-    pub timestamps: Vec<f64>,
-    pub unit: String,
-    pub name: String,
-    pub comment: String,
-    pub raw: bool,
+pub(crate) struct Signal {
+    pub(crate) samples: Vec<f64>,
+    pub(crate) timestamps: Vec<f64>,
+    pub(crate) unit: String,
+    pub(crate) name: String,
+    pub(crate) comment: String,
+    pub(crate) raw: bool,
 }
 
 impl Signal {
     #[must_use]
-    pub fn len(&self) -> usize {
+    pub(crate) fn len(&self) -> usize {
         self.samples.len()
     }
 
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool {
         self.samples.is_empty()
     }
 
     #[must_use]
-    pub fn new(
+    pub(crate) fn new(
         timestamps: Vec<f64>,
         samples: Vec<f64>,
         unit: String,
@@ -38,7 +38,7 @@ impl Signal {
         }
     }
     #[must_use]
-    pub fn cut(&self, start: f64, end: f64, include_ends: bool) -> Self {
+    pub(crate) fn cut(&self, start: f64, end: f64, include_ends: bool) -> Self {
         let mut adjusted = self.clone();
         if adjusted.is_empty() {
             return adjusted;
@@ -83,7 +83,7 @@ impl Signal {
     }
 
     #[must_use]
-    pub fn extend(&self, other: Self) -> Self {
+    pub(crate) fn extend(&self, other: Self) -> Self {
         let last_stamp = if !self.is_empty() {
             *self.timestamps.last().unwrap()
         } else {
@@ -124,7 +124,7 @@ impl Signal {
     }
 
     #[must_use]
-    pub fn interp(&self, new_timestamps: Vec<f64>, interpolation_mode: Interpolation) -> Self {
+    pub(crate) fn interp(&self, new_timestamps: Vec<f64>, interpolation_mode: Interpolation) -> Self {
         if self.samples.is_empty() || new_timestamps.is_empty() {
             return self.clone();
         }
@@ -138,24 +138,24 @@ impl Signal {
         signal
     }
 
-    pub fn as_type() {}
+    pub(crate) fn as_type() {}
 
-    pub fn physical() {}
+    pub(crate) fn physical() {}
 
-    pub fn validate() {}
+    pub(crate) fn validate() {}
 
     #[must_use]
-    pub fn copy(&self) -> Self {
+    pub(crate) fn copy(&self) -> Self {
         self.clone()
     }
 
     #[must_use]
-    pub fn max_time(&self) -> f64 {
+    pub(crate) fn max_time(&self) -> f64 {
         *self.timestamps.last().unwrap()
     }
 }
 
-pub enum Interpolation {
+pub(crate) enum Interpolation {
     RepeatPreviousSample,
     LinearInterpolation,
 }

@@ -1,15 +1,97 @@
-use crate::mdf3::{self, Record, MDF3};
-// use crate::mdf4;
+use crate::mdf3::{self, MDF3};
+use crate::record::Record;
+use crate::mdf4::MDF4;
 use crate::signal::Signal;
 
-pub struct MDF {
+enum MDFType {
+    MDF3(MDF3),
+    MDF4(MDF4),
+}
+
+impl MDFFile for MDFType {
+    fn channels(&self) -> Vec<MdfChannel> {
+        self.channels()
+    }
+    fn find_time_channel(
+        &self,
+        datagroup: usize,
+        channel_grp: usize,
+    ) -> Result<usize, &'static str> {
+        self.find_time_channel(datagroup, channel_grp)
+    }
+
+    fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
+        self.read_channel(datagroup, channel_grp, channel)
+    }
+
+    #[must_use]
+    fn new(filepath: &str) -> Self {
+        let file = MDFType::new(filepath);
+        Self {
+            filepath: filepath.to_string(),
+            channels: file.channels(),
+            file,
+        }
+    }
+
+    fn read_all(&mut self) {
+        self.read_all();
+    }
+
+    fn list(&mut self) {
+        self.list();
+    }
+
+    fn list_channels(&self) {
+        self.list_channels();
+    }
+
+    #[must_use]
+    fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal {
+        self.read(datagroup, channel_grp, channel)
+    }
+
+    fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
+        self.cut(start, end, include_ends, time_from_zero)
+    }
+
+    fn export(&self, format: &str, filename: &str) {
+        self.export(format, filename)
+    }
+
+    fn filter(&self, channels: &str) {
+        self.filter(channels)
+    }
+
+    #[must_use]
+    fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self {
+        Self {
+            filepath: self.filepath.clone(),
+            file: self.file.resample(raster, version, time_from_zero),
+            channels: Vec::new(),
+        }
+    }
+    // #[must_use]
+    // fn select(
+    //     &self,
+    //     channels: ChannelsType,
+    //     record_offset: isize,
+    //     raw: bool,
+    //     copy_master: bool,
+    //     ignore_value2text_conversions: bool,
+    //     record_count: isize,
+    //     validate: bool,
+    // ) -> Vec<Signal>;
+}
+
+pub(crate) struct MDF {
     filepath: String,
-    file: MDF3,
+    file: MDFType,
     channels: Vec<MdfChannel>,
 }
 
 impl MDF {
-    pub fn search_channels(&self, channel_name: &str) -> Result<MdfChannel, &'static str> {
+    pub(crate) fn search_channels(&self, channel_name: &str) -> Result<MdfChannel, &'static str> {
         let mut channels_match = Vec::with_capacity(self.channels.len());
 
         for channel in &self.channels {
@@ -26,7 +108,7 @@ impl MDF {
         }
     }
 
-    pub fn list_channels(&self) {
+    pub(crate) fn list_channels(&self) {
         for channel in &self.channels {
             println!(
                 "Channel: {}, DG: {}, CG: {}, CN: {}",
@@ -35,7 +117,7 @@ impl MDF {
         }
     }
 
-    pub fn read_channel(self, channel: MdfChannel) -> Signal {
+    pub(crate) fn read_channel(self, channel: MdfChannel) -> Signal {
         self.file.read(
             channel.data_group as usize,
             channel.channel_group as usize,
@@ -62,7 +144,7 @@ impl MDFFile for MDF {
     }
 
     fn new(filepath: &str) -> Self {
-        let file = MDF3::new(filepath);
+        let file = MDFType::new(filepath);
         Self {
             filepath: filepath.to_string(),
             channels: file.channels(),
@@ -125,7 +207,7 @@ impl MDFFile for MDF {
     // }
 }
 
-pub trait MDFFile {
+pub(crate) trait MDFFile {
     fn channels(&self) -> Vec<MdfChannel>;
     fn find_time_channel(
         &self,
@@ -166,17 +248,17 @@ pub trait MDFFile {
     // ) -> Vec<Signal>;
 }
 
-pub struct RasterType {}
+pub (crate) struct RasterType {}
 
-pub struct ChannelsType {}
+pub(crate)  struct ChannelsType {}
 
-pub struct TimeChannel {
+pub(crate) struct TimeChannel {
     pub time: Vec<f64>,
     pub data: Vec<f64>,
 }
 
 impl TimeChannel {
-    pub fn new(times: Vec<mdf3::Record>, datas: Vec<mdf3::Record>) -> Self {
+    pub(crate) fn new(times: Vec<mdf3::Record>, datas: Vec<mdf3::Record>) -> Self {
         let mut t = Vec::with_capacity(times.len());
         let mut d = Vec::with_capacity(datas.len());
 
@@ -191,13 +273,13 @@ impl TimeChannel {
         Self { time: t, data: d }
     }
 
-    pub fn max_time(&self) -> f64 {
+    pub(crate) fn max_time(&self) -> f64 {
         return *self.time.last().expect("Error reading time");
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct MdfChannel {
+pub(crate) struct MdfChannel {
     pub name: String,
     pub data_group: u64,
     pub channel: u64,
