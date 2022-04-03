@@ -1,17 +1,16 @@
 use crate::mdf::{self, MdfChannel};
+use crate::mdf3::Text;
 use crate::record::Record;
 use crate::{signal, utils};
 use std::fs::File;
 use std::io::prelude::*;
 use std::{convert::TryInto, mem};
 
-
 trait Block {
-	fn new() -> Self;
-	fn default() -> Self;
-	fn read(stream: &[u8]) -> (Self, usize);
+    fn new() -> Self;
+    fn default() -> Self;
+    fn read(stream: &[u8]) -> (usize, Self);
 }
-
 
 #[derive(Debug, Clone)]
 pub(crate) struct MDF4 {
@@ -50,23 +49,20 @@ struct AttachmentBlock {
     comment: String,
 }
 
-impl Block for AttachmentBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){
+impl Block for AttachmentBlock {
+    fn new() -> Self {}
+    fn default() -> Self {}
+    fn read(stream: &[u8]) -> (usize, Self) {
+        let mut pos = 0;
 
-		let mut pos = 0;
-
-		let id: [u8; 4] = stream[pos..pos+4].try_into().expect("msg");
-		if !utils::eq(
-			&id[..], 
-		&[0x23,0x23,0x43,0x4E]) {
-			panic!("Error: Reading Attachment block");
-		}
-
-	}
+        let id: [u8; 4] = stream[pos..pos + 4].try_into().expect("msg");
+        if !utils::eq(&id[..], &[0x23, 0x23, 0x43, 0x4E]) {
+            panic!("Error: Reading Attachment block");
+        }
+    }
 }
 
+#[derive(Debug, Clone)]
 struct CNBLOCK {
     id: [u8; 4],        //block ID; always b'##CN'
     reserved0: u8,      //reserved bytes
@@ -117,7 +113,7 @@ struct CNBLOCK {
     address: u8,       //channel address
     attachments: list, //list of referenced attachment blocks indexes;
     //   the index reference to the attachment block index
-    comment: String,               // channel comment
+    comment: String,     // channel comment
     conversion: CCBLOCK, // channel conversion; None if the
     //   channel has no conversion
     display_name: String, // channel display name; this is extracted from the
@@ -128,113 +124,352 @@ struct CNBLOCK {
     unit: String, // channel unit
 }
 
-impl Block for CNBLOCK{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for CNBLOCK {
+    fn new() -> Self {
+        CNBLOCK {
+            id: (),
+            reserved0: (),
+            block_len: (),
+            links_nr: (),
+            next_ch_addr: (),
+            component_addr: (),
+            name_addr: (),
+            source_addr: (),
+            conversion_addr: (),
+            data_block_addr: (),
+            unit_addr: (),
+            comment_addr: (),
+            attachment_addr: (),
+            default_X_dg_addr: (),
+            default_X_cg_addr: (),
+            default_X_ch_addr: (),
+            channel_type: (),
+            sync_type: (),
+            data_type: (),
+            bit_offset: (),
+            byte_offset: (),
+            bit_count: (),
+            flags: (),
+            pos_invalidation_bit: (),
+            precision: (),
+            reserved1: (),
+            min_raw_value: (),
+            max_raw_value: (),
+            lower_limit: (),
+            upper_limit: (),
+            lower_ext_limit: (),
+            upper_ext_limit: (),
+            address: (),
+            attachments: (),
+            comment: (),
+            conversion: (),
+            display_name: (),
+            name: (),
+            source: (),
+            unit: (),
+        }
+    }
+    fn default() -> Self {
+        CNBLOCK {
+            id: (),
+            reserved0: (),
+            block_len: (),
+            links_nr: (),
+            next_ch_addr: (),
+            component_addr: (),
+            name_addr: (),
+            source_addr: (),
+            conversion_addr: (),
+            data_block_addr: (),
+            unit_addr: (),
+            comment_addr: (),
+            attachment_addr: (),
+            default_X_dg_addr: (),
+            default_X_cg_addr: (),
+            default_X_ch_addr: (),
+            channel_type: (),
+            sync_type: (),
+            data_type: (),
+            bit_offset: (),
+            byte_offset: (),
+            bit_count: (),
+            flags: (),
+            pos_invalidation_bit: (),
+            precision: (),
+            reserved1: (),
+            min_raw_value: (),
+            max_raw_value: (),
+            lower_limit: (),
+            upper_limit: (),
+            lower_ext_limit: (),
+            upper_ext_limit: (),
+            address: (),
+            attachments: (),
+            comment: (),
+            conversion: (),
+            display_name: (),
+            name: (),
+            source: (),
+            unit: (),
+        }
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (
+            1,
+            CNBLOCK {
+                id: (),
+                reserved0: (),
+                block_len: (),
+                links_nr: (),
+                next_ch_addr: (),
+                component_addr: (),
+                name_addr: (),
+                source_addr: (),
+                conversion_addr: (),
+                data_block_addr: (),
+                unit_addr: (),
+                comment_addr: (),
+                attachment_addr: (),
+                default_X_dg_addr: (),
+                default_X_cg_addr: (),
+                default_X_ch_addr: (),
+                channel_type: (),
+                sync_type: (),
+                data_type: (),
+                bit_offset: (),
+                byte_offset: (),
+                bit_count: (),
+                flags: (),
+                pos_invalidation_bit: (),
+                precision: (),
+                reserved1: (),
+                min_raw_value: (),
+                max_raw_value: (),
+                lower_limit: (),
+                upper_limit: (),
+                lower_ext_limit: (),
+                upper_ext_limit: (),
+                address: (),
+                attachments: (),
+                comment: (),
+                conversion: (),
+                display_name: (),
+                name: (),
+                source: (),
+                unit: (),
+            },
+        )
+    }
 }
 
+#[derive(Debug, Clone)]
 struct CABLOCK {}
 
-impl Block for CABLOCK{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for CABLOCK {
+    fn new() -> Self {
+        CABLOCK {}
+    }
+    fn default() -> Self {
+        CABLOCK {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, CABLOCK {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct CGBLOCK {}
 
-impl Block for CGBLOCK{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for CGBLOCK {
+    fn new() -> Self {
+        CGBLOCK {}
+    }
+    fn default() -> Self {
+        CGBLOCK {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, CGBLOCK {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct CCBLOCK {}
-impl Block for CCBLOCK{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for CCBLOCK {
+    fn new() -> Self {
+        CCBLOCK {}
+    }
+    fn default() -> Self {
+        CCBLOCK {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, CCBLOCK {})
+    }
 }
+
+#[derive(Debug, Clone)]
 struct DataBlock {}
-impl Block for DataBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for DataBlock {
+    fn new() -> Self {
+        DataBlock {}
+    }
+    fn default() -> Self {
+        DataBlock {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, DataBlock {})
+    }
 }
+
+#[derive(Debug, Clone)]
 struct DataZippedBlock {}
-impl Block for DataZippedBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for DataZippedBlock {
+    fn new() -> Self {
+        DataZippedBlock {}
+    }
+    fn default() -> Self {
+        DataZippedBlock {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, DataZippedBlock {})
+    }
 }
+
+#[derive(Debug, Clone)]
 struct DataGroup {}
-impl Block for DataGroup{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for DataGroup {
+    fn new() -> Self {
+        DataGroup {}
+    }
+    fn default() -> Self {
+        DataGroup {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, DataGroup {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct DataList {}
-impl Block for DataList{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for DataList {
+    fn new() -> Self {
+        DataList {}
+    }
+    fn default() -> Self {
+        DataList {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, DataList {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct EventBlock {}
-impl Block for EventBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for EventBlock {
+    fn new() -> Self {
+        EventBlock {}
+    }
+    fn default() -> Self {
+        EventBlock {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, EventBlock {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct FileIdentificationBlock {}
-impl Block for FileIdentificationBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for FileIdentificationBlock {
+    fn new() -> Self {
+        FileIdentificationBlock {}
+    }
+    fn default() -> Self {
+        FileIdentificationBlock {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, FileIdentificationBlock {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct FileHistory {}
-impl Block for FileHistory{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for FileHistory {
+    fn new() -> Self {
+        FileHistory {}
+    }
+    fn default() -> Self {
+        FileHistory {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, FileHistory {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct HeaderBlock {}
-impl Block for HeaderBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for HeaderBlock {
+    fn new() -> Self {
+        HeaderBlock {}
+    }
+    fn default() -> Self {
+        HeaderBlock {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, HeaderBlock {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct HeaderList {}
-impl Block for HeaderList{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for HeaderList {
+    fn new() -> Self {
+        HeaderList {}
+    }
+    fn default() -> Self {
+        HeaderList {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, HeaderList {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct ListData {}
-impl Block for ListData{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for ListData {
+    fn new() -> Self {
+        ListData {}
+    }
+    fn default() -> Self {
+        ListData {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, ListData {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct SourceInformation {}
-impl Block for SourceInformation{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read() -> (Self, usize){}
+impl Block for SourceInformation {
+    fn new() -> Self {
+        SourceInformation {}
+    }
+    fn default() -> Self {
+        SourceInformation {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, SourceInformation {})
+    }
 }
 
+#[derive(Debug, Clone)]
 struct TextBlock {}
-impl Block for TextBlock{
-	fn new() -> Self{}
-	fn default() -> Self{}
-	fn read(stream: &[u8]) -> (Self, usize){}
+impl Block for TextBlock {
+    fn new() -> Self {
+        TextBlock {}
+    }
+    fn default() -> Self {
+        TextBlock {}
+    }
+    fn read(stream: &[u8]) -> (usize, Self) {
+        (1, TextBlock {})
+    }
 }
-

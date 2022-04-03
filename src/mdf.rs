@@ -1,6 +1,6 @@
 use crate::mdf3::{self, MDF3};
-use crate::record::Record;
 use crate::mdf4::MDF4;
+use crate::record::Record;
 use crate::signal::Signal;
 
 enum MDFType {
@@ -248,9 +248,9 @@ pub(crate) trait MDFFile {
     // ) -> Vec<Signal>;
 }
 
-pub (crate) struct RasterType {}
+pub(crate) struct RasterType {}
 
-pub(crate)  struct ChannelsType {}
+pub(crate) struct ChannelsType {}
 
 pub(crate) struct TimeChannel {
     pub time: Vec<f64>,
