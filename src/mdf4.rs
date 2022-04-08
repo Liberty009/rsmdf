@@ -914,7 +914,7 @@ impl Block for EVBlock {
 			ev_at_reference.push(address.remove(0));
 		}
 
-        (1, Self {
+        (pos, Self {
 			ev_ev_next,
 			ev_ev_parent,
 			ev_ev_range,
@@ -1026,16 +1026,50 @@ impl EventCause {
 }
 
 #[derive(Debug, Clone)]
-struct DGBLOCK {}
+struct DGBLOCK {
+	dg_dg_next: u64, 
+	dg_cg_first: u64, 
+	dg_data: u64, 
+	dg_md_comment: u64, 
+	dg_rec_id_size: u8
+}
 impl Block for DGBLOCK {
     fn new() -> Self {
-        Self {}
+        Self {	
+			dg_dg_next: 0_u64, 
+			dg_cg_first: 0_u64, 
+			dg_data: 0_u64, 
+			dg_md_comment: 0_u64, 
+			dg_rec_id_size: 0_u8}
     }
     fn default() -> Self {
-        Self {}
+		Self {	
+			dg_dg_next: 0_u64, 
+			dg_cg_first: 0_u64, 
+			dg_data: 0_u64, 
+			dg_md_comment: 0_u64, 
+			dg_rec_id_size: 0_u8}
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, Self {})
+
+		let (pos, header) = BlockHeader::read(stream, position, little_endian);
+		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+
+		let dg_rec_id_size = utils::read(stream, little_endian, &mut pos);
+		let dg_reserved: [u8; 7] = utils::read(stream, little_endian, &mut pos);
+
+		let dg_dg_next = address.remove(0);
+		let dg_cg_first = address.remove(0);
+		let dg_data = address.remove(0);
+		let dg_md_comment = address.remove(0);
+
+        (pos, Self {
+			dg_dg_next, 
+			dg_cg_first, 
+			dg_data, 
+			dg_md_comment, 
+			dg_rec_id_size,
+		})
     }
 }
 
