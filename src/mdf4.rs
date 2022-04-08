@@ -1191,17 +1191,114 @@ impl Block for CGBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct SIBLOCK {}
+struct SIBLOCK {
+	si_tx_name: u64, 
+	si_tx_path: u64, 
+	si_md_comment: u64, 
+	si_type: SourceType, 
+	si_bus_type: BusType, 
+	si_flags: u8, 
+
+}
 impl Block for SIBLOCK {
     fn new() -> Self {
-        SIBLOCK {}
+        SIBLOCK {
+			si_tx_name: 0_u64, 
+			si_tx_path: 0_u64, 
+			si_md_comment: 0_u64, 
+			si_type: SourceType::Bus, 
+			si_bus_type: BusType::CAN, 
+			si_flags: 0_u8, 
+		}
     }
     fn default() -> Self {
-        SIBLOCK {}
+		SIBLOCK {
+			si_tx_name: 0_u64, 
+			si_tx_path: 0_u64, 
+			si_md_comment: 0_u64, 
+			si_type: SourceType::Bus, 
+			si_bus_type: BusType::CAN, 
+			si_flags: 0_u8, 
+		}
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, SIBLOCK {})
+
+		let (pos, header) = BlockHeader::read(stream, position, little_endian);
+		let (mut pos, address) = link_extract(stream, pos ,little_endian, header.link_count);
+
+		let si_tx_name = address.remove(0); 
+		let si_tx_path = address.remove(0); 
+		let si_md_comment = address.remove(0);
+		
+		let si_type = SourceType::new(utils::read(stream, little_endian, &mut pos));
+		let si_bus_type = BusType::new(utils::read(stream, little_endian, &mut pos));
+		let si_flags = utils::read(stream, little_endian, &mut pos);
+
+		let si_reserved: [u8; 5] = utils::read(stream , little_endian, &mut pos);
+
+        (pos, SIBLOCK {
+			si_tx_name,
+			si_tx_path,
+			si_md_comment,
+			si_type,
+			si_bus_type,
+			si_flags,
+		})
     }
+}
+
+#[derive(Debug, Clone)]
+enum SourceType{
+	Other, 
+	ECU, 
+	Bus, 
+	IO, 
+	Tool, 
+	User,
+}
+
+impl SourceType {
+	fn new(source: u8) -> Self{
+		match source {
+			0 => Self::Other, 
+			1 => Self::ECU, 
+			2 => Self::Bus, 
+			3 => Self::IO, 
+			4 => Self::Tool, 
+			5 => Self::User,
+			_ => panic!("Error source type")
+		}
+	}
+}
+
+#[derive(Debug, Clone)]
+enum BusType{
+	None, 
+	Other, 
+	CAN, 
+	LIN, 
+	MOST, 
+	FlexRay, 
+	KLine, 
+	Ethernet, 
+	USB,
+}
+
+impl BusType {
+	fn new(source: u8) -> Self{
+		match source {
+			0 => Self::None, 
+			1 => Self::Other, 
+			2 => Self::CAN, 
+			3 => Self::LIN, 
+			4 => Self::MOST, 
+			5 => Self::FlexRay, 
+			6 => Self::KLine, 
+			7 => Self::Ethernet, 
+			8 => Self::USB,
+			_ => panic!("Error bus type")
+		}
+	}
 }
 
 #[derive(Debug, Clone)]
