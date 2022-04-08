@@ -1,11 +1,55 @@
-use crate::mdf3::{self, MDF3};
+use std::fs::File;
+use std::io::Read;
+
+use crate::mdf3::MDF3;
 use crate::mdf4::MDF4;
 use crate::record::Record;
 use crate::signal::Signal;
+use crate::utils;
+
+enum MDFVersion {
+    MDF3,
+    MDF4,
+}
 
 enum MDFType {
     MDF3(MDF3),
     MDF4(MDF4),
+}
+
+impl MDFType {
+    fn check_version(filepath: &str) -> MDFVersion {
+        let file = File::open(filepath).expect("Could not read file");
+        let mut id_stream = Vec::with_capacity(64);
+        let _ = file.read_exact(&mut id_stream);
+
+        let mut pos = 0;
+        let little_endian = true;
+
+        let id_file: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
+        let id_vers: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
+        let id_prog: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
+        let id_reserved1: [u8; 4] = utils::read(&id_stream, little_endian, &mut pos);
+        let id_ver: u16 = utils::read(&id_stream, little_endian, &mut pos);
+        let id_reserved2: [u8; 34] = utils::read(&id_stream, little_endian, &mut pos);
+
+        if !utils::eq(&id_file, &[b'M', b'D', b'F', b' ', b' ', b' ', b' ', b' ']) {
+            panic!("Error: Unknown file type");
+        }
+
+        let s = String::from_utf8_lossy(&id_vers).into_owned();
+        let version = s.split('.');
+        let major_version = version.next().unwrap().parse::<usize>().unwrap();
+        let minor_version = version.next().unwrap().parse::<usize>().unwrap();
+
+        let mdf_version = match major_version {
+            3 => MDFVersion::MDF3,
+            4 => MDFVersion::MDF4,
+            _ => panic!("Unknown MDF file version"),
+        };
+
+        mdf_version
+    }
 }
 
 impl MDFFile for MDFType {
@@ -26,12 +70,19 @@ impl MDFFile for MDFType {
 
     #[must_use]
     fn new(filepath: &str) -> Self {
-        let file = MDFType::new(filepath);
-        Self {
-            filepath: filepath.to_string(),
-            channels: file.channels(),
-            file,
-        }
+        let version = MDFType::check_version(filepath);
+
+        let file = match version {
+            MDFVersion::MDF3 => MDFType::MDF3(MDF3::new(filepath)),
+            MDFVersion::MDF4 => MDFType::MDF4(MDF4::new(filepath)),
+        };
+        //let file = MDFType::new(filepath);
+        // Self {
+        //     filepath: filepath.to_string(),
+        //     channels: file.channels(),
+        //     file,
+        // }
+        file
     }
 
     fn read_all(&mut self) {
@@ -65,11 +116,11 @@ impl MDFFile for MDFType {
 
     #[must_use]
     fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self {
-        Self {
-            filepath: self.filepath.clone(),
-            file: self.file.resample(raster, version, time_from_zero),
-            channels: Vec::new(),
-        }
+        // Self {
+        //     filepath: self.filepath.clone(),
+        self.resample(raster, version, time_from_zero)
+        //     channels: Vec::new(),
+        // }
     }
     // #[must_use]
     // fn select(
@@ -85,9 +136,9 @@ impl MDFFile for MDFType {
 }
 
 pub(crate) struct MDF {
-    filepath: String,
-    file: MDFType,
-    channels: Vec<MdfChannel>,
+    pub filepath: String,
+    pub file: MDFType,
+    pub channels: Vec<MdfChannel>,
 }
 
 impl MDF {
@@ -258,7 +309,7 @@ pub(crate) struct TimeChannel {
 }
 
 impl TimeChannel {
-    pub(crate) fn new(times: Vec<mdf3::Record>, datas: Vec<mdf3::Record>) -> Self {
+    pub(crate) fn new(times: Vec<Record>, datas: Vec<Record>) -> Self {
         let mut t = Vec::with_capacity(times.len());
         let mut d = Vec::with_capacity(datas.len());
 

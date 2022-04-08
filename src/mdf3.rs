@@ -29,16 +29,16 @@ const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 #[derive(Debug, Clone)]
 pub(crate) struct MDF3 {
     #[allow(dead_code)]
-    id: IDBLOCK,
+    pub id: IDBLOCK,
     #[allow(dead_code)]
-    header: HDBLOCK,
+    pub header: HDBLOCK,
     #[allow(dead_code)]
-    comment: TXBLOCK,
-    data_groups: Vec<DGBLOCK>,
-    channels: Vec<CNBLOCK>,
-    channel_groups: Vec<CGBLOCK>,
-    little_endian: bool,
-    file: Vec<u8>,
+    pub comment: TXBLOCK,
+    pub data_groups: Vec<DGBLOCK>,
+    pub channels: Vec<CNBLOCK>,
+    pub channel_groups: Vec<CGBLOCK>,
+    pub little_endian: bool,
+    pub file: Vec<u8>,
 }
 
 impl mdf::MDFFile for MDF3 {
