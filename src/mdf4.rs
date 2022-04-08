@@ -890,6 +890,9 @@ impl Block for EVBlock {
 		let ev_range_type = RangeType::new(utils::read(stream, little_endian, &mut pos));
 		let ev_cause = EventCause::new(utils::read(stream, little_endian, &mut pos));
 		let ev_flags = utils::read(stream, little_endian, &mut pos);
+		
+		let ev_reserved : [u8; 3] = utils::read(stream, little_endian, &mut pos);
+
 		let ev_scope_count = utils::read(stream, little_endian, &mut pos);
 		let ev_attachment_count = utils::read(stream, little_endian, &mut pos);
 		let ev_creator_index = utils::read(stream, little_endian, &mut pos);
