@@ -496,46 +496,41 @@ impl Block for HDBLOCK {
 
 #[derive(Debug, Clone)]
 struct MDBLOCK {
-	md_data: String,
+    md_data: String,
 }
-impl Block for MDBLOCK{
-	fn new() -> Self {
+impl Block for MDBLOCK {
+    fn new() -> Self {
         Self {
-			md_data: "".to_string(),
-		}
+            md_data: "".to_string(),
+        }
     }
     fn default() -> Self {
         Self {
-			md_data: "".to_string(),
-		}
+            md_data: "".to_string(),
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		
-		if !utils::eq(
-			&header.id, 
-			&"##MD".as_bytes()
-		) {
-			panic!("Error type incorrect");
-		}
+        if !utils::eq(&header.id, &"##MD".as_bytes()) {
+            panic!("Error type incorrect");
+        }
 
+        let mut md_data_temp = "";
+        unsafe {
+            md_data_temp =
+                str_from_u8_nul_utf8_unchecked(&stream[pos..(pos + header.length as usize - 10)]);
+        }
 
-		let mut md_data_temp = "";
-		unsafe {
-			md_data_temp = str_from_u8_nul_utf8_unchecked(&stream[pos..(pos+header.length as usize - 10)]);
-		}
+        let md_data = md_data_temp.to_string();
 
-		let md_data = md_data_temp.to_string();
-
-        (pos+md_data.len(), Self {
-			md_data,
-		})
+        (pos + md_data.len(), Self { md_data })
     }
 }
 
 pub unsafe fn str_from_u8_nul_utf8_unchecked(utf8_src: &[u8]) -> &str {
-    let nul_range_end = utf8_src.iter()
+    let nul_range_end = utf8_src
+        .iter()
         .position(|&c| c == b'\0')
         .unwrap_or(utf8_src.len()); // default to length if no `\0` present
     ::std::str::from_utf8_unchecked(&utf8_src[0..nul_range_end])
@@ -543,182 +538,184 @@ pub unsafe fn str_from_u8_nul_utf8_unchecked(utf8_src: &[u8]) -> &str {
 
 #[derive(Debug, Clone)]
 struct TXBLOCK {
-	tx_data: String,
+    tx_data: String,
 }
 impl Block for TXBLOCK {
     fn new() -> Self {
         Self {
-			tx_data: String::new(),
-		}
+            tx_data: String::new(),
+        }
     }
     fn default() -> Self {
         Self {
-			tx_data: String::new(),
-		}
+            tx_data: String::new(),
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		
-		if !utils::eq(
-			&header.id, 
-			&"##MD".as_bytes()
-		) {
-			panic!("Error type incorrect");
-		}
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
 
+        if !utils::eq(&header.id, &"##MD".as_bytes()) {
+            panic!("Error type incorrect");
+        }
 
-		let mut tx_data_temp = "";
-		unsafe {
-			tx_data_temp = str_from_u8_nul_utf8_unchecked(&stream[pos..(pos+header.length as usize - 10)]);
-		}
+        let mut tx_data_temp = "";
+        unsafe {
+            tx_data_temp =
+                str_from_u8_nul_utf8_unchecked(&stream[pos..(pos + header.length as usize - 10)]);
+        }
 
-		let tx_data = tx_data_temp.to_string();
+        let tx_data = tx_data_temp.to_string();
 
-        (pos+header.length as usize, Self {
-			tx_data,
-		})
-
+        (pos + header.length as usize, Self { tx_data })
     }
 }
 
 #[derive(Debug, Clone)]
 struct FHBLOCK {
-	fh_fh_next: u64, 
-	fh_md_comment: u64, 
-	fh_time_ns: u64, 
-	fh_tz_offset_min: i16, 
-	fh_dst_offset_min: i16, 
-	fh_time_flags: u8
+    fh_fh_next: u64,
+    fh_md_comment: u64,
+    fh_time_ns: u64,
+    fh_tz_offset_min: i16,
+    fh_dst_offset_min: i16,
+    fh_time_flags: u8,
 }
 impl Block for FHBLOCK {
     fn new() -> Self {
         Self {
-			fh_fh_next: 0_u64, 
-			fh_md_comment: 0_u64, 
-			fh_time_ns: 0_u64, 
-			fh_tz_offset_min: 0_i16, 
-			fh_dst_offset_min: 0_i16, 
-			fh_time_flags: 0_u8
-		}
+            fh_fh_next: 0_u64,
+            fh_md_comment: 0_u64,
+            fh_time_ns: 0_u64,
+            fh_tz_offset_min: 0_i16,
+            fh_dst_offset_min: 0_i16,
+            fh_time_flags: 0_u8,
+        }
     }
     fn default() -> Self {
         Self {
-		fh_fh_next: 0_u64, 
-		fh_md_comment: 0_u64, 
-		fh_time_ns: 0_u64, 
-		fh_tz_offset_min: 0_i16, 
-		fh_dst_offset_min: 0_i16, 
-		fh_time_flags: 0_u8
-		}
+            fh_fh_next: 0_u64,
+            fh_md_comment: 0_u64,
+            fh_time_ns: 0_u64,
+            fh_tz_offset_min: 0_i16,
+            fh_dst_offset_min: 0_i16,
+            fh_time_flags: 0_u8,
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let fh_fh_next = address.remove(0);
+        let fh_md_comment = address.remove(0);
 
-		let fh_fh_next = address.remove(0);
-		let fh_md_comment = address.remove(0);
+        let fh_time_ns = utils::read(stream, little_endian, &mut pos);
+        let fh_tz_offset_min = utils::read(stream, little_endian, &mut pos);
+        let fh_dst_offset_min = utils::read(stream, little_endian, &mut pos);
+        let fh_time_flags = utils::read(stream, little_endian, &mut pos);
 
-		let fh_time_ns  = utils::read(stream, little_endian, &mut pos);
-		let fh_tz_offset_min  = utils::read(stream, little_endian, &mut pos);
-		let fh_dst_offset_min  = utils::read(stream, little_endian, &mut pos);
-		let fh_time_flags = utils::read(stream, little_endian, &mut pos);
-
-        (pos, Self {
-			fh_fh_next, 
-			fh_md_comment, 
-			fh_time_ns, 
-			fh_tz_offset_min, 
-			fh_dst_offset_min, 
-			fh_time_flags
-		})
+        (
+            pos,
+            Self {
+                fh_fh_next,
+                fh_md_comment,
+                fh_time_ns,
+                fh_tz_offset_min,
+                fh_dst_offset_min,
+                fh_time_flags,
+            },
+        )
     }
 }
 
 enum ChannelHierarchyType {
-	Group, 
-	Function, 
-	Structure, 
-	MapList, 
-	FunctionInput, 
-	FunctionOutput, 
-	FunctionLocal, 
-	FunctionCalDef, 
-	FunctionCalRef, 
+    Group,
+    Function,
+    Structure,
+    MapList,
+    FunctionInput,
+    FunctionOutput,
+    FunctionLocal,
+    FunctionCalDef,
+    FunctionCalRef,
 }
 
 impl ChannelHierarchyType {
-	fn new(ch_type: u8) -> Self{
-		match ch_type {
-			0 => Self::Group, 
-			1 => Self::Function, 
-			2 => Self::Structure, 
-			3 => Self::MapList, 
-			4 => Self::FunctionInput, 
-			5 => Self::FunctionOutput, 
-			6 => Self::FunctionLocal, 
-			7 => Self::FunctionCalDef, 
-			8 => Self::FunctionCalRef, 
-			_ => panic!("Unknown channel type")
-		}
-	}
+    fn new(ch_type: u8) -> Self {
+        match ch_type {
+            0 => Self::Group,
+            1 => Self::Function,
+            2 => Self::Structure,
+            3 => Self::MapList,
+            4 => Self::FunctionInput,
+            5 => Self::FunctionOutput,
+            6 => Self::FunctionLocal,
+            7 => Self::FunctionCalDef,
+            8 => Self::FunctionCalRef,
+            _ => panic!("Unknown channel type"),
+        }
+    }
 }
 
 struct CHBLOCK {
-	ch_ch_next: u64, 
-	ch_ch_first: u64, 
-	ch_tx_name: u64, 
-	ch_md_comment: u64, 
-	ch_element: Vec<u64>,
-	ch_element_count: u32, 
-	ch_type: ChannelHierarchyType, 
+    ch_ch_next: u64,
+    ch_ch_first: u64,
+    ch_tx_name: u64,
+    ch_md_comment: u64,
+    ch_element: Vec<u64>,
+    ch_element_count: u32,
+    ch_type: ChannelHierarchyType,
 }
 impl Block for CHBLOCK {
-	fn new() -> Self{
-		Self{ch_ch_next: 0_u64, 
-		ch_ch_first: 0_u64, 
-		ch_tx_name: 0_u64, 
-		ch_md_comment: 0_u64, 
-		ch_element: Vec::new(),
-		ch_element_count: 0_u32, 
-		ch_type: ChannelHierarchyType::Function, }
-	}
-	fn default() -> Self{		Self{ch_ch_next: 0_u64, 
-		ch_ch_first: 0_u64, 
-		ch_tx_name: 0_u64, 
-		ch_md_comment: 0_u64, 
-		ch_element: Vec::new(),
-		ch_element_count: 0_u32, 
-		ch_type: ChannelHierarchyType::Function, }}
-	fn read(stream: &[u8], position: usize,little_endian: bool) -> (usize, Self){
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address)  = link_extract(stream, pos, little_endian, header.link_count);
+    fn new() -> Self {
+        Self {
+            ch_ch_next: 0_u64,
+            ch_ch_first: 0_u64,
+            ch_tx_name: 0_u64,
+            ch_md_comment: 0_u64,
+            ch_element: Vec::new(),
+            ch_element_count: 0_u32,
+            ch_type: ChannelHierarchyType::Function,
+        }
+    }
+    fn default() -> Self {
+        Self {
+            ch_ch_next: 0_u64,
+            ch_ch_first: 0_u64,
+            ch_tx_name: 0_u64,
+            ch_md_comment: 0_u64,
+            ch_element: Vec::new(),
+            ch_element_count: 0_u32,
+            ch_type: ChannelHierarchyType::Function,
+        }
+    }
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
 
+        let ch_element_count = utils::read(stream, little_endian, &mut pos);
+        let ch_type = ChannelHierarchyType::new(utils::read(stream, little_endian, &mut pos));
 
+        let ch_ch_next = address.remove(0);
+        let ch_ch_first = address.remove(0);
+        let ch_tx_name = address.remove(0);
+        let ch_md_comment = address.remove(0);
+        let mut ch_element = Vec::with_capacity(ch_element_count as usize * 3);
+        for i in 0..(ch_element_count * 3) {
+            ch_element.push(address.remove(0));
+        }
 
-		let ch_element_count = utils::read(stream, little_endian, &mut pos);
-		let ch_type = ChannelHierarchyType::new( utils::read(stream, little_endian, &mut pos));
-
-		let ch_ch_next = address.remove(0);
-		let ch_ch_first = address.remove(0);
-		let ch_tx_name = address.remove(0);
-		let ch_md_comment = address.remove(0);
-		let mut ch_element = Vec::with_capacity(ch_element_count as usize * 3 );
-		for i in 0..(ch_element_count * 3) {
-			ch_element.push(address.remove(0));
-		}
-
-		(pos, Self {
-			ch_ch_next,
-			ch_ch_first,
-			ch_tx_name,
-			ch_md_comment,
-			ch_element,
-			ch_element_count,
-			ch_type,
-
-		})
-	}
+        (
+            pos,
+            Self {
+                ch_ch_next,
+                ch_ch_first,
+                ch_tx_name,
+                ch_md_comment,
+                ch_element,
+                ch_element_count,
+                ch_type,
+            },
+        )
+    }
 }
 #[derive(Debug, Clone)]
 struct ATBLOCK {
@@ -817,259 +814,263 @@ impl Block for ATBLOCK {
 
 #[derive(Debug, Clone)]
 struct EVBlock {
-	ev_ev_next: u64, 
-	ev_ev_parent: u64, 
-	ev_ev_range: u64, 
-	ev_tx_name: u64,
-	ev_md_comment: u64, 
-	ev_scope: Vec<u64>,
-	ev_at_reference: Vec<u64>,
-	ev_type: EventType, 
-	ev_sync_type: EventSyncType, 
-	ev_range_type: RangeType,
-	ev_cause: EventCause, 
-	ev_flags: u8, 
-	ev_scope_count: u32, 
-	ev_attachment_count: u16, 
-	ev_creator_index: u16, 
-	ev_sync_base_value: i64, 
-	ev_sync_factor: f64, 
+    ev_ev_next: u64,
+    ev_ev_parent: u64,
+    ev_ev_range: u64,
+    ev_tx_name: u64,
+    ev_md_comment: u64,
+    ev_scope: Vec<u64>,
+    ev_at_reference: Vec<u64>,
+    ev_type: EventType,
+    ev_sync_type: EventSyncType,
+    ev_range_type: RangeType,
+    ev_cause: EventCause,
+    ev_flags: u8,
+    ev_scope_count: u32,
+    ev_attachment_count: u16,
+    ev_creator_index: u16,
+    ev_sync_base_value: i64,
+    ev_sync_factor: f64,
 }
 
 impl Block for EVBlock {
     fn new() -> Self {
         Self {
-			ev_ev_next: 0_u64, 
-			ev_ev_parent: 0_u64, 
-			ev_ev_range: 0_u64, 
-			ev_tx_name: 0_u64,
-			ev_md_comment: 0_u64, 
-			ev_scope: Vec::new(),
-			ev_at_reference: Vec::new(),
-			ev_type: EventType::AcquistionInterrupt, 
-			ev_sync_type: EventSyncType::Index, 
-			ev_range_type: RangeType::Point,
-			ev_cause: EventCause::Error, 
-			ev_flags: 0_u8, 
-			ev_scope_count: 0_u32, 
-			ev_attachment_count: 0_u16, 
-			ev_creator_index:0_u16, 
-			ev_sync_base_value: 0_i64, 
-			ev_sync_factor: 0_f64, 
-		}
+            ev_ev_next: 0_u64,
+            ev_ev_parent: 0_u64,
+            ev_ev_range: 0_u64,
+            ev_tx_name: 0_u64,
+            ev_md_comment: 0_u64,
+            ev_scope: Vec::new(),
+            ev_at_reference: Vec::new(),
+            ev_type: EventType::AcquistionInterrupt,
+            ev_sync_type: EventSyncType::Index,
+            ev_range_type: RangeType::Point,
+            ev_cause: EventCause::Error,
+            ev_flags: 0_u8,
+            ev_scope_count: 0_u32,
+            ev_attachment_count: 0_u16,
+            ev_creator_index: 0_u16,
+            ev_sync_base_value: 0_i64,
+            ev_sync_factor: 0_f64,
+        }
     }
     fn default() -> Self {
         Self {
-			ev_ev_next: 0_u64, 
-			ev_ev_parent: 0_u64, 
-			ev_ev_range: 0_u64, 
-			ev_tx_name: 0_u64,
-			ev_md_comment: 0_u64, 
-			ev_scope: Vec::new(),
-			ev_at_reference: Vec::new(),
-			ev_type: EventType::AcquistionInterrupt, 
-			ev_sync_type: EventSyncType::Index, 
-			ev_range_type: RangeType::Point,
-			ev_cause: EventCause::Error, 
-			ev_flags: 0_u8, 
-			ev_scope_count: 0_u32, 
-			ev_attachment_count: 0_u16, 
-			ev_creator_index:0_u16, 
-			ev_sync_base_value: 0_i64, 
-			ev_sync_factor: 0_f64, 
-
-		}
+            ev_ev_next: 0_u64,
+            ev_ev_parent: 0_u64,
+            ev_ev_range: 0_u64,
+            ev_tx_name: 0_u64,
+            ev_md_comment: 0_u64,
+            ev_scope: Vec::new(),
+            ev_at_reference: Vec::new(),
+            ev_type: EventType::AcquistionInterrupt,
+            ev_sync_type: EventSyncType::Index,
+            ev_range_type: RangeType::Point,
+            ev_cause: EventCause::Error,
+            ev_flags: 0_u8,
+            ev_scope_count: 0_u32,
+            ev_attachment_count: 0_u16,
+            ev_creator_index: 0_u16,
+            ev_sync_base_value: 0_i64,
+            ev_sync_factor: 0_f64,
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let ev_type = EventType::new(utils::read(stream, little_endian, &mut pos));
+        let ev_sync_type = EventSyncType::new(utils::read(stream, little_endian, &mut pos));
+        let ev_range_type = RangeType::new(utils::read(stream, little_endian, &mut pos));
+        let ev_cause = EventCause::new(utils::read(stream, little_endian, &mut pos));
+        let ev_flags = utils::read(stream, little_endian, &mut pos);
 
-		let ev_type = EventType::new(utils::read(stream, little_endian, &mut pos));
-		let ev_sync_type = EventSyncType::new(utils::read(stream, little_endian, &mut pos));
-		let ev_range_type = RangeType::new(utils::read(stream, little_endian, &mut pos));
-		let ev_cause = EventCause::new(utils::read(stream, little_endian, &mut pos));
-		let ev_flags = utils::read(stream, little_endian, &mut pos);
-		
-		let ev_reserved : [u8; 3] = utils::read(stream, little_endian, &mut pos);
+        let ev_reserved: [u8; 3] = utils::read(stream, little_endian, &mut pos);
 
-		let ev_scope_count = utils::read(stream, little_endian, &mut pos);
-		let ev_attachment_count = utils::read(stream, little_endian, &mut pos);
-		let ev_creator_index = utils::read(stream, little_endian, &mut pos);
-		let ev_sync_base_value = utils::read(stream, little_endian, &mut pos);
-		let ev_sync_factor = utils::read(stream, little_endian, &mut pos);
+        let ev_scope_count = utils::read(stream, little_endian, &mut pos);
+        let ev_attachment_count = utils::read(stream, little_endian, &mut pos);
+        let ev_creator_index = utils::read(stream, little_endian, &mut pos);
+        let ev_sync_base_value = utils::read(stream, little_endian, &mut pos);
+        let ev_sync_factor = utils::read(stream, little_endian, &mut pos);
 
+        let ev_ev_next = address.remove(0);
+        let ev_ev_parent = address.remove(0);
+        let ev_ev_range = address.remove(0);
+        let ev_tx_name = address.remove(0);
+        let ev_md_comment = address.remove(0);
+        let mut ev_scope = Vec::new();
+        for i in 0..ev_scope_count {
+            ev_scope.push(address.remove(0));
+        }
+        let mut ev_at_reference = Vec::new();
+        for i in 0..ev_attachment_count {
+            ev_at_reference.push(address.remove(0));
+        }
 
-		let ev_ev_next = address.remove(0);
-		let ev_ev_parent = address.remove(0);
-		let ev_ev_range = address.remove(0);
-		let ev_tx_name = address.remove(0);
-		let ev_md_comment = address.remove(0);
-		let mut ev_scope = Vec::new();
-		for i in 0..ev_scope_count  {
-			ev_scope.push(address.remove(0));
-		}
-		let mut ev_at_reference = Vec::new();
-		for i in 0..ev_attachment_count {
-			ev_at_reference.push(address.remove(0));
-		}
-
-        (pos, Self {
-			ev_ev_next,
-			ev_ev_parent,
-			ev_ev_range,
-			ev_tx_name,
-			ev_md_comment,
-			ev_scope,
-			ev_at_reference,
-			ev_type,
-			ev_sync_type,
-			ev_range_type,
-			ev_cause,
-			ev_flags,
-			ev_scope_count,
-			ev_attachment_count,
-			ev_creator_index,
-			ev_sync_base_value,
-			ev_sync_factor,
-		})
+        (
+            pos,
+            Self {
+                ev_ev_next,
+                ev_ev_parent,
+                ev_ev_range,
+                ev_tx_name,
+                ev_md_comment,
+                ev_scope,
+                ev_at_reference,
+                ev_type,
+                ev_sync_type,
+                ev_range_type,
+                ev_cause,
+                ev_flags,
+                ev_scope_count,
+                ev_attachment_count,
+                ev_creator_index,
+                ev_sync_base_value,
+                ev_sync_factor,
+            },
+        )
     }
 }
 
 #[derive(Debug, Clone)]
 
-enum EventType{
-	Recording, 
-	RecordingInterrupt, 
-	AcquistionInterrupt, 
-	StartRecordingTrigger, 
-	StopRecordingTrigger, 
-	Trigger, 
-	Marker,
+enum EventType {
+    Recording,
+    RecordingInterrupt,
+    AcquistionInterrupt,
+    StartRecordingTrigger,
+    StopRecordingTrigger,
+    Trigger,
+    Marker,
 }
 
 impl EventType {
-	fn new(ev_type: u8) -> Self {
-		match ev_type {
-			0 => Self::Recording, 
-			1 => Self::RecordingInterrupt, 
-			2 => Self::AcquistionInterrupt, 
-			3 => Self::StartRecordingTrigger, 
-			4 => Self::StopRecordingTrigger, 
-			5 => Self::Trigger, 
-			6 => Self::Marker,
-			_ => panic!("Error with Event Type")
-		}
-	}
+    fn new(ev_type: u8) -> Self {
+        match ev_type {
+            0 => Self::Recording,
+            1 => Self::RecordingInterrupt,
+            2 => Self::AcquistionInterrupt,
+            3 => Self::StartRecordingTrigger,
+            4 => Self::StopRecordingTrigger,
+            5 => Self::Trigger,
+            6 => Self::Marker,
+            _ => panic!("Error with Event Type"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
 
-enum EventSyncType{
-	Seconds, 
-	Radians, 
-	Meters, 
-	Index,
+enum EventSyncType {
+    Seconds,
+    Radians,
+    Meters,
+    Index,
 }
 
 impl EventSyncType {
-	fn new(ev_sync: u8) -> Self {
-		match ev_sync {
-			1 => Self::Seconds, 
-			2 => Self::Radians, 
-			3 => Self::Meters, 
-			4 => Self::Index,
-			_ => panic!("Error Event Sync Type")
-		}
-	}
+    fn new(ev_sync: u8) -> Self {
+        match ev_sync {
+            1 => Self::Seconds,
+            2 => Self::Radians,
+            3 => Self::Meters,
+            4 => Self::Index,
+            _ => panic!("Error Event Sync Type"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
 
-enum RangeType{
-	Point, 
-	RangeBegin, 
-	RangeEnd, 
+enum RangeType {
+    Point,
+    RangeBegin,
+    RangeEnd,
 }
 
 impl RangeType {
-	fn new(ev_range: u8) -> Self {
-		match ev_range {
-			0 => Self::Point, 
-			1 => Self::RangeBegin, 
-			2 => Self::RangeEnd, 
-			_ => panic!("Error Range Type")
-		}
-	}
+    fn new(ev_range: u8) -> Self {
+        match ev_range {
+            0 => Self::Point,
+            1 => Self::RangeBegin,
+            2 => Self::RangeEnd,
+            _ => panic!("Error Range Type"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
-enum EventCause{
-	Other, 
-	Error, 
-	Tool, 
-	Script, 
-	User,
+enum EventCause {
+    Other,
+    Error,
+    Tool,
+    Script,
+    User,
 }
 
 impl EventCause {
-	fn new(ev_cause: u8) -> Self{
-		match ev_cause{
-			0 => Self::Other, 
-			1 => Self::Error, 
-			2 => Self::Tool, 
-			3 => Self::Script, 
-			4 => Self::User,
-			_ => panic!("Error Event cause")
-		}
-	}
+    fn new(ev_cause: u8) -> Self {
+        match ev_cause {
+            0 => Self::Other,
+            1 => Self::Error,
+            2 => Self::Tool,
+            3 => Self::Script,
+            4 => Self::User,
+            _ => panic!("Error Event cause"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
 struct DGBLOCK {
-	dg_dg_next: u64, 
-	dg_cg_first: u64, 
-	dg_data: u64, 
-	dg_md_comment: u64, 
-	dg_rec_id_size: u8
+    dg_dg_next: u64,
+    dg_cg_first: u64,
+    dg_data: u64,
+    dg_md_comment: u64,
+    dg_rec_id_size: u8,
 }
 impl Block for DGBLOCK {
     fn new() -> Self {
-        Self {	
-			dg_dg_next: 0_u64, 
-			dg_cg_first: 0_u64, 
-			dg_data: 0_u64, 
-			dg_md_comment: 0_u64, 
-			dg_rec_id_size: 0_u8}
+        Self {
+            dg_dg_next: 0_u64,
+            dg_cg_first: 0_u64,
+            dg_data: 0_u64,
+            dg_md_comment: 0_u64,
+            dg_rec_id_size: 0_u8,
+        }
     }
     fn default() -> Self {
-		Self {	
-			dg_dg_next: 0_u64, 
-			dg_cg_first: 0_u64, 
-			dg_data: 0_u64, 
-			dg_md_comment: 0_u64, 
-			dg_rec_id_size: 0_u8}
+        Self {
+            dg_dg_next: 0_u64,
+            dg_cg_first: 0_u64,
+            dg_data: 0_u64,
+            dg_md_comment: 0_u64,
+            dg_rec_id_size: 0_u8,
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let dg_rec_id_size = utils::read(stream, little_endian, &mut pos);
+        let dg_reserved: [u8; 7] = utils::read(stream, little_endian, &mut pos);
 
-		let dg_rec_id_size = utils::read(stream, little_endian, &mut pos);
-		let dg_reserved: [u8; 7] = utils::read(stream, little_endian, &mut pos);
+        let dg_dg_next = address.remove(0);
+        let dg_cg_first = address.remove(0);
+        let dg_data = address.remove(0);
+        let dg_md_comment = address.remove(0);
 
-		let dg_dg_next = address.remove(0);
-		let dg_cg_first = address.remove(0);
-		let dg_data = address.remove(0);
-		let dg_md_comment = address.remove(0);
-
-        (pos, Self {
-			dg_dg_next, 
-			dg_cg_first, 
-			dg_data, 
-			dg_md_comment, 
-			dg_rec_id_size,
-		})
+        (
+            pos,
+            Self {
+                dg_dg_next,
+                dg_cg_first,
+                dg_data,
+                dg_md_comment,
+                dg_rec_id_size,
+            },
+        )
     }
 }
 
@@ -1192,113 +1193,114 @@ impl Block for CGBLOCK {
 
 #[derive(Debug, Clone)]
 struct SIBLOCK {
-	si_tx_name: u64, 
-	si_tx_path: u64, 
-	si_md_comment: u64, 
-	si_type: SourceType, 
-	si_bus_type: BusType, 
-	si_flags: u8, 
-
+    si_tx_name: u64,
+    si_tx_path: u64,
+    si_md_comment: u64,
+    si_type: SourceType,
+    si_bus_type: BusType,
+    si_flags: u8,
 }
 impl Block for SIBLOCK {
     fn new() -> Self {
         SIBLOCK {
-			si_tx_name: 0_u64, 
-			si_tx_path: 0_u64, 
-			si_md_comment: 0_u64, 
-			si_type: SourceType::Bus, 
-			si_bus_type: BusType::CAN, 
-			si_flags: 0_u8, 
-		}
+            si_tx_name: 0_u64,
+            si_tx_path: 0_u64,
+            si_md_comment: 0_u64,
+            si_type: SourceType::Bus,
+            si_bus_type: BusType::CAN,
+            si_flags: 0_u8,
+        }
     }
     fn default() -> Self {
-		SIBLOCK {
-			si_tx_name: 0_u64, 
-			si_tx_path: 0_u64, 
-			si_md_comment: 0_u64, 
-			si_type: SourceType::Bus, 
-			si_bus_type: BusType::CAN, 
-			si_flags: 0_u8, 
-		}
+        SIBLOCK {
+            si_tx_name: 0_u64,
+            si_tx_path: 0_u64,
+            si_md_comment: 0_u64,
+            si_type: SourceType::Bus,
+            si_bus_type: BusType::CAN,
+            si_flags: 0_u8,
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos ,little_endian, header.link_count);
+        let si_tx_name = address.remove(0);
+        let si_tx_path = address.remove(0);
+        let si_md_comment = address.remove(0);
 
-		let si_tx_name = address.remove(0); 
-		let si_tx_path = address.remove(0); 
-		let si_md_comment = address.remove(0);
-		
-		let si_type = SourceType::new(utils::read(stream, little_endian, &mut pos));
-		let si_bus_type = BusType::new(utils::read(stream, little_endian, &mut pos));
-		let si_flags = utils::read(stream, little_endian, &mut pos);
+        let si_type = SourceType::new(utils::read(stream, little_endian, &mut pos));
+        let si_bus_type = BusType::new(utils::read(stream, little_endian, &mut pos));
+        let si_flags = utils::read(stream, little_endian, &mut pos);
 
-		let si_reserved: [u8; 5] = utils::read(stream , little_endian, &mut pos);
+        let si_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
 
-        (pos, SIBLOCK {
-			si_tx_name,
-			si_tx_path,
-			si_md_comment,
-			si_type,
-			si_bus_type,
-			si_flags,
-		})
+        (
+            pos,
+            SIBLOCK {
+                si_tx_name,
+                si_tx_path,
+                si_md_comment,
+                si_type,
+                si_bus_type,
+                si_flags,
+            },
+        )
     }
 }
 
 #[derive(Debug, Clone)]
-enum SourceType{
-	Other, 
-	ECU, 
-	Bus, 
-	IO, 
-	Tool, 
-	User,
+enum SourceType {
+    Other,
+    ECU,
+    Bus,
+    IO,
+    Tool,
+    User,
 }
 
 impl SourceType {
-	fn new(source: u8) -> Self{
-		match source {
-			0 => Self::Other, 
-			1 => Self::ECU, 
-			2 => Self::Bus, 
-			3 => Self::IO, 
-			4 => Self::Tool, 
-			5 => Self::User,
-			_ => panic!("Error source type")
-		}
-	}
+    fn new(source: u8) -> Self {
+        match source {
+            0 => Self::Other,
+            1 => Self::ECU,
+            2 => Self::Bus,
+            3 => Self::IO,
+            4 => Self::Tool,
+            5 => Self::User,
+            _ => panic!("Error source type"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
-enum BusType{
-	None, 
-	Other, 
-	CAN, 
-	LIN, 
-	MOST, 
-	FlexRay, 
-	KLine, 
-	Ethernet, 
-	USB,
+enum BusType {
+    None,
+    Other,
+    CAN,
+    LIN,
+    MOST,
+    FlexRay,
+    KLine,
+    Ethernet,
+    USB,
 }
 
 impl BusType {
-	fn new(source: u8) -> Self{
-		match source {
-			0 => Self::None, 
-			1 => Self::Other, 
-			2 => Self::CAN, 
-			3 => Self::LIN, 
-			4 => Self::MOST, 
-			5 => Self::FlexRay, 
-			6 => Self::KLine, 
-			7 => Self::Ethernet, 
-			8 => Self::USB,
-			_ => panic!("Error bus type")
-		}
-	}
+    fn new(source: u8) -> Self {
+        match source {
+            0 => Self::None,
+            1 => Self::Other,
+            2 => Self::CAN,
+            3 => Self::LIN,
+            4 => Self::MOST,
+            5 => Self::FlexRay,
+            6 => Self::KLine,
+            7 => Self::Ethernet,
+            8 => Self::USB,
+            _ => panic!("Error bus type"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
