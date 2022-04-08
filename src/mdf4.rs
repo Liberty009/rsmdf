@@ -816,17 +816,210 @@ impl Block for ATBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct EVBlock {}
+struct EVBlock {
+	ev_ev_next: u64, 
+	ev_ev_parent: u64, 
+	ev_ev_range: u64, 
+	ev_tx_name: u64,
+	ev_md_comment: u64, 
+	ev_scope: Vec<u64>,
+	ev_at_reference: Vec<u64>,
+	ev_type: EventType, 
+	ev_sync_type: EventSyncType, 
+	ev_range_type: RangeType,
+	ev_cause: EventCause, 
+	ev_flags: u8, 
+	ev_scope_count: u32, 
+	ev_attachment_count: u16, 
+	ev_creator_index: u16, 
+	ev_sync_base_value: i64, 
+	ev_sync_factor: f64, 
+}
+
 impl Block for EVBlock {
     fn new() -> Self {
-        Self {}
+        Self {
+			ev_ev_next: 0_u64, 
+			ev_ev_parent: 0_u64, 
+			ev_ev_range: 0_u64, 
+			ev_tx_name: 0_u64,
+			ev_md_comment: 0_u64, 
+			ev_scope: Vec::new(),
+			ev_at_reference: Vec::new(),
+			ev_type: EventType::AcquistionInterrupt, 
+			ev_sync_type: EventSyncType::Index, 
+			ev_range_type: RangeType::Point,
+			ev_cause: EventCause::Error, 
+			ev_flags: 0_u8, 
+			ev_scope_count: 0_u32, 
+			ev_attachment_count: 0_u16, 
+			ev_creator_index:0_u16, 
+			ev_sync_base_value: 0_i64, 
+			ev_sync_factor: 0_f64, 
+		}
     }
     fn default() -> Self {
-        Self {}
+        Self {
+			ev_ev_next: 0_u64, 
+			ev_ev_parent: 0_u64, 
+			ev_ev_range: 0_u64, 
+			ev_tx_name: 0_u64,
+			ev_md_comment: 0_u64, 
+			ev_scope: Vec::new(),
+			ev_at_reference: Vec::new(),
+			ev_type: EventType::AcquistionInterrupt, 
+			ev_sync_type: EventSyncType::Index, 
+			ev_range_type: RangeType::Point,
+			ev_cause: EventCause::Error, 
+			ev_flags: 0_u8, 
+			ev_scope_count: 0_u32, 
+			ev_attachment_count: 0_u16, 
+			ev_creator_index:0_u16, 
+			ev_sync_base_value: 0_i64, 
+			ev_sync_factor: 0_f64, 
+
+		}
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, Self {})
+
+		let (pos, header) = BlockHeader::read(stream, position, little_endian);
+		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+
+		let ev_type = EventType::new(utils::read(stream, little_endian, &mut pos));
+		let ev_sync_type = EventSyncType::new(utils::read(stream, little_endian, &mut pos));
+		let ev_range_type = RangeType::new(utils::read(stream, little_endian, &mut pos));
+		let ev_cause = EventCause::new(utils::read(stream, little_endian, &mut pos));
+		let ev_flags = utils::read(stream, little_endian, &mut pos);
+		let ev_scope_count = utils::read(stream, little_endian, &mut pos);
+		let ev_attachment_count = utils::read(stream, little_endian, &mut pos);
+		let ev_creator_index = utils::read(stream, little_endian, &mut pos);
+		let ev_sync_base_value = utils::read(stream, little_endian, &mut pos);
+		let ev_sync_factor = utils::read(stream, little_endian, &mut pos);
+
+
+		let ev_ev_next = address.remove(0);
+		let ev_ev_parent = address.remove(0);
+		let ev_ev_range = address.remove(0);
+		let ev_tx_name = address.remove(0);
+		let ev_md_comment = address.remove(0);
+		let mut ev_scope = Vec::new();
+		for i in 0..ev_scope_count  {
+			ev_scope.push(address.remove(0));
+		}
+		let mut ev_at_reference = Vec::new();
+		for i in 0..ev_attachment_count {
+			ev_at_reference.push(address.remove(0));
+		}
+
+        (1, Self {
+			ev_ev_next,
+			ev_ev_parent,
+			ev_ev_range,
+			ev_tx_name,
+			ev_md_comment,
+			ev_scope,
+			ev_at_reference,
+			ev_type,
+			ev_sync_type,
+			ev_range_type,
+			ev_cause,
+			ev_flags,
+			ev_scope_count,
+			ev_attachment_count,
+			ev_creator_index,
+			ev_sync_base_value,
+			ev_sync_factor,
+		})
     }
+}
+
+#[derive(Debug, Clone)]
+
+enum EventType{
+	Recording, 
+	RecordingInterrupt, 
+	AcquistionInterrupt, 
+	StartRecordingTrigger, 
+	StopRecordingTrigger, 
+	Trigger, 
+	Marker,
+}
+
+impl EventType {
+	fn new(ev_type: u8) -> Self {
+		match ev_type {
+			0 => Self::Recording, 
+			1 => Self::RecordingInterrupt, 
+			2 => Self::AcquistionInterrupt, 
+			3 => Self::StartRecordingTrigger, 
+			4 => Self::StopRecordingTrigger, 
+			5 => Self::Trigger, 
+			6 => Self::Marker,
+			_ => panic!("Error with Event Type")
+		}
+	}
+}
+
+#[derive(Debug, Clone)]
+
+enum EventSyncType{
+	Seconds, 
+	Radians, 
+	Meters, 
+	Index,
+}
+
+impl EventSyncType {
+	fn new(ev_sync: u8) -> Self {
+		match ev_sync {
+			1 => Self::Seconds, 
+			2 => Self::Radians, 
+			3 => Self::Meters, 
+			4 => Self::Index,
+			_ => panic!("Error Event Sync Type")
+		}
+	}
+}
+
+#[derive(Debug, Clone)]
+
+enum RangeType{
+	Point, 
+	RangeBegin, 
+	RangeEnd, 
+}
+
+impl RangeType {
+	fn new(ev_range: u8) -> Self {
+		match ev_range {
+			0 => Self::Point, 
+			1 => Self::RangeBegin, 
+			2 => Self::RangeEnd, 
+			_ => panic!("Error Range Type")
+		}
+	}
+}
+
+#[derive(Debug, Clone)]
+enum EventCause{
+	Other, 
+	Error, 
+	Tool, 
+	Script, 
+	User,
+}
+
+impl EventCause {
+	fn new(ev_cause: u8) -> Self{
+		match ev_cause{
+			0 => Self::Other, 
+			1 => Self::Error, 
+			2 => Self::Tool, 
+			3 => Self::Script, 
+			4 => Self::User,
+			_ => panic!("Error Event cause")
+		}
+	}
 }
 
 #[derive(Debug, Clone)]
