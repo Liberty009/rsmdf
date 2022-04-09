@@ -3,6 +3,7 @@ use crate::record::Record;
 use crate::signal::{self, Signal};
 use crate::utils;
 use std::io::prelude::*;
+use std::mem;
 use std::{convert::TryInto, fs::File};
 
 struct BlockHeader {
@@ -99,13 +100,13 @@ impl mdf::MDFFile for MDF4 {
 
         let little_endian = true;
 
-        let (position, id_block) = IDBLOCK::read(&self.file, 0, little_endian);
+        let (position, _id_block) = IDBLOCK::read(&self.file, 0, little_endian);
         let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
 
         let mut next_dg = hd_block.hd_dg_first;
 
         while next_dg != 0 {
-            let (pos, dg_block) = DGBLOCK::read(&self.file, next_dg as usize, little_endian);
+            let (_pos, dg_block) = DGBLOCK::read(&self.file, next_dg as usize, little_endian);
             next_dg = dg_block.dg_dg_next;
             let mut next_cg = dg_block.dg_cg_first;
 
@@ -116,7 +117,7 @@ impl mdf::MDFFile for MDF4 {
                     CGBLOCK::read(&self.file, next_cg as usize, little_endian);
                 next_cg = cg_block.cg_cg_next;
                 let mut next_cn = cg_block.cg_cn_first;
-                cg.push(cg_block);
+                cg.push(cg_block.clone());
 
                 println!("Channel Group: {}", cg_block.cg_md_comment);
 
@@ -124,7 +125,7 @@ impl mdf::MDFFile for MDF4 {
                     let (_position, cn_block) =
                         CNBLOCK::read(&self.file, next_cn as usize, little_endian);
                     next_cn = cn_block.cn_cn_next;
-                    ch.push(cn_block);
+                    ch.push(cn_block.clone());
 
                     let name = cn_block.name(&self.file, little_endian);
                     channels.push(mdf::MdfChannel {
@@ -144,10 +145,12 @@ impl mdf::MDFFile for MDF4 {
         _datagroup: usize,
         channel_grp: usize,
     ) -> Result<usize, &'static str> {
-        let channel_group =
-            self.channel_groups[channel_grp].channels(&self.file, self.little_endian);
+        let channel_group = self.channel_groups[channel_grp]
+            .clone()
+            .channels(&self.file, self.little_endian);
         for (i, channel) in channel_group.iter().enumerate() {
-            if channel.channel_type == TIME_CHANNEL_TYPE {
+            if matches!(channel.channel_type, ChannelType::MasterChannel) {
+                //channel.channel_type == TIME_CHANNEL_TYPE {
                 return Ok(i);
             }
         }
@@ -156,59 +159,7 @@ impl mdf::MDFFile for MDF4 {
     }
 
     fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
-        let channels: Vec<CNBLOCK> = self.channel_groups[channel_grp].channels(&self.file, true);
-        let data_length = (self.channel_groups[channel_grp].record_number
-            * self.channel_groups[channel_grp].record_size as u32)
-            as usize;
-        let data = &self.file[self.data_groups[datagroup].data_block as usize
-            ..(self.data_groups[datagroup].data_block as usize + data_length)];
-
-        println!(
-            "Record Number: {}",
-            self.channel_groups[channel_grp].record_number
-        );
-
-        let mut data_blocks: Vec<&[u8]> =
-            vec![&[0]; self.channel_groups[channel_grp].record_number as usize];
-        // let mut data_blocks = Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
-        println!("Vec len: {}", data_blocks.len());
-
-        for (i, db) in data_blocks.iter_mut().enumerate() {
-            *db = &data[(i * self.channel_groups[channel_grp].record_size as usize) as usize
-                ..((i + 1) * self.channel_groups[channel_grp].record_size as usize) as usize];
-        }
-        // for i in 0..self.channel_groups[channel_grp].record_number {
-        //     data_blocks.push(
-        //         &data[(i * self.channel_groups[channel_grp].record_size as u32) as usize
-        //             ..((i + 1) * self.channel_groups[channel_grp].record_size as u32) as usize],
-        //     );
-        // }
-
-        let byte_offset = (self.channels[channel].start_offset / 8) as usize;
-        let _bit_offset = self.channels[channel].start_offset % 8;
-
-        let mut records =
-            Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
-        let mut pos = 0_usize;
-        for _i in 0..self.channel_groups[channel_grp].record_number {
-            records.push(&data[pos..pos + self.channel_groups[channel_grp].record_size as usize]);
-            pos += self.channel_groups[channel_grp].record_size as usize;
-        }
-
-        let mut raw_data =
-            Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
-        let end = byte_offset + channels[channel].data_type.len();
-        for rec in &records {
-            raw_data.push(&rec[byte_offset..end])
-        }
-
-        let mut extracted_data =
-            Vec::with_capacity(self.channel_groups[channel_grp].record_number as usize);
-        for raw in raw_data {
-            extracted_data.push(Record::new(raw, channels[channel].data_type));
-        }
-
-        extracted_data
+        Vec::new()
     }
 
     #[must_use]
@@ -216,18 +167,18 @@ impl mdf::MDFFile for MDF4 {
         let mut file = File::open(filepath).expect("Could not read file");
         let mut stream = Vec::new();
         let _ = file.read_to_end(&mut stream);
-        let (id, pos, little_endian) = IDBLOCK::read(&stream);
-        let (header, _pos) = HDBLOCK::read(&stream, pos, little_endian);
-        let (comment, _pos) = TXBLOCK::read(&stream, header.file_comment as usize, little_endian);
+
+        let little_endian = true;
+        let position = 0;
+
+        let (pos, id) = IDBLOCK::read(&stream, position, little_endian);
+        let (_pos, header) = HDBLOCK::read(&stream, pos, little_endian);
+        let (_pos, comment) = TXBLOCK::read(&stream, header.hd_md_comment as usize, little_endian);
         let mut mdf = Self {
             id,
-            header,
+            header: header.clone(),
             comment,
-            data_groups: DGBLOCK::read_all(
-                &stream,
-                little_endian,
-                header.data_group_block as usize,
-            ),
+            data_groups: DGBLOCK::read_all(&stream, header.hd_dg_first as usize, little_endian),
             channels: Vec::new(),
             channel_groups: Vec::new(),
             little_endian,
@@ -242,12 +193,16 @@ impl mdf::MDFFile for MDF4 {
     fn read_all(&mut self) {
         let mut channel_groups = Vec::with_capacity(self.data_groups.len());
         for group in &self.data_groups {
-            channel_groups.append(&mut group.read_channel_groups(&self.file, self.little_endian));
+            let group1 = group.clone();
+            let mut grp = group1.read_channel_groups(&self.file, self.little_endian);
+            channel_groups.append(&mut grp);
         }
 
         let mut channels = Vec::new();
         for grp in &channel_groups {
-            channels.append(&mut grp.channels(&self.file, self.little_endian));
+            let grp1 = grp.clone();
+
+            channels.append(&mut grp1.channels(&self.file, self.little_endian));
         }
 
         self.channel_groups = channel_groups;
@@ -255,15 +210,14 @@ impl mdf::MDFFile for MDF4 {
     }
 
     fn list(&mut self) {
-        let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
-        let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
+        let little_endian = true;
+        let position = 0;
+
+        let (position, _id_block) = IDBLOCK::read(&self.file, position, little_endian);
+        let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
         //position += pos;
 
-        let dg = DGBLOCK::read_all(
-            &self.file,
-            little_endian,
-            hd_block.data_group_block as usize,
-        );
+        let dg = DGBLOCK::read_all(&self.file, hd_block.hd_dg_first as usize, little_endian);
         self.data_groups = dg;
     }
 
@@ -272,32 +226,34 @@ impl mdf::MDFFile for MDF4 {
         let mut cg = Vec::new();
         let mut ch = Vec::new();
 
-        let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
-        let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
+        let little_endian = true;
+        let postion = 0;
+
+        let (position, _id_block) = IDBLOCK::read(&self.file, postion, little_endian);
+        let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
         //position += pos;
 
-        let mut next_dg = hd_block.data_group_block;
+        let mut next_dg = hd_block.hd_dg_first; // .data_group_block;
 
         while next_dg != 0 {
-            let dg_block = DGBLOCK::read(&self.file, little_endian, &mut (next_dg as usize));
-            next_dg = dg_block.next;
-            let mut next_cg = dg_block.first;
+            let (_pos, dg_block) = DGBLOCK::read(&self.file, next_dg as usize, little_endian);
+            next_dg = dg_block.dg_dg_next; //  .next;
+            let mut next_cg = dg_block.dg_cg_first; // .first;
 
             dg.push(dg_block);
 
             while next_cg != 0 {
-                let (cg_block, _position) =
-                    CGBLOCK::read(&self.file, little_endian, next_cg as usize);
-                next_cg = cg_block.next;
-                let mut next_cn = cg_block.first;
-                cg.push(cg_block);
+                let (_pos, cg_block) = CGBLOCK::read(&self.file, next_cg as usize, little_endian);
+                next_cg = cg_block.cg_cg_next; //.next;
+                let mut next_cn = cg_block.cg_cn_first; //.first;
+                cg.push(cg_block.clone());
 
-                println!("Channel Group: {}", cg_block.comment);
+                println!("Channel Group: {}", cg_block.cg_md_comment); //.comment);
 
                 while next_cn != 0 {
-                    let (cn_block, _position) =
-                        CNBLOCK::read(&self.file, little_endian, next_cn as usize);
-                    next_cn = cn_block.next;
+                    let (_pos, cn_block) =
+                        CNBLOCK::read(&self.file, next_cn as usize, little_endian);
+                    next_cn = cn_block.cn_cn_next; //.next;
 
                     ch.push(cn_block);
                 }
@@ -453,7 +409,7 @@ impl Block for HDBLOCK {
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
-        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let hd_dg_first = address.remove(0);
         let hd_fh_first = address.remove(0);
@@ -603,7 +559,7 @@ impl Block for FHBLOCK {
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
-        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let fh_fh_next = address.remove(0);
         let fh_md_comment = address.remove(0);
@@ -690,7 +646,7 @@ impl Block for CHBLOCK {
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
-        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let ch_element_count = utils::read(stream, little_endian, &mut pos);
         let ch_type = ChannelHierarchyType::new(utils::read(stream, little_endian, &mut pos));
@@ -879,7 +835,7 @@ impl Block for EVBlock {
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
-        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let ev_type = EventType::new(utils::read(stream, little_endian, &mut pos));
         let ev_sync_type = EventSyncType::new(utils::read(stream, little_endian, &mut pos));
@@ -1031,6 +987,33 @@ struct DGBLOCK {
     dg_md_comment: u64,
     dg_rec_id_size: u8,
 }
+
+impl DGBLOCK {
+    fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {
+        let mut all = Vec::new();
+        let mut next_dg = position;
+
+        while next_dg != 0 {
+            let (pos, dg_block) = DGBLOCK::read(stream, next_dg, little_endian);
+            next_dg = dg_block.dg_dg_next as usize;
+            all.push(dg_block);
+        }
+
+        all
+    }
+
+    fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
+        let mut channel_grps = Vec::new();
+        let mut next = self.dg_cg_first as usize;
+        while next != 0 {
+            let (_pos, cg_block) = CGBLOCK::read(stream, next, little_endian);
+            next = cg_block.cg_cg_next as usize;
+            channel_grps.push(cg_block);
+        }
+        channel_grps
+    }
+}
+
 impl Block for DGBLOCK {
     fn new() -> Self {
         Self {
@@ -1052,7 +1035,7 @@ impl Block for DGBLOCK {
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
-        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let dg_rec_id_size = utils::read(stream, little_endian, &mut pos);
         let dg_reserved: [u8; 7] = utils::read(stream, little_endian, &mut pos);
@@ -1081,8 +1064,8 @@ struct CGBLOCK {
     //reserved0: u64,     //- int : reserved bytes
     //block_len: u64,     //- int : block bytes size
     //links_nr: u64,      //- int : number of links
-    cg_cg_next: u64,  //- int : next channel group address
-    cg_cn_first: u64, //- int : address of first channel of this channel group
+    cg_cg_next: u64,     //- int : next channel group address
+    cg_cn_first: u64,    //- int : address of first channel of this channel group
     cg_tx_acq_name: u64, //- int : address of TextBLock that contains the channel
     //group acquisition name
     cg_si_acq_source: u64, //- int : address of SourceInformation that contains the
@@ -1092,7 +1075,7 @@ struct CGBLOCK {
     cg_md_comment: u64, //- int : address of TXBLOCK/MDBLOCK that contains the
     //channel group comment
     cg_record_id: u64,     //- int : record ID for the channel group
-    cg_cycle_count: u64,     //- int : number of cycles for this channel group
+    cg_cycle_count: u64,   //- int : number of cycles for this channel group
     cg_flags: u64,         //- int : channel group flags
     cg_path_separator: u8, //- int : ordinal for character used as path separator
     //reserved1: u64,       //- int : reserved bytes
@@ -1100,14 +1083,30 @@ struct CGBLOCK {
     //the record for this channel group; this does not contain the invalidation
     //bytes
     cg_inval_bytes: u64, // - int : number of bytes used for invalidation
-                                // bits by this channel group
+                         // bits by this channel group
 
-                                //Other attributes
-                                //acq_name: u64,   // - str : acquisition name
-                                //acq_source: u64, //- SourceInformation : acquisition source information
-                                //address: u64,    //- int : channel group address
-                                //comment: u64,    //- str : channel group comment
+                         //Other attributes
+                         //acq_name: u64,   // - str : acquisition name
+                         //acq_source: u64, //- SourceInformation : acquisition source information
+                         //address: u64,    //- int : channel group address
+                         //comment: u64,    //- str : channel group comment
 }
+
+impl CGBLOCK {
+    fn channels(self, stream: &[u8], little_endian: bool) -> Vec<CNBLOCK> {
+        let mut ch = Vec::new();
+        let mut next_cn = self.cg_cn_first as usize;
+        while next_cn != 0 {
+            let (_pos, cn_block) = CNBLOCK::read(stream, next_cn, little_endian);
+            next_cn = cn_block.cn_cn_next as usize;
+
+            ch.push(cn_block);
+        }
+
+        ch
+    }
+}
+
 impl Block for CGBLOCK {
     fn new() -> Self {
         CGBLOCK {
@@ -1148,20 +1147,20 @@ impl Block for CGBLOCK {
             panic!("Error: Channel group wrong id");
         }
 
-        let (mut pos, addresses) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
-        let next_cg_addr = addresses.remove(0);
-        let first_ch_addr = addresses.remove(0);
-        let acq_name_addr = addresses.remove(0);
-        let acq_source_addr = addresses.remove(0);
-        let first_sample_reduction_addr = addresses.remove(0);
-        let comment_addr = addresses.remove(0);
+        let next_cg_addr = address.remove(0);
+        let first_ch_addr = address.remove(0);
+        let acq_name_addr = address.remove(0);
+        let acq_source_addr = address.remove(0);
+        let first_sample_reduction_addr = address.remove(0);
+        let comment_addr = address.remove(0);
 
         let record_id = utils::read(stream, little_endian, &mut pos);
         let cycles_nr = utils::read(stream, little_endian, &mut pos);
         let flags = utils::read(stream, little_endian, &mut pos);
         let path_separator = utils::read(stream, little_endian, &mut pos);
-        let reserved1: [u8; 4] = utils::read(stream, little_endian, &mut pos);
+        let _reserved1: [u8; 4] = utils::read(stream, little_endian, &mut pos);
         let samples_byte_nr = utils::read(stream, little_endian, &mut pos);
         let invalidation_bytes_nr = utils::read(stream, little_endian, &mut pos);
 
@@ -1224,7 +1223,7 @@ impl Block for SIBLOCK {
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
-        let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let si_tx_name = address.remove(0);
         let si_tx_path = address.remove(0);
@@ -1234,7 +1233,7 @@ impl Block for SIBLOCK {
         let si_bus_type = BusType::new(utils::read(stream, little_endian, &mut pos));
         let si_flags = utils::read(stream, little_endian, &mut pos);
 
-        let si_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
+        let _si_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
 
         (
             pos,
@@ -1310,21 +1309,21 @@ struct CNBLOCK {
     //reserved0: u32,      //reserved bytes
     //block_len: u64,      //block bytes size
     //links_nr: u64,       //number of links
-    cn_cn_next: u64,   //next ATBLOCK address
+    cn_cn_next: u64,     //next ATBLOCK address
     cn_composition: u64, //address of first channel in case of structure channel
     //   composition, or ChannelArrayBlock in case of arrays
     //   file name
     cn_tx_name: u64,       //address of TXBLOCK that contains the channel name
     cn_si_source: u64,     //address of channel source block
     cn_cc_conversion: u64, //address of channel conversion block
-    cn_data: u64, //address of signal data block for VLSD channels
+    cn_data: u64,          //address of signal data block for VLSD channels
     cn_md_unit: u64,       //address of TXBLOCK that contains the channel unit
     cn_md_comment: u64,    //address of TXBLOCK/MDBLOCK that contains the
     //   channel comment
     cn_at_reference: Vec<u64>, //address of N:th ATBLOCK referenced by the
     //   current channel; if no ATBLOCK is referenced there will be no such key:value
     //   pair
-	cn_default_x: Vec<u64>,
+    cn_default_x: Vec<u64>,
     // default_X_dg_addr: u64, //address of DGBLOCK where the default X axis
     // //   channel for the current channel is found; this key:value pair will not
     // //   exist for channels that don't have a default X axis
@@ -1365,6 +1364,22 @@ struct CNBLOCK {
                           // source: SourceInformation, // channel source information; None if
                           // //   the channel has no source information
                           // unit: String, // channel unit
+}
+
+impl CNBLOCK {
+    fn name(self, stream: &[u8], little_endian: bool) -> String {
+        let mut name = "".to_string();
+
+        if matches!(self.channel_type, ChannelType::MasterChannel) {
+            name = "time".to_string();
+        } else if self.cn_tx_name != 0 {
+            let (_pos, tx) = TXBLOCK::read(stream, self.cn_tx_name as usize, little_endian);
+
+            name = tx.tx_data;
+        }
+
+        name
+    }
 }
 
 impl Block for CNBLOCK {
@@ -1433,7 +1448,7 @@ impl Block for CNBLOCK {
             panic!("Error: Incorrect channel id");
         }
 
-        let (mut pos, addresses) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut addresses) = link_extract(stream, pos, little_endian, header.link_count);
 
         let channel_type = ChannelType::new(utils::read(stream, little_endian, &mut pos));
         let sync_type = SyncType::new(utils::read(stream, little_endian, &mut pos));
@@ -1445,7 +1460,7 @@ impl Block for CNBLOCK {
         let flags = utils::read(stream, little_endian, &mut pos);
         let invalidation_bit_pos = utils::read(stream, little_endian, &mut pos);
         let precision = utils::read(stream, little_endian, &mut pos);
-        let reserved1: u8 = utils::read(stream, little_endian, &mut pos);
+        let _reserved1: u8 = utils::read(stream, little_endian, &mut pos);
         let attachment_nr: u16 = utils::read(stream, little_endian, &mut pos);
         let min_raw_value = utils::read(stream, little_endian, &mut pos);
         let max_raw_value = utils::read(stream, little_endian, &mut pos);
@@ -1464,12 +1479,12 @@ impl Block for CNBLOCK {
         let cn_md_comment = addresses.remove(0);
 
         let mut cn_at_reference = Vec::with_capacity(attachment_nr as usize);
-        for i in 0..attachment_nr {
+        for _i in 0..attachment_nr {
             cn_at_reference.push(addresses.remove(0));
         }
 
         let mut cn_default_x = Vec::with_capacity(3);
-        for i in 0..3 {
+        for _i in 0..3 {
             cn_default_x.push(addresses.remove(0));
         }
 
@@ -1689,7 +1704,7 @@ impl Block for CABLOCK {
             panic!("Error: id CABLOCK");
         }
 
-        let (mut pos, addresses) = link_extract(stream, pos, little_endian, header.link_count);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let ca_type = utils::read(stream, little_endian, &mut pos);
         let ca_storage = utils::read(stream, little_endian, &mut pos);
@@ -1700,52 +1715,52 @@ impl Block for CABLOCK {
 
         let D = ca_ndim as usize;
 
-        let ca_dim_size = Vec::new();
-        for i in 0..D {
+        let mut ca_dim_size = Vec::new();
+        for _i in 0..D {
             ca_dim_size.push(utils::read(stream, little_endian, &mut pos));
         }
 
         let nd_sum = ca_dim_size.iter().sum();
         let nd_prod = ca_dim_size.iter().product();
 
-        let ca_axis_value = Vec::new();
-        for i in 0..nd_sum {
+        let mut ca_axis_value = Vec::new();
+        for _i in 0..nd_sum {
             ca_axis_value.push(utils::read(stream, little_endian, &mut pos));
         }
 
-        let ca_cycle_count = Vec::new();
-        for i in 0..nd_prod {
+        let mut ca_cycle_count = Vec::new();
+        for _i in 0..nd_prod {
             ca_cycle_count.push(utils::read(stream, little_endian, &mut pos));
         }
 
-        let ca_composition = addresses.remove(0);
+        let ca_composition = address.remove(0);
         let mut ca_data = Vec::new();
-        for i in 0..nd_prod {
-            ca_data.push(addresses.remove(0));
+        for _i in 0..nd_prod {
+            ca_data.push(address.remove(0));
         }
-        let ca_dynamic_size = Vec::new();
-        for i in 0..(3 * D) {
-            ca_dynamic_size.push(addresses.remove(0));
+        let mut ca_dynamic_size = Vec::new();
+        for _i in 0..(3 * D) {
+            ca_dynamic_size.push(address.remove(0));
         }
         let mut ca_input_quantity = Vec::new();
-        for i in 0..(3 * D) {
-            ca_input_quantity.push(addresses.remove(0));
+        for _i in 0..(3 * D) {
+            ca_input_quantity.push(address.remove(0));
         }
         let mut ca_output_quantity = Vec::new();
-        for i in 0..3 {
-            ca_output_quantity.push(addresses.remove(0));
+        for _i in 0..3 {
+            ca_output_quantity.push(address.remove(0));
         }
-        let ca_comparison_quantity = Vec::new();
-        for i in 0..3 {
-            ca_comparison_quantity.push(addresses.remove(0));
+        let mut ca_comparison_quantity = Vec::new();
+        for _i in 0..3 {
+            ca_comparison_quantity.push(address.remove(0));
         }
         let mut ca_cc_axis_conversion = Vec::new();
-        for i in 0..D {
-            ca_cc_axis_conversion.push(addresses.remove(0));
+        for _i in 0..D {
+            ca_cc_axis_conversion.push(address.remove(0));
         }
         let mut ca_axis = Vec::new();
-        for i in 0..(3 * D) {
-            ca_axis.push(addresses.remove(0));
+        for _i in 0..(3 * D) {
+            ca_axis.push(address.remove(0));
         }
 
         (
@@ -1791,58 +1806,60 @@ impl Block for CABLOCK {
 
 #[derive(Debug, Clone)]
 struct SRBLOCK {
-	sr_sr_next: u64, 
-	sr_data: u64, 
-	sr_cycle_count: u64, 
-	sr_interval: f64, 
-	sr_sync_type: u8, 
-	sr_flags: u8,
+    sr_sr_next: u64,
+    sr_data: u64,
+    sr_cycle_count: u64,
+    sr_interval: f64,
+    sr_sync_type: u8,
+    sr_flags: u8,
 }
 
 impl Block for SRBLOCK {
-	fn new() -> Self{
-Self{
-	sr_sr_next: 0_u64, 
-	sr_data: 0_u64, 
-	sr_cycle_count: 0_u64, 
-	sr_interval: 0_f64, 
-	sr_sync_type: 0_u8, 
-	sr_flags: 0_u8,
-}
-	}
-	fn default() -> Self{
-		Self{
-			sr_sr_next: 0_u64, 
-			sr_data: 0_u64, 
-			sr_cycle_count: 0_u64, 
-			sr_interval: 0_f64, 
-			sr_sync_type: 0_u8, 
-			sr_flags: 0_u8,
-		}
-	}
-	fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self){
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
-		
-		let sr_sr_next = address.remove(0);
-		let sr_data = address.remove(0);
+    fn new() -> Self {
+        Self {
+            sr_sr_next: 0_u64,
+            sr_data: 0_u64,
+            sr_cycle_count: 0_u64,
+            sr_interval: 0_f64,
+            sr_sync_type: 0_u8,
+            sr_flags: 0_u8,
+        }
+    }
+    fn default() -> Self {
+        Self {
+            sr_sr_next: 0_u64,
+            sr_data: 0_u64,
+            sr_cycle_count: 0_u64,
+            sr_interval: 0_f64,
+            sr_sync_type: 0_u8,
+            sr_flags: 0_u8,
+        }
+    }
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let sr_cycle_count = utils::read(stream, little_endian, &mut pos);
-		let sr_interval = utils::read(stream ,little_endian, &mut pos);
-		let sr_sync_type = utils::read(stream ,little_endian, &mut pos);
-		let sr_flags = utils::read(stream ,little_endian, &mut pos);
-		let sr_reserved: [u8; 6] = utils::read(stream, little_endian, &mut pos);
+        let sr_sr_next = address.remove(0);
+        let sr_data = address.remove(0);
 
-		(pos, Self{
-			sr_sr_next,
-			sr_data,
-			sr_cycle_count,
-			sr_interval,
-			sr_sync_type,
-			sr_flags,
-		})
+        let sr_cycle_count = utils::read(stream, little_endian, &mut pos);
+        let sr_interval = utils::read(stream, little_endian, &mut pos);
+        let sr_sync_type = utils::read(stream, little_endian, &mut pos);
+        let sr_flags = utils::read(stream, little_endian, &mut pos);
+        let _sr_reserved: [u8; 6] = utils::read(stream, little_endian, &mut pos);
 
-	}
+        (
+            pos,
+            Self {
+                sr_sr_next,
+                sr_data,
+                sr_cycle_count,
+                sr_interval,
+                sr_sync_type,
+                sr_flags,
+            },
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -1853,182 +1870,185 @@ struct SDBLOCK {}
 
 #[derive(Debug, Clone)]
 struct DLBLOCK {
-	dl_dl_next: u64, 
-	dl_data: Vec<u64>, 
-	dl_flags: u8, 
-	dl_count: u32, 
-	dl_equal_length: u64, 
-	dl_offset: Vec<u64>, 
+    dl_dl_next: u64,
+    dl_data: Vec<u64>,
+    dl_flags: u8,
+    dl_count: u32,
+    dl_equal_length: u64,
+    dl_offset: Vec<u64>,
 }
 impl Block for DLBLOCK {
     fn new() -> Self {
         Self {
-			dl_dl_next: 0_u64, 
-			dl_data: Vec::new(), 
-			dl_flags: 0_u8, 
-			dl_count: 0_u32, 
-			dl_equal_length: 0_u64, 
-			dl_offset: Vec::new(), 
-		}
+            dl_dl_next: 0_u64,
+            dl_data: Vec::new(),
+            dl_flags: 0_u8,
+            dl_count: 0_u32,
+            dl_equal_length: 0_u64,
+            dl_offset: Vec::new(),
+        }
     }
     fn default() -> Self {
         Self {
-			dl_dl_next: 0_u64, 
-			dl_data: Vec::new(), 
-			dl_flags: 0_u8, 
-			dl_count: 0_u32, 
-			dl_equal_length: 0_u64, 
-			dl_offset: Vec::new(), 
-		}
+            dl_dl_next: 0_u64,
+            dl_data: Vec::new(),
+            dl_flags: 0_u8,
+            dl_count: 0_u32,
+            dl_equal_length: 0_u64,
+            dl_offset: Vec::new(),
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let dl_flags = utils::read(stream, little_endian, &mut pos);
+        let dl_count = utils::read(stream, little_endian, &mut pos);
+        let dl_equal_length = utils::read(stream, little_endian, &mut pos);
+        let mut dl_offset = Vec::new();
+        for _i in 0..dl_count {
+            dl_offset.push(utils::read(stream, little_endian, &mut pos));
+        }
 
-		let dl_flags = utils::read(stream, little_endian, &mut pos);
-		let dl_count = utils::read(stream, little_endian, &mut pos);
-		let dl_equal_length = utils::read(stream, little_endian, &mut pos);
-		let mut dl_offset = Vec::new();
-		for i in 0..dl_count {
-			dl_offset.push(utils::read(stream, little_endian, &mut pos));
-		} 
+        let dl_dl_next = address.remove(0);
+        let mut dl_data = Vec::new();
+        for _i in 0..dl_count {
+            dl_data.push(address.remove(0));
+        }
 
-		let dl_dl_next = address.remove(0);
-		let mut dl_data = Vec::new();
-		for i in 0..dl_count {
-			dl_data.push(address.remove(0));
-		}
-
-        (pos, Self {
-			dl_dl_next,
-			dl_data,
-			dl_flags,
-			dl_count,
-			dl_equal_length,
-			dl_offset,
-		})
+        (
+            pos,
+            Self {
+                dl_dl_next,
+                dl_data,
+                dl_flags,
+                dl_count,
+                dl_equal_length,
+                dl_offset,
+            },
+        )
     }
 }
 
 #[derive(Debug, Clone)]
 struct DZBlock {
-	dz_org_block_type: [u8; 2],
-	dz_zip_type: ZipType, 
-	dz_reserved: u8, 
-	dz_zip_parameter: u32, 
-	dz_org_data_length: u64, 
-	dz_data_length: u64, 
-	dz_data: Vec<u8>,
-
+    dz_org_block_type: [u8; 2],
+    dz_zip_type: ZipType,
+    dz_reserved: u8,
+    dz_zip_parameter: u32,
+    dz_org_data_length: u64,
+    dz_data_length: u64,
+    dz_data: Vec<u8>,
 }
 impl Block for DZBlock {
     fn new() -> Self {
         Self {
-			dz_org_block_type: [0_u8; 2],
-			dz_zip_type: ZipType::Deflate, 
-			dz_reserved: 0_u8, 
-			dz_zip_parameter: 0_u32, 
-			dz_org_data_length: 0_u64, 
-			dz_data_length: 0_u64, 
-			dz_data: Vec::new(),
-		}
+            dz_org_block_type: [0_u8; 2],
+            dz_zip_type: ZipType::Deflate,
+            dz_reserved: 0_u8,
+            dz_zip_parameter: 0_u32,
+            dz_org_data_length: 0_u64,
+            dz_data_length: 0_u64,
+            dz_data: Vec::new(),
+        }
     }
     fn default() -> Self {
         Self {
-			dz_org_block_type: [0_u8; 2],
-			dz_zip_type: ZipType::Deflate, 
-			dz_reserved: 0_u8, 
-			dz_zip_parameter: 0_u32, 
-			dz_org_data_length: 0_u64, 
-			dz_data_length: 0_u64, 
-			dz_data: Vec::new(),
-		}
+            dz_org_block_type: [0_u8; 2],
+            dz_zip_type: ZipType::Deflate,
+            dz_reserved: 0_u8,
+            dz_zip_parameter: 0_u32,
+            dz_org_data_length: 0_u64,
+            dz_data_length: 0_u64,
+            dz_data: Vec::new(),
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (mut pos, _header) = BlockHeader::read(stream, position, little_endian);
 
-		let (mut pos, header) = BlockHeader::read(stream, position, little_endian);
-		
+        let dz_org_block_type = utils::read(stream, little_endian, &mut pos);
+        let dz_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
+        let dz_reserved = utils::read(stream, little_endian, &mut pos);
+        let dz_zip_parameter = utils::read(stream, little_endian, &mut pos);
+        let dz_org_data_length = utils::read(stream, little_endian, &mut pos);
+        let dz_data_length = utils::read(stream, little_endian, &mut pos);
+        let dz_data = stream[pos..pos + dz_data_length as usize].to_vec();
 
-		let dz_org_block_type = utils::read(stream, little_endian, &mut pos);
-		let dz_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
-		let dz_reserved = utils::read(stream, little_endian, &mut pos);
-		let dz_zip_parameter = utils::read(stream, little_endian, &mut pos);
-		let dz_org_data_length = utils::read(stream, little_endian, &mut pos);
-		let dz_data_length = utils::read(stream, little_endian, &mut pos);
-		let dz_data = stream[pos..pos+dz_data_length as usize].to_vec();
+        pos += dz_data.len();
 
-		pos += dz_data.len();
-
-        (pos, Self {
-			dz_org_block_type,
-			dz_zip_type, 
-			dz_reserved, 
-			dz_zip_parameter, 
-			dz_org_data_length, 
-			dz_data_length, 
-			dz_data,
-		})
+        (
+            pos,
+            Self {
+                dz_org_block_type,
+                dz_zip_type,
+                dz_reserved,
+                dz_zip_parameter,
+                dz_org_data_length,
+                dz_data_length,
+                dz_data,
+            },
+        )
     }
 }
 
 #[derive(Debug, Clone)]
-enum ZipType{
-	Deflate, 
-	TransposeDeflate,
+enum ZipType {
+    Deflate,
+    TransposeDeflate,
 }
 
-impl ZipType{
-	fn new(zip: u8) -> Self {
-match zip {
-	0 => Self::Deflate, 
-	1 => Self::TransposeDeflate,
-	_ => panic!("Error zip type")
+impl ZipType {
+    fn new(zip: u8) -> Self {
+        match zip {
+            0 => Self::Deflate,
+            1 => Self::TransposeDeflate,
+            _ => panic!("Error zip type"),
+        }
+    }
 }
-	}
-}
-
 
 #[derive(Debug, Clone)]
 struct HLBLOCK {
-	hl_dl_first: u64,
-	hl_flags: u16, 
-	hl_zip_type: ZipType, 
-	//hl_reserved: [u8; 5],
+    hl_dl_first: u64,
+    hl_flags: u16,
+    hl_zip_type: ZipType,
+    //hl_reserved: [u8; 5],
 }
 impl Block for HLBLOCK {
     fn new() -> Self {
         Self {
-			hl_dl_first: 0_u64,
-			hl_flags: 0_u16, 
-			hl_zip_type: ZipType::Deflate, 
-			//hl_reserved: [0_u8; 5]
-		}
+            hl_dl_first: 0_u64,
+            hl_flags: 0_u16,
+            hl_zip_type: ZipType::Deflate,
+            //hl_reserved: [0_u8; 5]
+        }
     }
     fn default() -> Self {
         Self {
-			hl_dl_first: 0_u64,
-			hl_flags: 0_u16, 
-			hl_zip_type: ZipType::Deflate, 
-			//hl_reserved: [0_u8; 5]
-		}
+            hl_dl_first: 0_u64,
+            hl_flags: 0_u16,
+            hl_zip_type: ZipType::Deflate,
+            //hl_reserved: [0_u8; 5]
+        }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
-		let (pos, header) = BlockHeader::read(stream, position, little_endian);
-		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+        let hl_dl_first = address.remove(0);
+        let hl_flags = utils::read(stream, little_endian, &mut pos);
+        let hl_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
+        let _hl_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
 
-		let hl_dl_first = address.remove(0);
-		let hl_flags = utils::read(stream, little_endian, &mut pos);
-		let hl_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
-		let hl_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
-
-        (pos, Self {
-			hl_dl_first,
-			hl_flags, 
-			hl_zip_type, 
-			//hl_reserved,
-		})
+        (
+            pos,
+            Self {
+                hl_dl_first,
+                hl_flags,
+                hl_zip_type,
+                //hl_reserved,
+            },
+        )
     }
 }
 
@@ -2113,6 +2133,25 @@ impl DataType {
             12 => Self::CANopenData,
             13 => Self::CANopenTime,
             _ => panic!("Error: Unknown data type"),
+        }
+    }
+    fn len(self) -> usize {
+        match self {
+            Self::UnsignedByteLE => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::UnsignedByteBE => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::SignedLE => mem::size_of::<i8>() / mem::size_of::<u8>(),
+            Self::SignedBE => mem::size_of::<i8>() / mem::size_of::<u8>(),
+            Self::FloatLE => mem::size_of::<f64>() / mem::size_of::<u8>(),
+            Self::FloatBE => mem::size_of::<f64>() / mem::size_of::<u8>(),
+            Self::StringLatin => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::StringUTF8 => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::StringUTF16LE => mem::size_of::<u16>() / mem::size_of::<u8>(),
+            Self::StringUTF16BE => mem::size_of::<u16>() / mem::size_of::<u8>(),
+            Self::ByteArray => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::MIMESample => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::CANopenData => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            Self::CANopenTime => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            // _ => panic!("")
         }
     }
 }

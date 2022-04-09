@@ -1,7 +1,42 @@
-use crate::{
-    mdf3::{DataType, DataTypeRead},
-    utils,
-};
+use std::mem;
+
+use crate::utils;
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum DataType {
+    UnsignedInt,
+    SignedInt,
+    Float32,
+    Float64,
+    FFloat,
+    GFloat,
+    DFloat,
+    StringNullTerm,
+    ByteArray,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct DataTypeRead {
+    pub(crate) data_type: DataType,
+    pub(crate) little_endian: bool,
+}
+
+impl DataTypeRead {
+    pub fn len(self) -> usize {
+        match self.data_type {
+            DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),
+            DataType::SignedInt => mem::size_of::<i8>() / mem::size_of::<u8>(),
+            DataType::Float32 => mem::size_of::<f32>() / mem::size_of::<u8>(),
+            DataType::Float64 => mem::size_of::<f64>() / mem::size_of::<u8>(),
+            DataType::FFloat => 0,
+            DataType::GFloat => 0,
+            DataType::DFloat => 0,
+            DataType::StringNullTerm => 0,
+            DataType::ByteArray => 0,
+            // _ => panic!("")
+        }
+    }
+}
 
 pub fn print_record(value: Record) {
     match value {

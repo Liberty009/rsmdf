@@ -1,9 +1,9 @@
 use crate::mdf::{self, MdfChannel};
-use crate::record::Record;
+use crate::record::{DataType, DataTypeRead, Record};
 use crate::{signal, utils};
+use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
-use std::{convert::TryInto, mem};
 
 // Define constants that are used
 const TIME_CHANNEL_TYPE: u16 = 1;
@@ -802,42 +802,6 @@ impl CGBLOCK {
         }
 
         ch
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) enum DataType {
-    UnsignedInt,
-    SignedInt,
-    Float32,
-    Float64,
-    FFloat,
-    GFloat,
-    DFloat,
-    StringNullTerm,
-    ByteArray,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct DataTypeRead {
-    pub(crate) data_type: DataType,
-    pub(crate) little_endian: bool,
-}
-
-impl DataTypeRead {
-    fn len(self) -> usize {
-        match self.data_type {
-            DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),
-            DataType::SignedInt => mem::size_of::<i8>() / mem::size_of::<u8>(),
-            DataType::Float32 => mem::size_of::<f32>() / mem::size_of::<u8>(),
-            DataType::Float64 => mem::size_of::<f64>() / mem::size_of::<u8>(),
-            DataType::FFloat => 0,
-            DataType::GFloat => 0,
-            DataType::DFloat => 0,
-            DataType::StringNullTerm => 0,
-            DataType::ByteArray => 0,
-            // _ => panic!("")
-        }
     }
 }
 
