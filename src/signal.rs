@@ -1,26 +1,26 @@
 #[derive(Debug, Clone)]
-pub(crate) struct Signal {
-    pub(crate) samples: Vec<f64>,
-    pub(crate) timestamps: Vec<f64>,
-    pub(crate) unit: String,
-    pub(crate) name: String,
-    pub(crate) comment: String,
-    pub(crate) raw: bool,
+pub struct Signal {
+    pub samples: Vec<f64>,
+    pub timestamps: Vec<f64>,
+    pub unit: String,
+    pub name: String,
+    pub comment: String,
+    pub raw: bool,
 }
 
 impl Signal {
     #[must_use]
-    pub(crate) fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.samples.len()
     }
 
     #[must_use]
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.samples.is_empty()
     }
 
     #[must_use]
-    pub(crate) fn new(
+    pub fn new(
         timestamps: Vec<f64>,
         samples: Vec<f64>,
         unit: String,
@@ -38,7 +38,7 @@ impl Signal {
         }
     }
     #[must_use]
-    pub(crate) fn cut(&self, start: f64, end: f64, include_ends: bool) -> Self {
+    pub fn cut(&self, start: f64, end: f64, include_ends: bool) -> Self {
         let mut adjusted = self.clone();
         if adjusted.is_empty() {
             return adjusted;
@@ -83,7 +83,7 @@ impl Signal {
     }
 
     #[must_use]
-    pub(crate) fn extend(&self, other: Self) -> Self {
+    pub fn extend(&self, other: Self) -> Self {
         let last_stamp = if !self.is_empty() {
             *self.timestamps.last().unwrap()
         } else {
@@ -124,7 +124,7 @@ impl Signal {
     }
 
     #[must_use]
-    pub(crate) fn interp(
+    pub fn interp(
         &self,
         new_timestamps: Vec<f64>,
         interpolation_mode: Interpolation,
@@ -142,24 +142,24 @@ impl Signal {
         signal
     }
 
-    pub(crate) fn as_type() {}
+    pub fn as_type() {}
 
-    pub(crate) fn physical() {}
+    pub fn physical() {}
 
-    pub(crate) fn validate() {}
+    pub fn validate() {}
 
     #[must_use]
-    pub(crate) fn copy(&self) -> Self {
+    pub fn copy(&self) -> Self {
         self.clone()
     }
 
     #[must_use]
-    pub(crate) fn max_time(&self) -> f64 {
+    pub fn max_time(&self) -> f64 {
         *self.timestamps.last().unwrap()
     }
 }
 
-pub(crate) enum Interpolation {
+pub enum Interpolation {
     RepeatPreviousSample,
     LinearInterpolation,
 }

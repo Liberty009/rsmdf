@@ -3,7 +3,7 @@ use std::mem;
 use crate::utils;
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum DataType {
+pub enum DataType {
     UnsignedInt,
     SignedInt,
     Float32,
@@ -16,9 +16,9 @@ pub(crate) enum DataType {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct DataTypeRead {
-    pub(crate) data_type: DataType,
-    pub(crate) little_endian: bool,
+pub struct DataTypeRead {
+    pub data_type: DataType,
+    pub little_endian: bool,
 }
 
 impl DataTypeRead {
@@ -38,7 +38,7 @@ impl DataTypeRead {
     }
 }
 
-pub fn print_record(value: Record) {
+pub fn _print_record(value: Record) {
     match value {
         Record::Uint(number) => print!("{}", number),
         Record::Int(number) => print!("{}", number),

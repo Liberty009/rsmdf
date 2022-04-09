@@ -1,7 +1,7 @@
 use std::mem;
 use xml::reader::{EventReader, XmlEvent};
 
-pub(crate) fn extract_name(text: &[u8]) -> String {
+pub fn extract_name(text: &[u8]) -> String {
     let parser = EventReader::new(text);
 
     let mut display_name = "".to_string();
@@ -37,7 +37,7 @@ pub(crate) fn extract_name(text: &[u8]) -> String {
     display_name
 }
 
-pub(crate) trait FromBytes {
+pub trait FromBytes {
     fn from_be_bytes(a: &[u8]) -> Self;
     fn from_le_bytes(a: &[u8]) -> Self;
 }
@@ -146,13 +146,13 @@ impl FromBytes for f32 {
     }
 }
 
-pub(crate) fn read_be<T: FromBytes>(input: &[u8]) -> T {
+pub fn read_be<T: FromBytes>(input: &[u8]) -> T {
     T::from_be_bytes(input)
 }
-pub(crate) fn read_le<T: FromBytes>(input: &[u8]) -> T {
+pub fn read_le<T: FromBytes>(input: &[u8]) -> T {
     T::from_le_bytes(input)
 }
-pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usize) -> T {
+pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usize) -> T {
     let old = *position;
     *position += mem::size_of::<T>() / mem::size_of::<u8>();
     if little_endian {
@@ -162,7 +162,7 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
     }
 }
 
-// pub(crate) fn read<T>(stream: &[u8], _little_endian: bool, position: &mut usize) -> [T]
+// pub fn read<T>(stream: &[u8], _little_endian: bool, position: &mut usize) -> [T]
 // where T: Copy + FromByteSlice
 // {
 
@@ -182,17 +182,17 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
 // 	// }
 // }
 
-// pub(crate) fn read_u8(stream: &[u8], _little_endian: bool, position: &mut usize) -> u8 {
+// pub fn read_u8(stream: &[u8], _little_endian: bool, position: &mut usize) -> u8 {
 //     *position += 1;
 //     stream[0];
 // }
 
-// pub(crate) fn read_i8(stream: &[u8], _little_endian: bool, position: &mut usize) -> i8 {
+// pub fn read_i8(stream: &[u8], _little_endian: bool, position: &mut usize) -> i8 {
 //     *position += 1;
 //     unsafe { std::mem::transmute::<u8, i8>(stream[0]) };
 // }
 
-// pub(crate) fn read_u16(stream: &[u8], little_endian: bool, position: &mut usize) -> u16 {
+// pub fn read_u16(stream: &[u8], little_endian: bool, position: &mut usize) -> u16 {
 //     *position += mem::size_of::<u16>() / mem::size_of::<u8>();
 //     if little_endian {
 //         LittleEndian::read_u16(stream);
@@ -201,7 +201,7 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
 //     }
 // }
 
-// pub(crate) fn read_i16(stream: &[u8], little_endian: bool, position: &mut usize) -> i16 {
+// pub fn read_i16(stream: &[u8], little_endian: bool, position: &mut usize) -> i16 {
 //     *position += mem::size_of::<i16>() / mem::size_of::<u8>();
 //     if little_endian {
 //         LittleEndian::read_i16(stream);
@@ -210,7 +210,7 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
 //     }
 // }
 
-// pub(crate) fn read_u32(stream: &[u8], little_endian: bool, position: &mut usize) -> u32 {
+// pub fn read_u32(stream: &[u8], little_endian: bool, position: &mut usize) -> u32 {
 //     *position += mem::size_of::<u32>() / mem::size_of::<u8>();
 
 //     if little_endian {
@@ -220,7 +220,7 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
 //     }
 // }
 
-// pub(crate) fn read_u64(stream: &[u8], little_endian: bool, position: &mut usize) -> u64 {
+// pub fn read_u64(stream: &[u8], little_endian: bool, position: &mut usize) -> u64 {
 //     *position += mem::size_of::<u64>() / mem::size_of::<u8>();
 
 //     if little_endian {
@@ -230,7 +230,7 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
 //     }
 // }
 
-// pub(crate) fn read_f64(stream: &[u8], little_endian: bool, position: &mut usize) -> f64 {
+// pub fn read_f64(stream: &[u8], little_endian: bool, position: &mut usize) -> f64 {
 //     *position += mem::size_of::<f64>() / mem::size_of::<u8>();
 //     if little_endian {
 //         LittleEndian::read_f64(stream);
@@ -239,6 +239,6 @@ pub(crate) fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &m
 //     }
 // }
 
-pub(crate) fn eq(array1: &[u8], other: &[u8]) -> bool {
+pub fn eq(array1: &[u8], other: &[u8]) -> bool {
     array1.iter().zip(other.iter()).all(|(a, b)| a == b)
 }

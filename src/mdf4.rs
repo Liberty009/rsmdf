@@ -76,7 +76,7 @@ trait Block {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct MDF4 {
+pub struct MDF4 {
     #[allow(dead_code)]
     id: IDBLOCK,
     #[allow(dead_code)]

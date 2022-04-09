@@ -135,7 +135,7 @@ impl MDFFile for MDFType {
     // ) -> Vec<Signal>;
 }
 
-pub(crate) struct MDF {
+pub struct MDF {
     pub filepath: String,
     file: MDFType,
     pub channels: Vec<MdfChannel>,
@@ -258,7 +258,7 @@ impl MDFFile for MDF {
     // }
 }
 
-pub(crate) trait MDFFile {
+pub trait MDFFile {
     fn channels(&self) -> Vec<MdfChannel>;
     fn find_time_channel(
         &self,
@@ -299,17 +299,17 @@ pub(crate) trait MDFFile {
     // ) -> Vec<Signal>;
 }
 
-pub(crate) struct RasterType {}
+pub struct RasterType {}
 
-pub(crate) struct ChannelsType {}
+pub struct ChannelsType {}
 
-pub(crate) struct TimeChannel {
+pub struct TimeChannel {
     pub time: Vec<f64>,
     pub data: Vec<f64>,
 }
 
 impl TimeChannel {
-    pub(crate) fn new(times: Vec<Record>, datas: Vec<Record>) -> Self {
+    pub fn new(times: Vec<Record>, datas: Vec<Record>) -> Self {
         let mut t = Vec::with_capacity(times.len());
         let mut d = Vec::with_capacity(datas.len());
 
@@ -324,13 +324,13 @@ impl TimeChannel {
         Self { time: t, data: d }
     }
 
-    pub(crate) fn max_time(&self) -> f64 {
+    pub fn max_time(&self) -> f64 {
         return *self.time.last().expect("Error reading time");
     }
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct MdfChannel {
+pub struct MdfChannel {
     pub name: String,
     pub data_group: u64,
     pub channel: u64,

@@ -27,7 +27,7 @@ const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
 const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 
 #[derive(Debug, Clone)]
-pub(crate) struct MDF3 {
+pub struct MDF3 {
     #[allow(dead_code)]
     pub id: IDBLOCK,
     #[allow(dead_code)]
@@ -301,20 +301,20 @@ impl mdf::MDFFile for MDF3 {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct IDBLOCK {
-    pub(crate) file_id: [u8; 8],
-    pub(crate) format_id: [u8; 8],
-    pub(crate) program_id: [u8; 8],
-    pub(crate) default_byte_order: u16,
-    pub(crate) default_float_format: u16,
-    pub(crate) version_number: u16,
-    pub(crate) code_page_number: u16,
-    pub(crate) reserved1: [u8; 2],
-    pub(crate) reserved2: [u8; 30],
+pub struct IDBLOCK {
+    pub file_id: [u8; 8],
+    pub format_id: [u8; 8],
+    pub program_id: [u8; 8],
+    pub default_byte_order: u16,
+    pub default_float_format: u16,
+    pub version_number: u16,
+    pub code_page_number: u16,
+    pub reserved1: [u8; 2],
+    pub reserved2: [u8; 30],
 }
 
 impl IDBLOCK {
-    pub(crate) fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
+    pub fn read(stream: &[u8]) -> (IDBLOCK, usize, bool) {
         let mut position = 0;
         let file_id: [u8; 8] = stream[position..position + 8].try_into().expect("msg");
 
@@ -367,28 +367,28 @@ impl IDBLOCK {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct HDBLOCK {
-    pub(crate) position: usize,
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) data_group_block: u32,
-    pub(crate) file_comment: u32,
-    pub(crate) program_block: u32,
-    pub(crate) data_group_number: u16,
-    pub(crate) date: [u8; 10],
-    pub(crate) time: [u8; 8],
-    pub(crate) author: [u8; 32],
-    pub(crate) department: [u8; 32],
-    pub(crate) project: [u8; 32],
-    pub(crate) subject: [u8; 32],
-    pub(crate) timestamp: u64,
-    pub(crate) utc_time_offset: i16,
-    pub(crate) time_quality: u16,
-    pub(crate) timer_id: [u8; 32],
+pub struct HDBLOCK {
+    pub position: usize,
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub data_group_block: u32,
+    pub file_comment: u32,
+    pub program_block: u32,
+    pub data_group_number: u16,
+    pub date: [u8; 10],
+    pub time: [u8; 8],
+    pub author: [u8; 32],
+    pub department: [u8; 32],
+    pub project: [u8; 32],
+    pub subject: [u8; 32],
+    pub timestamp: u64,
+    pub utc_time_offset: i16,
+    pub time_quality: u16,
+    pub timer_id: [u8; 32],
 }
 
 impl HDBLOCK {
-    pub(crate) fn read(stream: &[u8], position: usize, little_endian: bool) -> (HDBLOCK, usize) {
+    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (HDBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("");
 
@@ -446,14 +446,14 @@ impl HDBLOCK {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct TXBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) text: Vec<u8>,
+pub struct TXBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub text: Vec<u8>,
 }
 
 impl TXBLOCK {
-    pub(crate) fn read(stream: &[u8], position: usize, little_endian: bool) -> (TXBLOCK, usize) {
+    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (TXBLOCK, usize) {
         let mut pos = position;
 
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
@@ -489,7 +489,7 @@ impl TXBLOCK {
         )
     }
 
-    pub(crate) fn name(self) -> String {
+    pub fn name(self) -> String {
         //let mut name = "".to_string();
 
         //let (tx, _pos) = Self::read(stream, little_endian);
@@ -499,14 +499,14 @@ impl TXBLOCK {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct PRBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) program_data: Vec<u8>,
+pub struct PRBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub program_data: Vec<u8>,
 }
 
 impl PRBLOCK {
-    pub(crate) fn read(stream: &[u8], position: usize, little_endian: bool) -> (PRBLOCK, usize) {
+    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (PRBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
         if !utils::eq(&block_type, &[b'P', b'R']) {
@@ -544,16 +544,16 @@ impl PRBLOCK {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct TRBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) trigger_comment: u32,
-    pub(crate) trigger_events_number: u16,
-    pub(crate) events: Vec<Event>,
+pub struct TRBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub trigger_comment: u32,
+    pub trigger_events_number: u16,
+    pub events: Vec<Event>,
 }
 
 impl TRBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool, position: usize) -> (TRBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (TRBLOCK, usize) {
         let mut pos = position;
 
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
@@ -602,10 +602,10 @@ impl TRBLOCK {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct Event {
-    pub(crate) trigger_time: f64,
-    pub(crate) pre_trigger_time: f64,
-    pub(crate) post_trigger_time: f64,
+pub struct Event {
+    pub trigger_time: f64,
+    pub pre_trigger_time: f64,
+    pub post_trigger_time: f64,
 }
 
 impl Event {
@@ -626,17 +626,17 @@ impl Event {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct SRBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) next: u32,
-    pub(crate) data_block: u32,
-    pub(crate) samples_reduced_number: u32,
-    pub(crate) time_interval_length: f64,
+pub struct SRBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub next: u32,
+    pub data_block: u32,
+    pub samples_reduced_number: u32,
+    pub time_interval_length: f64,
 }
 
 impl SRBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (SRBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (SRBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream.try_into().expect("msg");
         position += block_type.len();
@@ -661,21 +661,21 @@ impl SRBLOCK {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct DGBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) next: u32,
-    pub(crate) first: u32,
-    pub(crate) trigger_block: u32,
-    pub(crate) data_block: u32,
-    pub(crate) group_number: u16,
-    pub(crate) id_number: u16,
-    pub(crate) reserved: u32,
+pub struct DGBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub next: u32,
+    pub first: u32,
+    pub trigger_block: u32,
+    pub data_block: u32,
+    pub group_number: u16,
+    pub id_number: u16,
+    pub reserved: u32,
 }
 
 impl DGBLOCK {
     // Read the data stream in to a DGBLOCK type, position reached
-    pub(crate) fn read(stream: &[u8], little_endian: bool, position: &mut usize) -> Self {
+    pub fn read(stream: &[u8], little_endian: bool, position: &mut usize) -> Self {
         let pos = position;
 
         // Read block type to confirm
@@ -711,7 +711,7 @@ impl DGBLOCK {
         }
     }
 
-    pub(crate) fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {
+    pub fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {
         let mut all = Vec::new();
         let mut next_dg = position;
 
@@ -724,7 +724,7 @@ impl DGBLOCK {
         all
     }
 
-    pub(crate) fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
+    pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
         let mut channel_grps = Vec::new();
         let mut next = self.first as usize;
         while next != 0 {
@@ -737,21 +737,21 @@ impl DGBLOCK {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct CGBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) next: u32,
-    pub(crate) first: u32,
-    pub(crate) comment: u32,
-    pub(crate) record_id: u16,
-    pub(crate) channel_number: u16,
-    pub(crate) record_size: u16,
-    pub(crate) record_number: u32,
-    pub(crate) first_sample_reduction_block: u32,
+pub struct CGBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub next: u32,
+    pub first: u32,
+    pub comment: u32,
+    pub record_id: u16,
+    pub channel_number: u16,
+    pub record_size: u16,
+    pub record_number: u32,
+    pub first_sample_reduction_block: u32,
 }
 
 impl CGBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool, position: usize) -> (CGBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (CGBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
 
@@ -790,7 +790,7 @@ impl CGBLOCK {
             pos,
         )
     }
-    pub(crate) fn channels(self, stream: &[u8], little_endian: bool) -> Vec<CNBLOCK> {
+    pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<CNBLOCK> {
         //let (group, _) = Self::read(stream, little_endian, position);
         let mut ch = Vec::new();
         let mut next_cn = self.first as usize;
@@ -805,7 +805,7 @@ impl CGBLOCK {
     }
 }
 
-// pub(crate) struct RecordedData<T: utils::FromBytes> {
+// pub struct RecordedData<T: utils::FromBytes> {
 //     data: Vec<T>,
 // }
 
@@ -855,31 +855,31 @@ impl CGBLOCK {
 // }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct CNBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) next: u32,
-    pub(crate) conversion_formula: u32,
-    pub(crate) source_ext: u32,
-    pub(crate) dependency: u32,
-    pub(crate) comment: u32,
-    pub(crate) channel_type: u16,
-    pub(crate) short_name: [u8; 32],
-    pub(crate) desc: [u8; 128],
-    pub(crate) start_offset: u16,
-    pub(crate) bit_number: u16,
-    pub(crate) data_type: DataTypeRead,
-    pub(crate) value_range_valid: u16,
-    pub(crate) signal_min: f64,
-    pub(crate) signal_max: f64,
-    pub(crate) sample_rate: f64,
-    pub(crate) long_name: u32,
-    pub(crate) display_name: u32,
-    pub(crate) addition_byte_offset: u16,
+pub struct CNBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub next: u32,
+    pub conversion_formula: u32,
+    pub source_ext: u32,
+    pub dependency: u32,
+    pub comment: u32,
+    pub channel_type: u16,
+    pub short_name: [u8; 32],
+    pub desc: [u8; 128],
+    pub start_offset: u16,
+    pub bit_number: u16,
+    pub data_type: DataTypeRead,
+    pub value_range_valid: u16,
+    pub signal_min: f64,
+    pub signal_max: f64,
+    pub sample_rate: f64,
+    pub long_name: u32,
+    pub display_name: u32,
+    pub addition_byte_offset: u16,
 }
 
 impl CNBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool, position: usize) -> (CNBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (CNBLOCK, usize) {
         let mut pos = position;
         let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
         pos += block_type.len();
@@ -1015,7 +1015,7 @@ impl CNBLOCK {
         )
     }
 
-    pub(crate) fn name(self, stream: &[u8], little_endian: bool) -> String {
+    pub fn name(self, stream: &[u8], little_endian: bool) -> String {
         let mut name = "".to_string();
 
         if self.channel_type == 1 {
@@ -1034,20 +1034,20 @@ impl CNBLOCK {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct CCBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) physical_range_valid: u16,
-    pub(crate) physical_min: f64,
-    pub(crate) physical_max: f64,
-    pub(crate) unit: [u8; 20],
-    pub(crate) conversion_type: u16,
-    pub(crate) size_info: u16,
-    pub(crate) conversion_data: ConversionData,
+pub struct CCBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub physical_range_valid: u16,
+    pub physical_min: f64,
+    pub physical_max: f64,
+    pub unit: [u8; 20],
+    pub conversion_type: u16,
+    pub size_info: u16,
+    pub conversion_data: ConversionData,
 }
 
 impl CCBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (CCBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (CCBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
@@ -1088,14 +1088,14 @@ impl CCBLOCK {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum ConversionData {
+pub enum ConversionData {
     Parameters,
     Table,
     Text,
 }
 
 impl ConversionData {
-    pub(crate) fn read(
+    pub fn read(
         _data: &[u8],
         _little_endian: bool,
         datatype: u8,
@@ -1109,7 +1109,7 @@ impl ConversionData {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Parameters {
+pub enum Parameters {
     ConversionLinear,
     ConversionPoly,
     ConversionExponetial,
@@ -1118,19 +1118,19 @@ pub(crate) enum Parameters {
 }
 
 impl Parameters {
-    pub(crate) fn read(_data: &[u8], _little_endian: bool) -> (Parameters, usize) {
+    pub fn read(_data: &[u8], _little_endian: bool) -> (Parameters, usize) {
         (Parameters::ConversionLinear, 10)
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ConversionLinear {
-    pub(crate) p1: f64,
-    pub(crate) p2: f64,
+pub struct ConversionLinear {
+    pub p1: f64,
+    pub p2: f64,
 }
 
 impl ConversionLinear {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionLinear, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLinear, usize) {
         let mut position = 0;
         let p1 = utils::read(stream, little_endian, &mut position);
         let p2 = utils::read(stream, little_endian, &mut position);
@@ -1140,17 +1140,17 @@ impl ConversionLinear {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ConversionPoly {
-    pub(crate) p1: f64,
-    pub(crate) p2: f64,
-    pub(crate) p3: f64,
-    pub(crate) p4: f64,
-    pub(crate) p5: f64,
-    pub(crate) p6: f64,
+pub struct ConversionPoly {
+    pub p1: f64,
+    pub p2: f64,
+    pub p3: f64,
+    pub p4: f64,
+    pub p5: f64,
+    pub p6: f64,
 }
 
 impl ConversionPoly {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionPoly, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionPoly, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
         let p2: f64 = utils::read(stream, little_endian, &mut position);
@@ -1174,18 +1174,18 @@ impl ConversionPoly {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ConversionExponetial {
-    pub(crate) p1: f64,
-    pub(crate) p2: f64,
-    pub(crate) p3: f64,
-    pub(crate) p4: f64,
-    pub(crate) p5: f64,
-    pub(crate) p6: f64,
-    pub(crate) p7: f64,
+pub struct ConversionExponetial {
+    pub p1: f64,
+    pub p2: f64,
+    pub p3: f64,
+    pub p4: f64,
+    pub p5: f64,
+    pub p6: f64,
+    pub p7: f64,
 }
 
 impl ConversionExponetial {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionExponetial, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionExponetial, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
         let p2: f64 = utils::read(stream, little_endian, &mut position);
@@ -1211,18 +1211,18 @@ impl ConversionExponetial {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ConversionLog {
-    pub(crate) p1: f64,
-    pub(crate) p2: f64,
-    pub(crate) p3: f64,
-    pub(crate) p4: f64,
-    pub(crate) p5: f64,
-    pub(crate) p6: f64,
-    pub(crate) p7: f64,
+pub struct ConversionLog {
+    pub p1: f64,
+    pub p2: f64,
+    pub p3: f64,
+    pub p4: f64,
+    pub p5: f64,
+    pub p6: f64,
+    pub p7: f64,
 }
 
 impl ConversionLog {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionLog, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLog, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
         let p2: f64 = utils::read(stream, little_endian, &mut position);
@@ -1248,17 +1248,17 @@ impl ConversionLog {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ConversionRational {
-    pub(crate) p1: f64,
-    pub(crate) p2: f64,
-    pub(crate) p3: f64,
-    pub(crate) p4: f64,
-    pub(crate) p5: f64,
-    pub(crate) p6: f64,
+pub struct ConversionRational {
+    pub p1: f64,
+    pub p2: f64,
+    pub p3: f64,
+    pub p4: f64,
+    pub p5: f64,
+    pub p6: f64,
 }
 
 impl ConversionRational {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionRational, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionRational, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
         let p2: f64 = utils::read(stream, little_endian, &mut position);
@@ -1282,17 +1282,17 @@ impl ConversionRational {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Table {
+pub enum Table {
     ConversionTabular,
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct ConversionTabular {
-    pub(crate) value: Vec<TableEntry>,
+pub struct ConversionTabular {
+    pub value: Vec<TableEntry>,
 }
 
 impl ConversionTabular {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionTabular, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTabular, usize) {
         let mut position = 0;
         let mut value = Vec::new();
         for _i in 0..1 {
@@ -1306,13 +1306,13 @@ impl ConversionTabular {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct TableEntry {
-    pub(crate) internal: f64,
-    pub(crate) physical: f64,
+pub struct TableEntry {
+    pub internal: f64,
+    pub physical: f64,
 }
 
 impl TableEntry {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (TableEntry, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (TableEntry, usize) {
         let mut position = 0;
         let internal = utils::read(stream, little_endian, &mut position);
         let physical = utils::read(stream, little_endian, &mut position);
@@ -1322,18 +1322,18 @@ impl TableEntry {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum Text {
+pub enum Text {
     ConversionTextFormula,
     ConversionTextRangeTable,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct ConversionTextFormula {
-    pub(crate) formula: [u8; 256],
+pub struct ConversionTextFormula {
+    pub formula: [u8; 256],
 }
 
 impl ConversionTextFormula {
-    pub(crate) fn read(stream: &[u8], _little_endian: bool) -> (ConversionTextFormula, usize) {
+    pub fn read(stream: &[u8], _little_endian: bool) -> (ConversionTextFormula, usize) {
         let mut position = 0;
         let formula: [u8; 256] = stream.try_into().expect("msg");
         position += formula.len();
@@ -1343,12 +1343,12 @@ impl ConversionTextFormula {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct ConversionTextTable {
-    pub(crate) table: Vec<TextTableEntry>,
+pub struct ConversionTextTable {
+    pub table: Vec<TextTableEntry>,
 }
 
 impl ConversionTextTable {
-    pub(crate) fn read(
+    pub fn read(
         stream: &[u8],
         little_endian: bool,
         number: usize,
@@ -1366,13 +1366,13 @@ impl ConversionTextTable {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct TextTableEntry {
-    pub(crate) internal: f64,
-    pub(crate) text: [u8; 32],
+pub struct TextTableEntry {
+    pub internal: f64,
+    pub text: [u8; 32],
 }
 
 impl TextTableEntry {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (TextTableEntry, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (TextTableEntry, usize) {
         let mut position = 0;
         let internal = utils::read(stream, little_endian, &mut position);
         let text: [u8; 32] = stream.try_into().expect("msg");
@@ -1382,15 +1382,15 @@ impl TextTableEntry {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct ConversionTextRangeTable {
-    pub(crate) undef1: f64,
-    pub(crate) undef2: f64,
-    pub(crate) txblock: u32,
-    pub(crate) entry: Vec<TextRange>,
+pub struct ConversionTextRangeTable {
+    pub undef1: f64,
+    pub undef2: f64,
+    pub txblock: u32,
+    pub entry: Vec<TextRange>,
 }
 
 impl ConversionTextRangeTable {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (ConversionTextRangeTable, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTextRangeTable, usize) {
         let mut position = 0;
         let undef1 = utils::read(stream, little_endian, &mut position);
         let undef2 = utils::read(stream, little_endian, &mut position);
@@ -1410,14 +1410,14 @@ impl ConversionTextRangeTable {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct TextRange {
-    pub(crate) lower: f64,
-    pub(crate) upper: f64,
-    pub(crate) txblock: u32,
+pub struct TextRange {
+    pub lower: f64,
+    pub upper: f64,
+    pub txblock: u32,
 }
 
 impl TextRange {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (TextRange, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (TextRange, usize) {
         let mut position = 0;
         let lower = utils::read(stream, little_endian, &mut position);
         let upper = utils::read(stream, little_endian, &mut position);
@@ -1435,17 +1435,17 @@ impl TextRange {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct DateStruct {
-    pub(crate) ms: u16,
-    pub(crate) min: u8,
-    pub(crate) hour: u8,
-    pub(crate) day: u8,
-    pub(crate) month: u8,
-    pub(crate) year: u8,
+pub struct DateStruct {
+    pub ms: u16,
+    pub min: u8,
+    pub hour: u8,
+    pub day: u8,
+    pub month: u8,
+    pub year: u8,
 }
 
 impl DateStruct {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (DateStruct, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (DateStruct, usize) {
         let mut position = 0;
         let ms = utils::read(stream, little_endian, &mut position);
         let min = utils::read(stream, little_endian, &mut position);
@@ -1469,13 +1469,13 @@ impl DateStruct {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) struct TimeStruct {
-    pub(crate) ms: u32,
-    pub(crate) days: u8,
+pub struct TimeStruct {
+    pub ms: u32,
+    pub days: u8,
 }
 
 impl TimeStruct {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (TimeStruct, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (TimeStruct, usize) {
         let mut position = 0;
         let ms = utils::read(stream, little_endian, &mut position);
         let days = utils::read(stream, little_endian, &mut position);
@@ -1485,17 +1485,17 @@ impl TimeStruct {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct CDBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) dependency_type: u16,
-    pub(crate) signal_number: u16,
-    pub(crate) groups: Vec<Signals>,
-    pub(crate) dims: Vec<u16>,
+pub struct CDBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub dependency_type: u16,
+    pub signal_number: u16,
+    pub groups: Vec<Signals>,
+    pub dims: Vec<u16>,
 }
 
 impl CDBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (CDBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (CDBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
@@ -1537,14 +1537,14 @@ impl CDBLOCK {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Signals {
-    pub(crate) data_group: u32,
-    pub(crate) channel_group: u32,
-    pub(crate) channel: u32,
+pub struct Signals {
+    pub data_group: u32,
+    pub channel_group: u32,
+    pub channel: u32,
 }
 
 impl Signals {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
         let mut position = 0;
         let data_group = utils::read(stream, little_endian, &mut position);
         let channel_group = utils::read(stream, little_endian, &mut position);
@@ -1562,15 +1562,15 @@ impl Signals {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct CEBLOCK {
-    pub(crate) block_type: [u8; 2],
-    pub(crate) block_size: u16,
-    pub(crate) extension_type: u16,
-    pub(crate) additional: Vec<u8>,
+pub struct CEBLOCK {
+    pub block_type: [u8; 2],
+    pub block_size: u16,
+    pub extension_type: u16,
+    pub additional: Vec<u8>,
 }
 
 impl CEBLOCK {
-    pub(crate) fn read(stream: &[u8], little_endian: bool) -> (CEBLOCK, usize) {
+    pub fn read(stream: &[u8], little_endian: bool) -> (CEBLOCK, usize) {
         let mut position = 0;
         let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
         position += block_type.len();
