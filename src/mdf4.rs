@@ -100,30 +100,30 @@ impl mdf::MDFFile for MDF4 {
         let little_endian = true;
 
         let (position, id_block) = IDBLOCK::read(&self.file, 0, little_endian);
-        let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
+        let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
 
-        let mut next_dg = hd_block.data_group_block;
+        let mut next_dg = hd_block.hd_dg_first;
 
         while next_dg != 0 {
-            let dg_block = DGBLOCK::read(&self.file, &mut (next_dg as usize), little_endian);
-            next_dg = dg_block.next;
-            let mut next_cg = dg_block.first;
+            let (pos, dg_block) = DGBLOCK::read(&self.file, next_dg as usize, little_endian);
+            next_dg = dg_block.dg_dg_next;
+            let mut next_cg = dg_block.dg_cg_first;
 
             dg.push(dg_block);
 
             while next_cg != 0 {
-                let (cg_block, _position) =
+                let (_position, cg_block) =
                     CGBLOCK::read(&self.file, next_cg as usize, little_endian);
-                next_cg = cg_block.next;
-                let mut next_cn = cg_block.first;
+                next_cg = cg_block.cg_cg_next;
+                let mut next_cn = cg_block.cg_cn_first;
                 cg.push(cg_block);
 
-                println!("Channel Group: {}", cg_block.comment);
+                println!("Channel Group: {}", cg_block.cg_md_comment);
 
                 while next_cn != 0 {
-                    let (cn_block, _position) =
+                    let (_position, cn_block) =
                         CNBLOCK::read(&self.file, next_cn as usize, little_endian);
-                    next_cn = cn_block.next;
+                    next_cn = cn_block.cn_cn_next;
                     ch.push(cn_block);
 
                     let name = cn_block.name(&self.file, little_endian);
@@ -1081,25 +1081,25 @@ struct CGBLOCK {
     //reserved0: u64,     //- int : reserved bytes
     //block_len: u64,     //- int : block bytes size
     //links_nr: u64,      //- int : number of links
-    next_cg_addr: u64,  //- int : next channel group address
-    first_ch_addr: u64, //- int : address of first channel of this channel group
-    acq_name_addr: u64, //- int : address of TextBLock that contains the channel
+    cg_cg_next: u64,  //- int : next channel group address
+    cg_cn_first: u64, //- int : address of first channel of this channel group
+    cg_tx_acq_name: u64, //- int : address of TextBLock that contains the channel
     //group acquisition name
-    acq_source_addr: u64, //- int : address of SourceInformation that contains the
+    cg_si_acq_source: u64, //- int : address of SourceInformation that contains the
     //channel group source
-    first_sample_reduction_addr: u64, // - int : address of first SRBLOCK; this is
+    cg_sr_first: u64, // - int : address of first SRBLOCK; this is
     //considered 0 since sample reduction is not yet supported
-    comment_addr: u64, //- int : address of TXBLOCK/MDBLOCK that contains the
+    cg_md_comment: u64, //- int : address of TXBLOCK/MDBLOCK that contains the
     //channel group comment
-    record_id: u64,     //- int : record ID for the channel group
-    cycles_nr: u64,     //- int : number of cycles for this channel group
-    flags: u64,         //- int : channel group flags
-    path_separator: u8, //- int : ordinal for character used as path separator
+    cg_record_id: u64,     //- int : record ID for the channel group
+    cg_cycle_count: u64,     //- int : number of cycles for this channel group
+    cg_flags: u64,         //- int : channel group flags
+    cg_path_separator: u8, //- int : ordinal for character used as path separator
     //reserved1: u64,       //- int : reserved bytes
-    samples_byte_nr: u64, //- int : number of bytes used for channels samples in
+    cg_data_bytes: u64, //- int : number of bytes used for channels samples in
     //the record for this channel group; this does not contain the invalidation
     //bytes
-    invalidation_bytes_nr: u64, // - int : number of bytes used for invalidation
+    cg_inval_bytes: u64, // - int : number of bytes used for invalidation
                                 // bits by this channel group
 
                                 //Other attributes
@@ -1111,34 +1111,34 @@ struct CGBLOCK {
 impl Block for CGBLOCK {
     fn new() -> Self {
         CGBLOCK {
-            next_cg_addr: 0,
-            first_ch_addr: 0,
-            acq_name_addr: 0,
-            acq_source_addr: 0,
-            first_sample_reduction_addr: 0,
-            comment_addr: 0,
-            record_id: 0,
-            cycles_nr: 0,
-            flags: 0,
-            path_separator: 0,
-            samples_byte_nr: 0,
-            invalidation_bytes_nr: 0,
+            cg_cg_next: 0,
+            cg_cn_first: 0,
+            cg_tx_acq_name: 0,
+            cg_si_acq_source: 0,
+            cg_sr_first: 0,
+            cg_md_comment: 0,
+            cg_record_id: 0,
+            cg_cycle_count: 0,
+            cg_flags: 0,
+            cg_path_separator: 0,
+            cg_data_bytes: 0,
+            cg_inval_bytes: 0,
         }
     }
     fn default() -> Self {
         CGBLOCK {
-            next_cg_addr: 0,
-            first_ch_addr: 0,
-            acq_name_addr: 0,
-            acq_source_addr: 0,
-            first_sample_reduction_addr: 0,
-            comment_addr: 0,
-            record_id: 0,
-            cycles_nr: 0,
-            flags: 0,
-            path_separator: 0,
-            samples_byte_nr: 0,
-            invalidation_bytes_nr: 0,
+            cg_cg_next: 0,
+            cg_cn_first: 0,
+            cg_tx_acq_name: 0,
+            cg_si_acq_source: 0,
+            cg_sr_first: 0,
+            cg_md_comment: 0,
+            cg_record_id: 0,
+            cg_cycle_count: 0,
+            cg_flags: 0,
+            cg_path_separator: 0,
+            cg_data_bytes: 0,
+            cg_inval_bytes: 0,
         }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
@@ -1172,19 +1172,19 @@ impl Block for CGBLOCK {
                 // reserved0,
                 // block_len,
                 // links_nr,
-                next_cg_addr,
-                first_ch_addr,
-                acq_name_addr,
-                acq_source_addr,
-                first_sample_reduction_addr,
-                comment_addr,
-                record_id,
-                cycles_nr,
-                flags,
-                path_separator,
+                cg_cg_next: next_cg_addr,
+                cg_cn_first: first_ch_addr,
+                cg_tx_acq_name: acq_name_addr,
+                cg_si_acq_source: acq_source_addr,
+                cg_sr_first: first_sample_reduction_addr,
+                cg_md_comment: comment_addr,
+                cg_record_id: record_id,
+                cg_cycle_count: cycles_nr,
+                cg_flags: flags,
+                cg_path_separator: path_separator,
                 //reserved1,
-                samples_byte_nr,
-                invalidation_bytes_nr,
+                cg_data_bytes: samples_byte_nr,
+                cg_inval_bytes: invalidation_bytes_nr,
                 // acq_name,
                 // comment,
             },
@@ -1310,29 +1310,30 @@ struct CNBLOCK {
     //reserved0: u32,      //reserved bytes
     //block_len: u64,      //block bytes size
     //links_nr: u64,       //number of links
-    next_ch_addr: u64,   //next ATBLOCK address
-    component_addr: u64, //address of first channel in case of structure channel
+    cn_cn_next: u64,   //next ATBLOCK address
+    cn_composition: u64, //address of first channel in case of structure channel
     //   composition, or ChannelArrayBlock in case of arrays
     //   file name
-    name_addr: u64,       //address of TXBLOCK that contains the channel name
-    source_addr: u64,     //address of channel source block
-    conversion_addr: u64, //address of channel conversion block
-    data_block_addr: u64, //address of signal data block for VLSD channels
-    unit_addr: u64,       //address of TXBLOCK that contains the channel unit
-    comment_addr: u64,    //address of TXBLOCK/MDBLOCK that contains the
+    cn_tx_name: u64,       //address of TXBLOCK that contains the channel name
+    cn_si_source: u64,     //address of channel source block
+    cn_cc_conversion: u64, //address of channel conversion block
+    cn_data: u64, //address of signal data block for VLSD channels
+    cn_md_unit: u64,       //address of TXBLOCK that contains the channel unit
+    cn_md_comment: u64,    //address of TXBLOCK/MDBLOCK that contains the
     //   channel comment
-    attachment_addr: Vec<u64>, //address of N:th ATBLOCK referenced by the
+    cn_at_reference: Vec<u64>, //address of N:th ATBLOCK referenced by the
     //   current channel; if no ATBLOCK is referenced there will be no such key:value
     //   pair
-    default_X_dg_addr: u64, //address of DGBLOCK where the default X axis
-    //   channel for the current channel is found; this key:value pair will not
-    //   exist for channels that don't have a default X axis
-    default_X_cg_addr: u64, //address of CGBLOCK where the default X axis
-    //   channel for the current channel is found; this key:value pair will not
-    //   exist for channels that don't have a default X axis
-    default_X_ch_addr: u64, //address of default X axis
-    //   channel for the current channel; this key:value pair will not
-    //   exist for channels that don't have a default X axis
+	cn_default_x: Vec<u64>,
+    // default_X_dg_addr: u64, //address of DGBLOCK where the default X axis
+    // //   channel for the current channel is found; this key:value pair will not
+    // //   exist for channels that don't have a default X axis
+    // default_X_cg_addr: u64, //address of CGBLOCK where the default X axis
+    // //   channel for the current channel is found; this key:value pair will not
+    // //   exist for channels that don't have a default X axis
+    // default_X_ch_addr: u64, //address of default X axis
+    // //   channel for the current channel; this key:value pair will not
+    // //   exist for channels that don't have a default X axis
     channel_type: ChannelType, //integer code for the channel type
     sync_type: SyncType,       //integer code for the channel's sync type
     data_type: DataType,       //integer code for the channel's data type
@@ -1369,18 +1370,16 @@ struct CNBLOCK {
 impl Block for CNBLOCK {
     fn new() -> Self {
         CNBLOCK {
-            next_ch_addr: 0,
-            component_addr: 0,
-            name_addr: 0,
-            source_addr: 0,
-            conversion_addr: 0,
-            data_block_addr: 0,
-            unit_addr: 0,
-            comment_addr: 0,
-            attachment_addr: Vec::new(),
-            default_X_dg_addr: 0,
-            default_X_cg_addr: 0,
-            default_X_ch_addr: 0,
+            cn_cn_next: 0,
+            cn_composition: 0,
+            cn_tx_name: 0,
+            cn_si_source: 0,
+            cn_cc_conversion: 0,
+            cn_data: 0,
+            cn_md_unit: 0,
+            cn_md_comment: 0,
+            cn_at_reference: Vec::new(),
+            cn_default_x: Vec::new(),
             channel_type: ChannelType::FixedLengthChannel,
             sync_type: SyncType::Angle,
             data_type: DataType::ByteArray,
@@ -1400,18 +1399,16 @@ impl Block for CNBLOCK {
     }
     fn default() -> Self {
         CNBLOCK {
-            next_ch_addr: 0,
-            component_addr: 0,
-            name_addr: 0,
-            source_addr: 0,
-            conversion_addr: 0,
-            data_block_addr: 0,
-            unit_addr: 0,
-            comment_addr: 0,
-            attachment_addr: Vec::new(),
-            default_X_dg_addr: 0,
-            default_X_cg_addr: 0,
-            default_X_ch_addr: 0,
+            cn_cn_next: 0,
+            cn_composition: 0,
+            cn_tx_name: 0,
+            cn_si_source: 0,
+            cn_cc_conversion: 0,
+            cn_data: 0,
+            cn_md_unit: 0,
+            cn_md_comment: 0,
+            cn_at_reference: Vec::new(),
+            cn_default_x: Vec::new(),
             channel_type: ChannelType::FixedLengthChannel,
             sync_type: SyncType::Angle,
             data_type: DataType::ByteArray,
@@ -1457,40 +1454,38 @@ impl Block for CNBLOCK {
         let lower_ext_limit = utils::read(stream, little_endian, &mut pos);
         let upper_ext_limit = utils::read(stream, little_endian, &mut pos);
 
-        let next_ch_addr = addresses.remove(0);
-        let component_addr = addresses.remove(0);
-        let name_addr = addresses.remove(0);
-        let source_addr = addresses.remove(0);
-        let conversion_addr = addresses.remove(0);
-        let data_block_addr = addresses.remove(0);
-        let unit_addr = addresses.remove(0);
-        let comment_addr = addresses.remove(0);
+        let cn_cn_next = addresses.remove(0);
+        let cn_composition = addresses.remove(0);
+        let cn_tx_name = addresses.remove(0);
+        let cn_si_source = addresses.remove(0);
+        let cn_cc_conversion = addresses.remove(0);
+        let cn_data = addresses.remove(0);
+        let cn_md_unit = addresses.remove(0);
+        let cn_md_comment = addresses.remove(0);
 
-        let mut attachment_addr = Vec::with_capacity(attachment_nr as usize);
+        let mut cn_at_reference = Vec::with_capacity(attachment_nr as usize);
         for i in 0..attachment_nr {
-            attachment_addr.push(addresses.remove(0));
+            cn_at_reference.push(addresses.remove(0));
         }
 
-        let mut default_x = Vec::with_capacity(3);
+        let mut cn_default_x = Vec::with_capacity(3);
         for i in 0..3 {
-            default_x.push(addresses.remove(0));
+            cn_default_x.push(addresses.remove(0));
         }
 
         (
             1,
             CNBLOCK {
-                next_ch_addr,
-                component_addr,
-                name_addr,
-                source_addr,
-                conversion_addr,
-                data_block_addr,
-                unit_addr,
-                comment_addr,
-                attachment_addr,
-                default_X_dg_addr: default_x[0],
-                default_X_cg_addr: default_x[1],
-                default_X_ch_addr: default_x[2],
+                cn_cn_next,
+                cn_composition,
+                cn_tx_name,
+                cn_si_source,
+                cn_cc_conversion,
+                cn_data,
+                cn_md_unit,
+                cn_md_comment,
+                cn_at_reference,
+                cn_default_x,
                 channel_type,
                 sync_type,
                 data_type,
