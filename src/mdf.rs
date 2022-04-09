@@ -142,7 +142,7 @@ pub(crate) struct MDF {
 }
 
 impl MDF {
-    pub(crate) fn search_channels(&self, channel_name: &str) -> Result<MdfChannel, &'static str> {
+    pub fn search_channels(&self, channel_name: &str) -> Result<MdfChannel, &'static str> {
         let mut channels_match = Vec::with_capacity(self.channels.len());
 
         for channel in &self.channels {
@@ -159,7 +159,7 @@ impl MDF {
         }
     }
 
-    pub(crate) fn list_channels(&self) {
+    pub fn list_channels(&self) {
         for channel in &self.channels {
             println!(
                 "Channel: {}, DG: {}, CG: {}, CN: {}",
@@ -168,7 +168,7 @@ impl MDF {
         }
     }
 
-    pub(crate) fn read_channel(self, channel: MdfChannel) -> Signal {
+    pub fn read_channel(self, channel: MdfChannel) -> Signal {
         self.file.read(
             channel.data_group as usize,
             channel.channel_group as usize,
