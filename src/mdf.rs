@@ -19,7 +19,7 @@ enum MDFType {
 
 impl MDFType {
     fn check_version(filepath: &str) -> MDFVersion {
-        let file = File::open(filepath).expect("Could not read file");
+        let mut file = File::open(filepath).expect("Could not read file");
         let mut id_stream = Vec::with_capacity(64);
         let _ = file.read_exact(&mut id_stream);
 
@@ -28,19 +28,19 @@ impl MDFType {
 
         let id_file: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
         let id_vers: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
-        let id_prog: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
-        let id_reserved1: [u8; 4] = utils::read(&id_stream, little_endian, &mut pos);
-        let id_ver: u16 = utils::read(&id_stream, little_endian, &mut pos);
-        let id_reserved2: [u8; 34] = utils::read(&id_stream, little_endian, &mut pos);
+        let _id_prog: [u8; 8] = utils::read(&id_stream, little_endian, &mut pos);
+        let _id_reserved1: [u8; 4] = utils::read(&id_stream, little_endian, &mut pos);
+        let _id_ver: u16 = utils::read(&id_stream, little_endian, &mut pos);
+        let _id_reserved2: [u8; 34] = utils::read(&id_stream, little_endian, &mut pos);
 
         if !utils::eq(&id_file, &[b'M', b'D', b'F', b' ', b' ', b' ', b' ', b' ']) {
             panic!("Error: Unknown file type");
         }
 
         let s = String::from_utf8_lossy(&id_vers).into_owned();
-        let version = s.split('.');
+        let mut version = s.split('.');
         let major_version = version.next().unwrap().parse::<usize>().unwrap();
-        let minor_version = version.next().unwrap().parse::<usize>().unwrap();
+        let _minor_version = version.next().unwrap().parse::<usize>().unwrap();
 
         let mdf_version = match major_version {
             3 => MDFVersion::MDF3,
@@ -137,7 +137,7 @@ impl MDFFile for MDFType {
 
 pub(crate) struct MDF {
     pub filepath: String,
-    pub file: MDFType,
+    file: MDFType,
     pub channels: Vec<MdfChannel>,
 }
 
