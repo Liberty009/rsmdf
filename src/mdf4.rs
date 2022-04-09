@@ -1,4 +1,5 @@
 use crate::mdf::{self, MdfChannel, RasterType};
+use crate::record::Record;
 use crate::signal::{self, Signal};
 use crate::utils;
 use std::io::prelude::*;
@@ -1777,22 +1778,77 @@ impl Block for CABLOCK {
     }
 }
 
-#[derive(Debug, Clone)]
-struct DTBlock {}
-impl Block for DTBlock {
-    fn new() -> Self {
-        Self {}
-    }
-    fn default() -> Self {
-        Self {}
-    }
-    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, Self {})
-    }
-}
+// #[derive(Debug, Clone)]
+// struct DTBlock {
+// 	dt_data: Vec<Record>
+// }
+// impl Block for DTBlock {
+//     fn new() -> Self {
+//         Self {}
+//     }
+//     fn default() -> Self {
+//         Self {}
+//     }
+//     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+//         (1, Self {})
+//     }
+// }
 
 #[derive(Debug, Clone)]
-struct SRBLOCK {}
+struct SRBLOCK {
+	sr_sr_next: u64, 
+	sr_data: u64, 
+	sr_cycle_count: u64, 
+	sr_interval: f64, 
+	sr_sync_type: u8, 
+	sr_flags: u8,
+}
+
+impl Block for SRBLOCK {
+	fn new() -> Self{
+Self{
+	sr_sr_next: 0_u64, 
+	sr_data: 0_u64, 
+	sr_cycle_count: 0_u64, 
+	sr_interval: 0_f64, 
+	sr_sync_type: 0_u8, 
+	sr_flags: 0_u8,
+}
+	}
+	fn default() -> Self{
+		Self{
+			sr_sr_next: 0_u64, 
+			sr_data: 0_u64, 
+			sr_cycle_count: 0_u64, 
+			sr_interval: 0_f64, 
+			sr_sync_type: 0_u8, 
+			sr_flags: 0_u8,
+		}
+	}
+	fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self){
+		let (pos, header) = BlockHeader::read(stream, position, little_endian);
+		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+		
+		let sr_sr_next = address.remove(0);
+		let sr_data = address.remove(0);
+
+		let sr_cycle_count = utils::read(stream, little_endian, &mut pos);
+		let sr_interval = utils::read(stream ,little_endian, &mut pos);
+		let sr_sync_type = utils::read(stream ,little_endian, &mut pos);
+		let sr_flags = utils::read(stream ,little_endian, &mut pos);
+		let sr_reserved: [u8; 6] = utils::read(stream, little_endian, &mut pos);
+
+		(pos, Self{
+			sr_sr_next,
+			sr_data,
+			sr_cycle_count,
+			sr_interval,
+			sr_sync_type,
+			sr_flags,
+		})
+
+	}
+}
 
 #[derive(Debug, Clone)]
 struct RDBLOCK {}
@@ -1801,44 +1857,183 @@ struct RDBLOCK {}
 struct SDBLOCK {}
 
 #[derive(Debug, Clone)]
-struct DLBLOCK {}
+struct DLBLOCK {
+	dl_dl_next: u64, 
+	dl_data: Vec<u64>, 
+	dl_flags: u8, 
+	dl_count: u32, 
+	dl_equal_length: u64, 
+	dl_offset: Vec<u64>, 
+}
 impl Block for DLBLOCK {
     fn new() -> Self {
-        Self {}
+        Self {
+			dl_dl_next: 0_u64, 
+			dl_data: Vec::new(), 
+			dl_flags: 0_u8, 
+			dl_count: 0_u32, 
+			dl_equal_length: 0_u64, 
+			dl_offset: Vec::new(), 
+		}
     }
     fn default() -> Self {
-        Self {}
+        Self {
+			dl_dl_next: 0_u64, 
+			dl_data: Vec::new(), 
+			dl_flags: 0_u8, 
+			dl_count: 0_u32, 
+			dl_equal_length: 0_u64, 
+			dl_offset: Vec::new(), 
+		}
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, Self {})
+
+		let (pos, header) = BlockHeader::read(stream, position, little_endian);
+		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+
+		let dl_flags = utils::read(stream, little_endian, &mut pos);
+		let dl_count = utils::read(stream, little_endian, &mut pos);
+		let dl_equal_length = utils::read(stream, little_endian, &mut pos);
+		let mut dl_offset = Vec::new();
+		for i in 0..dl_count {
+			dl_offset.push(utils::read(stream, little_endian, &mut pos));
+		} 
+
+		let dl_dl_next = address.remove(0);
+		let mut dl_data = Vec::new();
+		for i in 0..dl_count {
+			dl_data.push(address.remove(0));
+		}
+
+        (pos, Self {
+			dl_dl_next,
+			dl_data,
+			dl_flags,
+			dl_count,
+			dl_equal_length,
+			dl_offset,
+		})
     }
 }
 
 #[derive(Debug, Clone)]
-struct DZBlock {}
+struct DZBlock {
+	dz_org_block_type: [u8; 2],
+	dz_zip_type: ZipType, 
+	dz_reserved: u8, 
+	dz_zip_parameter: u32, 
+	dz_org_data_length: u64, 
+	dz_data_length: u64, 
+	dz_data: Vec<u8>,
+
+}
 impl Block for DZBlock {
     fn new() -> Self {
-        Self {}
+        Self {
+			dz_org_block_type: [0_u8; 2],
+			dz_zip_type: ZipType::Deflate, 
+			dz_reserved: 0_u8, 
+			dz_zip_parameter: 0_u32, 
+			dz_org_data_length: 0_u64, 
+			dz_data_length: 0_u64, 
+			dz_data: Vec::new(),
+		}
     }
     fn default() -> Self {
-        Self {}
+        Self {
+			dz_org_block_type: [0_u8; 2],
+			dz_zip_type: ZipType::Deflate, 
+			dz_reserved: 0_u8, 
+			dz_zip_parameter: 0_u32, 
+			dz_org_data_length: 0_u64, 
+			dz_data_length: 0_u64, 
+			dz_data: Vec::new(),
+		}
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, Self {})
+
+		let (mut pos, header) = BlockHeader::read(stream, position, little_endian);
+		
+
+		let dz_org_block_type = utils::read(stream, little_endian, &mut pos);
+		let dz_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
+		let dz_reserved = utils::read(stream, little_endian, &mut pos);
+		let dz_zip_parameter = utils::read(stream, little_endian, &mut pos);
+		let dz_org_data_length = utils::read(stream, little_endian, &mut pos);
+		let dz_data_length = utils::read(stream, little_endian, &mut pos);
+		let dz_data = stream[pos..pos+dz_data_length as usize].to_vec();
+
+		pos += dz_data.len();
+
+        (pos, Self {
+			dz_org_block_type,
+			dz_zip_type, 
+			dz_reserved, 
+			dz_zip_parameter, 
+			dz_org_data_length, 
+			dz_data_length, 
+			dz_data,
+		})
     }
 }
 
 #[derive(Debug, Clone)]
-struct HLBLOCK {}
+enum ZipType{
+	Deflate, 
+	TransposeDeflate,
+}
+
+impl ZipType{
+	fn new(zip: u8) -> Self {
+match zip {
+	0 => Self::Deflate, 
+	1 => Self::TransposeDeflate,
+	_ => panic!("Error zip type")
+}
+	}
+}
+
+
+#[derive(Debug, Clone)]
+struct HLBLOCK {
+	hl_dl_first: u64,
+	hl_flags: u16, 
+	hl_zip_type: ZipType, 
+	//hl_reserved: [u8; 5],
+}
 impl Block for HLBLOCK {
     fn new() -> Self {
-        Self {}
+        Self {
+			hl_dl_first: 0_u64,
+			hl_flags: 0_u16, 
+			hl_zip_type: ZipType::Deflate, 
+			//hl_reserved: [0_u8; 5]
+		}
     }
     fn default() -> Self {
-        Self {}
+        Self {
+			hl_dl_first: 0_u64,
+			hl_flags: 0_u16, 
+			hl_zip_type: ZipType::Deflate, 
+			//hl_reserved: [0_u8; 5]
+		}
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, Self {})
+
+		let (pos, header) = BlockHeader::read(stream, position, little_endian);
+		let (mut pos, address) = link_extract(stream, pos, little_endian, header.link_count);
+
+		let hl_dl_first = address.remove(0);
+		let hl_flags = utils::read(stream, little_endian, &mut pos);
+		let hl_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
+		let hl_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
+
+        (pos, Self {
+			hl_dl_first,
+			hl_flags, 
+			hl_zip_type, 
+			//hl_reserved,
+		})
     }
 }
 
@@ -1857,13 +2052,10 @@ impl ChannelType {
         match channel_type {
             0 => Self::FixedLengthChannel,
             1 => Self::VariableLengthChannel,
-
             2 => Self::MasterChannel,
             3 => Self::VirtualMasterChannel,
-
             4 => Self::SyncChannel,
             5 => Self::MaxLengthDataChannel,
-
             6 => Self::VirtualDataChannel,
             _ => panic!("Error: Unknown channel type"),
         }
@@ -1962,33 +2154,5 @@ impl CCType {
             10 => Self::TextTableText,
             _ => panic!("Error CCtype"),
         }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct FileIdentificationBlock {}
-impl Block for FileIdentificationBlock {
-    fn new() -> Self {
-        FileIdentificationBlock {}
-    }
-    fn default() -> Self {
-        FileIdentificationBlock {}
-    }
-    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, FileIdentificationBlock {})
-    }
-}
-
-#[derive(Debug, Clone)]
-struct ListData {}
-impl Block for ListData {
-    fn new() -> Self {
-        ListData {}
-    }
-    fn default() -> Self {
-        ListData {}
-    }
-    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        (1, ListData {})
     }
 }
