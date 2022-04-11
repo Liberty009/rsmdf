@@ -1095,7 +1095,11 @@ pub enum ConversionData {
 }
 
 impl ConversionData {
-    pub fn read(_data: &[u8], _little_endian: bool, datatype: u8) -> (ConversionData, usize) {
+    pub fn read(
+        _data: &[u8],
+        _little_endian: bool,
+        datatype: u8,
+    ) -> (ConversionData, usize) {
         if datatype == 1 {
             (ConversionData::Parameters, 1)
         } else {
@@ -1344,7 +1348,11 @@ pub struct ConversionTextTable {
 }
 
 impl ConversionTextTable {
-    pub fn read(stream: &[u8], little_endian: bool, number: usize) -> (ConversionTextTable, usize) {
+    pub fn read(
+        stream: &[u8],
+        little_endian: bool,
+        number: usize,
+    ) -> (ConversionTextTable, usize) {
         let mut position = 0;
         let mut table = Vec::new();
         for _i in 0..number - 1 {
