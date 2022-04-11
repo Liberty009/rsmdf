@@ -1,8 +1,9 @@
 use crate::mdf::{self, MdfChannel};
+use crate::record::{DataType, DataTypeRead, Record};
 use crate::{signal, utils};
+use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
-use std::{convert::TryInto, mem};
 
 // Define constants that are used
 const TIME_CHANNEL_TYPE: u16 = 1;
@@ -26,18 +27,18 @@ const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
 const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 
 #[derive(Debug, Clone)]
-pub(crate) struct MDF3 {
+pub struct MDF3 {
     #[allow(dead_code)]
-    id: IDBLOCK,
+    pub id: IDBLOCK,
     #[allow(dead_code)]
-    header: HDBLOCK,
+    pub header: HDBLOCK,
     #[allow(dead_code)]
-    comment: TXBLOCK,
-    data_groups: Vec<DGBLOCK>,
-    channels: Vec<CNBLOCK>,
-    channel_groups: Vec<CGBLOCK>,
-    little_endian: bool,
-    file: Vec<u8>,
+    pub comment: TXBLOCK,
+    pub data_groups: Vec<DGBLOCK>,
+    pub channels: Vec<CNBLOCK>,
+    pub channel_groups: Vec<CGBLOCK>,
+    pub little_endian: bool,
+    pub file: Vec<u8>,
 }
 
 impl mdf::MDFFile for MDF3 {
@@ -804,106 +805,6 @@ impl CGBLOCK {
     }
 }
 
-pub fn print_record(value: Record) {
-    match value {
-        Record::Uint(number) => print!("{}", number),
-        Record::Int(number) => print!("{}", number),
-        Record::Float32(number) => print!("{}", number),
-        Record::Float64(number) => print!("{}", number),
-        // _ => panic!("Help!")
-    };
-}
-
-pub enum Record {
-    Uint(u8),
-    Int(i8),
-    Float32(f32),
-    Float64(f64),
-}
-
-impl Record {
-    pub fn new(stream: &[u8], dtype: DataTypeRead) -> Self {
-        let rec = match dtype.data_type {
-            DataType::UnsignedInt => Self::unsigned_int(stream, dtype),
-            DataType::SignedInt => Self::signed_int(stream, dtype),
-            DataType::Float32 => Self::float32(stream, dtype),
-            DataType::Float64 => Self::float64(stream, dtype),
-            _ => (panic!("Incorrect or not implemented type!")),
-        };
-
-        rec
-    }
-
-    pub fn extract(&self) -> f64 {
-        match self {
-            Record::Uint(number) => *number as f64,
-            Record::Int(number) => *number as f64,
-            Record::Float32(number) => *number as f64,
-            Record::Float64(number) => *number as f64,
-            // _ => panic!("Help!")
-        }
-    }
-
-    fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {
-        let records = utils::read(stream, dtype.little_endian, &mut 0);
-
-        Self::Uint(records)
-    }
-
-    fn signed_int(stream: &[u8], dtype: DataTypeRead) -> Self {
-        let records = utils::read(stream, dtype.little_endian, &mut 0);
-
-        Self::Int(records)
-    }
-
-    fn float32(stream: &[u8], dtype: DataTypeRead) -> Self {
-        let records = utils::read(stream, dtype.little_endian, &mut 0);
-
-        Self::Float32(records)
-    }
-    fn float64(stream: &[u8], dtype: DataTypeRead) -> Self {
-        let records = utils::read(stream, dtype.little_endian, &mut 0);
-
-        Self::Float64(records)
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum DataType {
-    UnsignedInt,
-    SignedInt,
-    Float32,
-    Float64,
-    FFloat,
-    GFloat,
-    DFloat,
-    StringNullTerm,
-    ByteArray,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct DataTypeRead {
-    pub data_type: DataType,
-    pub little_endian: bool,
-}
-
-impl DataTypeRead {
-    fn len(self) -> usize {
-        match self.data_type {
-            DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),
-            DataType::SignedInt => mem::size_of::<i8>() / mem::size_of::<u8>(),
-            DataType::Float32 => mem::size_of::<f32>() / mem::size_of::<u8>(),
-            DataType::Float64 => mem::size_of::<f64>() / mem::size_of::<u8>(),
-            DataType::FFloat => 0,
-            DataType::GFloat => 0,
-            DataType::DFloat => 0,
-            DataType::StringNullTerm => 0,
-            DataType::ByteArray => 0,
-            // _ => panic!("")
-        }
-    }
-}
-
 // pub struct RecordedData<T: utils::FromBytes> {
 //     data: Vec<T>,
 // }
@@ -1194,7 +1095,11 @@ pub enum ConversionData {
 }
 
 impl ConversionData {
-    pub fn read(_data: &[u8], _little_endian: bool, datatype: u8) -> (ConversionData, usize) {
+    pub fn read(
+        _data: &[u8],
+        _little_endian: bool,
+        datatype: u8,
+    ) -> (ConversionData, usize) {
         if datatype == 1 {
             (ConversionData::Parameters, 1)
         } else {
@@ -1443,7 +1348,11 @@ pub struct ConversionTextTable {
 }
 
 impl ConversionTextTable {
-    pub fn read(stream: &[u8], little_endian: bool, number: usize) -> (ConversionTextTable, usize) {
+    pub fn read(
+        stream: &[u8],
+        little_endian: bool,
+        number: usize,
+    ) -> (ConversionTextTable, usize) {
         let mut position = 0;
         let mut table = Vec::new();
         for _i in 0..number - 1 {
