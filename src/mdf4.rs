@@ -497,13 +497,13 @@ impl Block for Mdblock {
         }
 
         let md_data: String = unsafe {
-                str_from_u8_nul_utf8_unchecked(&stream[pos..(pos + header.length as usize - 10)]).to_string()
+            str_from_u8_nul_utf8_unchecked(&stream[pos..(pos + header.length as usize - 10)])
+                .to_string()
         };
 
         (pos + md_data.len(), Self { md_data })
     }
 }
-
 
 /// # Safety
 ///
@@ -538,9 +538,9 @@ impl Block for Txblock {
             panic!("Error type incorrect");
         }
 
-        let tx_data = 
-        unsafe {
-                str_from_u8_nul_utf8_unchecked(&stream[pos..(pos + header.length as usize - 10)]).to_string()
+        let tx_data = unsafe {
+            str_from_u8_nul_utf8_unchecked(&stream[pos..(pos + header.length as usize - 10)])
+                .to_string()
         };
 
         (pos + header.length as usize, Self { tx_data })
@@ -2302,7 +2302,7 @@ impl DataType {
             _ => panic!("Error: Unknown data type"),
         }
     }
-	#[allow(dead_code)]
+    #[allow(dead_code)]
     fn len(&self) -> usize {
         match self {
             Self::UnsignedByteLE => mem::size_of::<u8>() / mem::size_of::<u8>(),
@@ -2322,7 +2322,7 @@ impl DataType {
             // _ => panic!("")
         }
     }
-	#[allow(dead_code)]
+    #[allow(dead_code)]
     fn is_empty(&self) -> bool {
         self.len() == 0
     }
