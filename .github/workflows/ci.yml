@@ -28,7 +28,7 @@ jobs:
       - cross
       - minrust
       - minimal-versions
-      - fmt
+#       - fmt
       - clippy
     steps:
       - run: exit 0
@@ -105,26 +105,26 @@ jobs:
           # Update Cargo.lock to minimal version dependencies.
           cargo update -Z minimal-versions
           cargo hack check --all-features --ignore-private
-  fmt:
-    name: fmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Rust ${{ env.rust_stable }}
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ env.rust_stable }}
-          override: true
-          components: rustfmt
-      - uses: Swatinem/rust-cache@v1
-      # Check fmt
-      - name: "rustfmt --check"
-        # Workaround for rust-lang/cargo#7732
-        run: |
-          if ! rustfmt --check --edition 2021 $(git ls-files '*.rs'); then
-            printf "Please run \`rustfmt --edition 2021 \$(git ls-files '*.rs')\` to fix rustfmt errors.\nSee CONTRIBUTING.md for more details.\n" >&2
-            exit 1
-          fi
+#   fmt:
+#     name: fmt
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Install Rust ${{ env.rust_stable }}
+#         uses: actions-rs/toolchain@v1
+#         with:
+#           toolchain: ${{ env.rust_stable }}
+#           override: true
+#           components: rustfmt
+#       - uses: Swatinem/rust-cache@v1
+#       # Check fmt
+#       - name: "rustfmt --check"
+#         # Workaround for rust-lang/cargo#7732
+#         run: |
+#           if ! rustfmt --check --edition 2021 $(git ls-files '*.rs'); then
+#             printf "Please run \`rustfmt --edition 2021 \$(git ls-files '*.rs')\` to fix rustfmt errors.\nSee CONTRIBUTING.md for more details.\n" >&2
+#             exit 1
+#           fi
   clippy:
     name: clippy
     runs-on: ubuntu-latest
