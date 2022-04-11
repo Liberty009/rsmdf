@@ -54,11 +54,10 @@ impl MDFType {
 
 impl MDFFile for MDFType {
     fn channels(&self) -> Vec<MdfChannel> {
-
-		 match self {
-			Self::MDF3(file) => file.channels(), 
-			Self::MDF4(file) => file.channels(),
-		}
+        match self {
+            Self::MDF3(file) => file.channels(),
+            Self::MDF4(file) => file.channels(),
+        }
         // chan
     }
     fn find_time_channel(
@@ -66,22 +65,17 @@ impl MDFFile for MDFType {
         datagroup: usize,
         channel_grp: usize,
     ) -> Result<usize, &'static str> {
-
-
-		match self {
-			Self::MDF3(file) => file.find_time_channel(datagroup, channel_grp), 
-			Self::MDF4(file) => file.find_time_channel(datagroup, channel_grp),
-		}
-		
+        match self {
+            Self::MDF3(file) => file.find_time_channel(datagroup, channel_grp),
+            Self::MDF4(file) => file.find_time_channel(datagroup, channel_grp),
+        }
     }
 
     fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
-        
-		match self{
-			Self::MDF3(file) => file.read_channel(datagroup, channel_grp, channel), 
-			Self::MDF4(file) => file.read_channel(datagroup, channel_grp, channel)
-		}
-
+        match self {
+            Self::MDF3(file) => file.read_channel(datagroup, channel_grp, channel),
+            Self::MDF4(file) => file.read_channel(datagroup, channel_grp, channel),
+        }
     }
 
     #[must_use]
@@ -95,70 +89,61 @@ impl MDFFile for MDFType {
     }
 
     fn read_all(&mut self) {
-		match self {
-			Self::MDF3(file) => file.read_all(),
-			Self::MDF4(file) => file.read_all(),
-		}
-
+        match self {
+            Self::MDF3(file) => file.read_all(),
+            Self::MDF4(file) => file.read_all(),
+        }
     }
 
     fn list(&mut self) {
-		match self {
-			Self::MDF3(file) => file.list(),
-			Self::MDF4(file) => file.list(),
-		}
+        match self {
+            Self::MDF3(file) => file.list(),
+            Self::MDF4(file) => file.list(),
+        }
     }
 
     fn list_channels(&self) {
-		match self {
-			Self::MDF3(file) => file.list_channels(),
-			Self::MDF4(file) => file.list_channels(),
-		}
+        match self {
+            Self::MDF3(file) => file.list_channels(),
+            Self::MDF4(file) => file.list_channels(),
+        }
     }
 
     #[must_use]
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal {
-		match self {
-			Self::MDF3(file) => file.read(datagroup, channel_grp, channel),
-			Self::MDF4(file) => file.read(datagroup, channel_grp, channel),
-		}
+        match self {
+            Self::MDF3(file) => file.read(datagroup, channel_grp, channel),
+            Self::MDF4(file) => file.read(datagroup, channel_grp, channel),
+        }
     }
 
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
-		match self {
-			Self::MDF3(file) => file.cut(start, end, include_ends, time_from_zero),
-			Self::MDF4(file) => file.cut(start, end, include_ends, time_from_zero),
-		}
+        match self {
+            Self::MDF3(file) => file.cut(start, end, include_ends, time_from_zero),
+            Self::MDF4(file) => file.cut(start, end, include_ends, time_from_zero),
+        }
     }
 
     fn export(&self, format: &str, filename: &str) {
-		match self {
-			Self::MDF3(file) => file.export(format, filename),
-			Self::MDF4(file) => file.export(format, filename),
-		}
+        match self {
+            Self::MDF3(file) => file.export(format, filename),
+            Self::MDF4(file) => file.export(format, filename),
+        }
     }
 
     fn filter(&self, channels: &str) {
-		match self {
-			Self::MDF3(file) => file.filter(channels),
-			Self::MDF4(file) => file.filter(channels),
-		}
+        match self {
+            Self::MDF3(file) => file.filter(channels),
+            Self::MDF4(file) => file.filter(channels),
+        }
     }
 
     #[must_use]
     fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self {
-	 	match self {
-			Self::MDF3(file) => {
-				Self::MDF3(file.resample(raster, version, time_from_zero))
-			}
-			Self::MDF4(file) => {
-				Self::MDF4(file.resample(raster, version, time_from_zero))
-			},
-		}
-
-
-
-
+        match self {
+            Self::MDF3(file) => Self::MDF3(file.resample(raster, version, time_from_zero)),
+            Self::MDF4(file) => Self::MDF4(file.resample(raster, version, time_from_zero)),
+        }
     }
     // #[must_use]
     // fn select(

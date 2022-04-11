@@ -37,9 +37,9 @@ impl DataTypeRead {
         }
     }
 
-	pub fn is_empty(self) -> bool{
-		self.len() == 0
-	}
+    pub fn is_empty(self) -> bool {
+        self.len() == 0
+    }
 }
 
 pub fn _print_record(value: Record) {
