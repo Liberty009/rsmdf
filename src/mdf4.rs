@@ -76,14 +76,14 @@ trait Block {
 #[derive(Debug, Clone)]
 pub struct MDF4 {
     #[allow(dead_code)]
-    id: IDBLOCK,
+    id: Idblock,
     #[allow(dead_code)]
-    header: HDBLOCK,
+    header: Hdblock,
     #[allow(dead_code)]
-    comment: TXBLOCK,
-    data_groups: Vec<DGBLOCK>,
-    channels: Vec<CNBLOCK>,
-    channel_groups: Vec<CGBLOCK>,
+    comment: Txblock,
+    data_groups: Vec<Dgblock>,
+    channels: Vec<Cnblock>,
+    channel_groups: Vec<Cgblock>,
     little_endian: bool,
     file: Vec<u8>,
 }
@@ -98,13 +98,13 @@ impl mdf::MDFFile for MDF4 {
 
         let little_endian = true;
 
-        let (position, _id_block) = IDBLOCK::read(&self.file, 0, little_endian);
-        let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
+        let (position, _id_block) = Idblock::read(&self.file, 0, little_endian);
+        let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
 
         let mut next_dg = hd_block.hd_dg_first;
 
         while next_dg != 0 {
-            let (_pos, dg_block) = DGBLOCK::read(&self.file, next_dg as usize, little_endian);
+            let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
             next_dg = dg_block.dg_dg_next;
             let mut next_cg = dg_block.dg_cg_first;
 
@@ -112,7 +112,7 @@ impl mdf::MDFFile for MDF4 {
 
             while next_cg != 0 {
                 let (_position, cg_block) =
-                    CGBLOCK::read(&self.file, next_cg as usize, little_endian);
+                    Cgblock::read(&self.file, next_cg as usize, little_endian);
                 next_cg = cg_block.cg_cg_next;
                 let mut next_cn = cg_block.cg_cn_first;
                 cg.push(cg_block.clone());
@@ -121,7 +121,7 @@ impl mdf::MDFFile for MDF4 {
 
                 while next_cn != 0 {
                     let (_position, cn_block) =
-                        CNBLOCK::read(&self.file, next_cn as usize, little_endian);
+                        Cnblock::read(&self.file, next_cn as usize, little_endian);
                     next_cn = cn_block.cn_cn_next;
                     ch.push(cn_block.clone());
 
@@ -169,14 +169,14 @@ impl mdf::MDFFile for MDF4 {
         let little_endian = true;
         let position = 0;
 
-        let (pos, id) = IDBLOCK::read(&stream, position, little_endian);
-        let (_pos, header) = HDBLOCK::read(&stream, pos, little_endian);
-        let (_pos, comment) = TXBLOCK::read(&stream, header.hd_md_comment as usize, little_endian);
+        let (pos, id) = Idblock::read(&stream, position, little_endian);
+        let (_pos, header) = Hdblock::read(&stream, pos, little_endian);
+        let (_pos, comment) = Txblock::read(&stream, header.hd_md_comment as usize, little_endian);
         let mut mdf = Self {
             id,
             header: header.clone(),
             comment,
-            data_groups: DGBLOCK::read_all(&stream, header.hd_dg_first as usize, little_endian),
+            data_groups: Dgblock::read_all(&stream, header.hd_dg_first as usize, little_endian),
             channels: Vec::new(),
             channel_groups: Vec::new(),
             little_endian,
@@ -211,11 +211,11 @@ impl mdf::MDFFile for MDF4 {
         let little_endian = true;
         let position = 0;
 
-        let (position, _id_block) = IDBLOCK::read(&self.file, position, little_endian);
-        let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
+        let (position, _id_block) = Idblock::read(&self.file, position, little_endian);
+        let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
         //position += pos;
 
-        let dg = DGBLOCK::read_all(&self.file, hd_block.hd_dg_first as usize, little_endian);
+        let dg = Dgblock::read_all(&self.file, hd_block.hd_dg_first as usize, little_endian);
         self.data_groups = dg;
     }
 
@@ -227,21 +227,21 @@ impl mdf::MDFFile for MDF4 {
         let little_endian = true;
         let postion = 0;
 
-        let (position, _id_block) = IDBLOCK::read(&self.file, postion, little_endian);
-        let (_pos, hd_block) = HDBLOCK::read(&self.file, position, little_endian);
+        let (position, _id_block) = Idblock::read(&self.file, postion, little_endian);
+        let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
         //position += pos;
 
         let mut next_dg = hd_block.hd_dg_first; // .data_group_block;
 
         while next_dg != 0 {
-            let (_pos, dg_block) = DGBLOCK::read(&self.file, next_dg as usize, little_endian);
+            let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
             next_dg = dg_block.dg_dg_next; //  .next;
             let mut next_cg = dg_block.dg_cg_first; // .first;
 
             dg.push(dg_block);
 
             while next_cg != 0 {
-                let (_pos, cg_block) = CGBLOCK::read(&self.file, next_cg as usize, little_endian);
+                let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
                 next_cg = cg_block.cg_cg_next; //.next;
                 let mut next_cn = cg_block.cg_cn_first; //.first;
                 cg.push(cg_block.clone());
@@ -250,7 +250,7 @@ impl mdf::MDFFile for MDF4 {
 
                 while next_cn != 0 {
                     let (_pos, cn_block) =
-                        CNBLOCK::read(&self.file, next_cn as usize, little_endian);
+                        Cnblock::read(&self.file, next_cn as usize, little_endian);
                     next_cn = cn_block.cn_cn_next; //.next;
 
                     ch.push(cn_block);
@@ -295,7 +295,7 @@ impl mdf::MDFFile for MDF4 {
 }
 
 #[derive(Debug, Clone)]
-struct IDBLOCK {
+struct Idblock {
     #[allow(dead_code)]
     id_file: [u8; 8],
     #[allow(dead_code)]
@@ -308,7 +308,7 @@ struct IDBLOCK {
     id_ver: u16,
     //id_reserved2: [u8; 34],
 }
-impl Block for IDBLOCK {
+impl Block for Idblock {
     fn new() -> Self {
         Self {
             id_file: [0; 8],
@@ -354,7 +354,7 @@ impl Block for IDBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct HDBLOCK {
+struct Hdblock {
     #[allow(dead_code)]
     hd_dg_first: u64,
     #[allow(dead_code)]
@@ -385,9 +385,9 @@ struct HDBLOCK {
     #[allow(dead_code)]
     hd_start_distance_m: f64,
 }
-impl Block for HDBLOCK {
+impl Block for Hdblock {
     fn new() -> Self {
-        HDBLOCK {
+        Hdblock {
             hd_dg_first: 0,
             hd_fh_first: 0,
             hd_ch_first: 0,
@@ -406,7 +406,7 @@ impl Block for HDBLOCK {
         }
     }
     fn default() -> Self {
-        HDBLOCK {
+        Hdblock {
             hd_dg_first: 0,
             hd_fh_first: 0,
             hd_ch_first: 0,
@@ -452,7 +452,7 @@ impl Block for HDBLOCK {
 
         (
             pos,
-            HDBLOCK {
+            Hdblock {
                 hd_dg_first,
                 hd_fh_first,
                 hd_ch_first,
@@ -474,11 +474,11 @@ impl Block for HDBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct MDBLOCK {
+struct Mdblock {
     #[allow(dead_code)]
     md_data: String,
 }
-impl Block for MDBLOCK {
+impl Block for Mdblock {
     fn new() -> Self {
         Self {
             md_data: "".to_string(),
@@ -520,10 +520,10 @@ pub unsafe fn str_from_u8_nul_utf8_unchecked(utf8_src: &[u8]) -> &str {
 }
 
 #[derive(Debug, Clone)]
-struct TXBLOCK {
+struct Txblock {
     tx_data: String,
 }
-impl Block for TXBLOCK {
+impl Block for Txblock {
     fn new() -> Self {
         Self {
             tx_data: String::new(),
@@ -554,7 +554,7 @@ impl Block for TXBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct FHBLOCK {
+struct Fhblock {
     #[allow(dead_code)]
     fh_fh_next: u64,
     #[allow(dead_code)]
@@ -568,7 +568,7 @@ struct FHBLOCK {
     #[allow(dead_code)]
     fh_time_flags: u8,
 }
-impl Block for FHBLOCK {
+impl Block for Fhblock {
     fn new() -> Self {
         Self {
             fh_fh_next: 0_u64,
@@ -649,7 +649,7 @@ impl ChannelHierarchyType {
     }
 }
 
-struct CHBLOCK {
+struct Chblock {
     #[allow(dead_code)]
     ch_ch_next: u64,
     #[allow(dead_code)]
@@ -665,7 +665,7 @@ struct CHBLOCK {
     #[allow(dead_code)]
     ch_type: ChannelHierarchyType,
 }
-impl Block for CHBLOCK {
+impl Block for Chblock {
     fn new() -> Self {
         Self {
             ch_ch_next: 0_u64,
@@ -705,7 +705,7 @@ impl Block for CHBLOCK {
         let ch_tx_name = address.remove(0);
         let ch_md_comment = address.remove(0);
         let mut ch_element = Vec::with_capacity(ch_element_count as usize * 3);
-        for i in 0..(ch_element_count * 3) {
+        for _i in 0..(ch_element_count * 3) {
             ch_element.push(address.remove(0));
         }
 
@@ -724,7 +724,7 @@ impl Block for CHBLOCK {
     }
 }
 #[derive(Debug, Clone)]
-struct ATBLOCK {
+struct Atblock {
     //id: [u8; 4],
     //reserved0: [u8; 4],
     //block_len: u64,
@@ -752,7 +752,7 @@ struct ATBLOCK {
     embedded_data: Vec<u8>,
 }
 
-impl Block for ATBLOCK {
+impl Block for Atblock {
     fn new() -> Self {
         Self {
             next_at_addr: 0,
@@ -1056,7 +1056,7 @@ impl EventCause {
 }
 
 #[derive(Debug, Clone)]
-struct DGBLOCK {
+struct Dgblock {
     #[allow(dead_code)]
     dg_dg_next: u64,
     #[allow(dead_code)]
@@ -1069,13 +1069,13 @@ struct DGBLOCK {
     dg_rec_id_size: u8,
 }
 
-impl DGBLOCK {
+impl Dgblock {
     fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {
         let mut all = Vec::new();
         let mut next_dg = position;
 
         while next_dg != 0 {
-            let (_pos, dg_block) = DGBLOCK::read(stream, next_dg, little_endian);
+            let (_pos, dg_block) = Dgblock::read(stream, next_dg, little_endian);
             next_dg = dg_block.dg_dg_next as usize;
             all.push(dg_block);
         }
@@ -1083,11 +1083,11 @@ impl DGBLOCK {
         all
     }
 
-    fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<CGBLOCK> {
+    fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<Cgblock> {
         let mut channel_grps = Vec::new();
         let mut next = self.dg_cg_first as usize;
         while next != 0 {
-            let (_pos, cg_block) = CGBLOCK::read(stream, next, little_endian);
+            let (_pos, cg_block) = Cgblock::read(stream, next, little_endian);
             next = cg_block.cg_cg_next as usize;
             channel_grps.push(cg_block);
         }
@@ -1095,7 +1095,7 @@ impl DGBLOCK {
     }
 }
 
-impl Block for DGBLOCK {
+impl Block for Dgblock {
     fn new() -> Self {
         Self {
             dg_dg_next: 0_u64,
@@ -1140,7 +1140,7 @@ impl Block for DGBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct CGBLOCK {
+struct Cgblock {
     //id: [u8; 4],        //- bytes : block ID; always b'##CG'
     //reserved0: u64,     //- int : reserved bytes
     //block_len: u64,     //- int : block bytes size
@@ -1178,12 +1178,12 @@ struct CGBLOCK {
                          //comment: u64,    //- str : channel group comment
 }
 
-impl CGBLOCK {
-    fn channels(self, stream: &[u8], little_endian: bool) -> Vec<CNBLOCK> {
+impl Cgblock {
+    fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
         let mut ch = Vec::new();
         let mut next_cn = self.cg_cn_first as usize;
         while next_cn != 0 {
-            let (_pos, cn_block) = CNBLOCK::read(stream, next_cn, little_endian);
+            let (_pos, cn_block) = Cnblock::read(stream, next_cn, little_endian);
             next_cn = cn_block.cn_cn_next as usize;
 
             ch.push(cn_block);
@@ -1193,9 +1193,9 @@ impl CGBLOCK {
     }
 }
 
-impl Block for CGBLOCK {
+impl Block for Cgblock {
     fn new() -> Self {
-        CGBLOCK {
+        Cgblock {
             cg_cg_next: 0,
             cg_cn_first: 0,
             cg_tx_acq_name: 0,
@@ -1211,7 +1211,7 @@ impl Block for CGBLOCK {
         }
     }
     fn default() -> Self {
-        CGBLOCK {
+        Cgblock {
             cg_cg_next: 0,
             cg_cn_first: 0,
             cg_tx_acq_name: 0,
@@ -1252,7 +1252,7 @@ impl Block for CGBLOCK {
 
         (
             pos,
-            CGBLOCK {
+            Cgblock {
                 // id,
                 // reserved0,
                 // block_len,
@@ -1278,7 +1278,7 @@ impl Block for CGBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct SIBLOCK {
+struct Siblock {
     #[allow(dead_code)]
     si_tx_name: u64,
     #[allow(dead_code)]
@@ -1292,9 +1292,9 @@ struct SIBLOCK {
     #[allow(dead_code)]
     si_flags: u8,
 }
-impl Block for SIBLOCK {
+impl Block for Siblock {
     fn new() -> Self {
-        SIBLOCK {
+        Siblock {
             si_tx_name: 0_u64,
             si_tx_path: 0_u64,
             si_md_comment: 0_u64,
@@ -1304,7 +1304,7 @@ impl Block for SIBLOCK {
         }
     }
     fn default() -> Self {
-        SIBLOCK {
+        Siblock {
             si_tx_name: 0_u64,
             si_tx_path: 0_u64,
             si_md_comment: 0_u64,
@@ -1334,7 +1334,7 @@ impl Block for SIBLOCK {
 
         (
             pos,
-            SIBLOCK {
+            Siblock {
                 si_tx_name,
                 si_tx_path,
                 si_md_comment,
@@ -1349,7 +1349,7 @@ impl Block for SIBLOCK {
 #[derive(Debug, Clone)]
 enum SourceType {
     Other,
-    ECU,
+    Ecu,
     Bus,
     IO,
     Tool,
@@ -1360,7 +1360,7 @@ impl SourceType {
     fn new(source: u8) -> Self {
         match source {
             0 => Self::Other,
-            1 => Self::ECU,
+            1 => Self::Ecu,
             2 => Self::Bus,
             3 => Self::IO,
             4 => Self::Tool,
@@ -1401,7 +1401,7 @@ impl BusType {
 }
 
 #[derive(Debug, Clone)]
-struct CNBLOCK {
+struct Cnblock {
     //id: [u8; 4],        //block ID; always b'##CN'
     //reserved0: u32,      //reserved bytes
     //block_len: u64,      //block bytes size
@@ -1472,14 +1472,14 @@ struct CNBLOCK {
                           // unit: String, // channel unit
 }
 
-impl CNBLOCK {
+impl Cnblock {
     fn name(self, stream: &[u8], little_endian: bool) -> String {
         let mut name = "".to_string();
 
         if matches!(self.channel_type, ChannelType::Master) {
             name = "time".to_string();
         } else if self.cn_tx_name != 0 {
-            let (_pos, tx) = TXBLOCK::read(stream, self.cn_tx_name as usize, little_endian);
+            let (_pos, tx) = Txblock::read(stream, self.cn_tx_name as usize, little_endian);
 
             name = tx.tx_data;
         }
@@ -1488,9 +1488,9 @@ impl CNBLOCK {
     }
 }
 
-impl Block for CNBLOCK {
+impl Block for Cnblock {
     fn new() -> Self {
-        CNBLOCK {
+        Cnblock {
             cn_cn_next: 0,
             cn_composition: 0,
             cn_tx_name: 0,
@@ -1519,7 +1519,7 @@ impl Block for CNBLOCK {
         }
     }
     fn default() -> Self {
-        CNBLOCK {
+        Cnblock {
             cn_cn_next: 0,
             cn_composition: 0,
             cn_tx_name: 0,
@@ -1596,7 +1596,7 @@ impl Block for CNBLOCK {
 
         (
             1,
-            CNBLOCK {
+            Cnblock {
                 cn_cn_next,
                 cn_composition,
                 cn_tx_name,
@@ -1629,7 +1629,7 @@ impl Block for CNBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct CCBLOCK {
+struct Ccblock {
     #[allow(dead_code)]
     name_addr: u64,
     #[allow(dead_code)]
@@ -1657,7 +1657,7 @@ struct CCBLOCK {
     #[allow(dead_code)]
     cc_val: Vec<f64>,
 }
-impl Block for CCBLOCK {
+impl Block for Ccblock {
     fn new() -> Self {
         Self {
             name_addr: 0,
@@ -1751,7 +1751,7 @@ impl Block for CCBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct CABLOCK {
+struct Cablock {
     #[allow(dead_code)]
     ca_composition: u64,
     #[allow(dead_code)]
@@ -1787,9 +1787,9 @@ struct CABLOCK {
     #[allow(dead_code)]
     ca_cycle_count: Vec<u64>,
 }
-impl Block for CABLOCK {
+impl Block for Cablock {
     fn new() -> Self {
-        CABLOCK {
+        Cablock {
             ca_composition: 0,
             ca_data: Vec::new(),
             ca_dynamic_size: Vec::new(),
@@ -1810,7 +1810,7 @@ impl Block for CABLOCK {
         }
     }
     fn default() -> Self {
-        CABLOCK {
+        Cablock {
             ca_composition: 0,
             ca_data: Vec::new(),
             ca_dynamic_size: Vec::new(),
@@ -1898,7 +1898,7 @@ impl Block for CABLOCK {
 
         (
             pos,
-            CABLOCK {
+            Cablock {
                 ca_composition,
                 ca_data,
                 ca_dynamic_size,
@@ -1938,7 +1938,7 @@ impl Block for CABLOCK {
 // }
 
 #[derive(Debug, Clone)]
-struct SRBLOCK {
+struct Srblock {
     #[allow(dead_code)]
     sr_sr_next: u64,
     #[allow(dead_code)]
@@ -1953,7 +1953,7 @@ struct SRBLOCK {
     sr_flags: u8,
 }
 
-impl Block for SRBLOCK {
+impl Block for Srblock {
     fn new() -> Self {
         Self {
             sr_sr_next: 0_u64,
@@ -2007,13 +2007,13 @@ impl Block for SRBLOCK {
 }
 
 #[derive(Debug, Clone)]
-struct RDBLOCK {}
+struct Rdblock {}
 
 #[derive(Debug, Clone)]
-struct SDBLOCK {}
+struct Sdblock {}
 
 #[derive(Debug, Clone)]
-struct DLBLOCK {
+struct Dlblock {
     #[allow(dead_code)]
     dl_dl_next: u64,
     #[allow(dead_code)]
@@ -2027,7 +2027,7 @@ struct DLBLOCK {
     #[allow(dead_code)]
     dl_offset: Vec<u64>,
 }
-impl Block for DLBLOCK {
+impl Block for Dlblock {
     fn new() -> Self {
         Self {
             dl_dl_next: 0_u64,
@@ -2173,7 +2173,7 @@ impl ZipType {
 }
 
 #[derive(Debug, Clone)]
-struct HLBLOCK {
+struct Hlblock {
     #[allow(dead_code)]
     hl_dl_first: u64,
     #[allow(dead_code)]
@@ -2182,7 +2182,7 @@ struct HLBLOCK {
     hl_zip_type: ZipType,
     //hl_reserved: [u8; 5],
 }
-impl Block for HLBLOCK {
+impl Block for Hlblock {
     fn new() -> Self {
         Self {
             hl_dl_first: 0_u64,
