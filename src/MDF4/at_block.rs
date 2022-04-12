@@ -1,5 +1,5 @@
-use crate::MDF4::Block::Block;
-use crate::MDF4::BlockHeader::BlockHeader;
+use super::block::Block;
+use super::block_header::BlockHeader;
 
 #[derive(Debug, Clone)]
 pub struct Atblock {

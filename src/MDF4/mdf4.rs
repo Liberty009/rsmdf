@@ -274,8 +274,8 @@ impl MDFFile for MDF4 {
         )
     }
 
-    fn cut(&self, start: f64, _end: f64, _include_ends: bool, time_from_zero: bool) {
-        let _delta = if time_from_zero { start } else { 0.0 };
+    fn cut(&self, _start: f64, _end: f64, _include_ends: bool, _time_from_zero: bool) {
+        // let _delta = if time_from_zero { start } else { 0.0 };
     }
 
     fn export(&self, _format: &str, _filename: &str) {}

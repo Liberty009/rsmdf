@@ -1,5 +1,5 @@
 use super::block::Block;
-use super::blockHeader::*;
+use super::block_header::*;
 
 #[derive(Debug, Clone)]
 struct DZBlock {

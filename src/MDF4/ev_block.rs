@@ -1,5 +1,5 @@
-use crate::MDF4::BlockHeader::*;
-use crate::MDF4::Block::Block;
+use super::block_header::*;
+use super::block::Block;
 
 #[derive(Debug, Clone)]
 pub struct EVBlock {

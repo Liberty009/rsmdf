@@ -1,5 +1,5 @@
-use crate::MDF4::Block::Block;
-use crate::MDF4::BlockHeader::*;
+use super::block::Block;
+use super::block_header::*;
 
 #[derive(Debug, Clone)]
 pub struct Siblock {
