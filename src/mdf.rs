@@ -2,10 +2,10 @@ use std::fs::File;
 use std::io::Read;
 
 use crate::mdf3::MDF3;
-use crate::MDF4::mdf4::MDF4;
 use crate::record::Record;
 use crate::signal::Signal;
 use crate::utils;
+use crate::MDF4::mdf4::MDF4;
 
 enum MDFVersion {
     MDF3,

@@ -1,11 +1,11 @@
-pub mod mdf4;
 mod Block;
 mod BlockHeader;
-mod IdBlock;
-mod HdBlock;
-mod TxBlock;
-mod utils;
-mod DgBlock;
 mod CgBlock;
 mod CnBlock;
+mod DgBlock;
+mod HdBlock;
+mod IdBlock;
+mod TxBlock;
+pub mod mdf4;
 mod mdf4_enums;
+mod utils;

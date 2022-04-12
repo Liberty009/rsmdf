@@ -1,11 +1,11 @@
+use crate::utils;
 use crate::MDF4::Block::Block;
 use crate::MDF4::BlockHeader::*;
-use crate::utils;
 
+use super::mdf4::link_extract;
 use super::Block::LinkedBlock;
 use super::CnBlock::Cnblock;
 use super::TxBlock;
-use super::mdf4::link_extract;
 
 #[derive(Debug, Clone)]
 pub struct Cgblock {
@@ -47,70 +47,67 @@ pub struct Cgblock {
 }
 
 impl LinkedBlock for Cgblock {
-	fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self> {
-		if self.cg_cg_next == 0{
-		 	None
-		} else {
-			let (_, block) = Self::read(stream, self.cg_cg_next as usize, little_endian);
-			Some (block)
-		}
-	}
+    fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self> {
+        if self.cg_cg_next == 0 {
+            None
+        } else {
+            let (_, block) = Self::read(stream, self.cg_cg_next as usize, little_endian);
+            Some(block)
+        }
+    }
 
-	fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>{
-		let mut all = Vec::new();
-		
-		let next_block = self;
+    fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self> {
+        let mut all = Vec::new();
 
-		all.push(self.clone());
-		loop {
-			let next_block = next_block.next(stream, little_endian);
+        let next_block = self;
 
-			match next_block {
-				Some(block) => all.push(block.clone()), 
-				None => break
-			}
-		}
+        all.push(self.clone());
+        loop {
+            let next_block = next_block.next(stream, little_endian);
 
-		all
-	}
+            match next_block {
+                Some(block) => all.push(block.clone()),
+                None => break,
+            }
+        }
 
+        all
+    }
 }
 
 impl Cgblock {
-	pub fn first(&self, stream: &[u8], little_endian: bool) -> Cnblock {
-		let (_, block) = Cnblock::read(stream, self.cg_cn_first as usize, little_endian);
-		block
-	}
-
+    pub fn first(&self, stream: &[u8], little_endian: bool) -> Cnblock {
+        let (_, block) = Cnblock::read(stream, self.cg_cn_first as usize, little_endian);
+        block
+    }
 
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
         let mut ch = Vec::new();
-		let first = self.first(stream, little_endian);
-		ch.push(first.clone());
+        let first = self.first(stream, little_endian);
+        ch.push(first.clone());
 
-		let next = first;
-		loop {
-			let next = next.next(stream, little_endian);
+        let next = first;
+        loop {
+            let next = next.next(stream, little_endian);
 
-			match next {
-				Some(cn) => ch.push(cn.clone()),
-				None => break,
-			}
-		}
+            match next {
+                Some(cn) => ch.push(cn.clone()),
+                None => break,
+            }
+        }
         ch
     }
 
-	pub fn comment(&self, stream: &[u8], little_endian: bool) -> String{
-		if self.cg_md_comment == 0 {
-			return "".to_string();
-		}
+    pub fn comment(&self, stream: &[u8], little_endian: bool) -> String {
+        if self.cg_md_comment == 0 {
+            return "".to_string();
+        }
 
-		let (_, tx_block) = TxBlock::Txblock::read(stream, self.cg_md_comment as usize, little_endian);
+        let (_, tx_block) =
+            TxBlock::Txblock::read(stream, self.cg_md_comment as usize, little_endian);
 
-		tx_block.text()
-
-		
-	}
+        tx_block.text()
+    }
 }
 
 impl Block for Cgblock {

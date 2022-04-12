@@ -1,5 +1,5 @@
-use crate::MDF4::Block::Block;
 use crate::utils;
+use crate::MDF4::Block::Block;
 
 #[derive(Debug, Clone)]
 pub struct Idblock {

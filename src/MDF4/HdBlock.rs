@@ -1,10 +1,9 @@
-use crate::MDF4::{Block::Block, BlockHeader::*};
 use crate::utils;
+use crate::MDF4::{Block::Block, BlockHeader::*};
 
+use super::mdf4::link_extract;
 use super::DgBlock::Dgblock;
 use super::TxBlock;
-use super::mdf4::link_extract;
-
 
 #[derive(Debug, Clone)]
 pub struct Hdblock {
@@ -40,26 +39,26 @@ pub struct Hdblock {
 }
 
 impl Hdblock {
-	pub fn first_data_group(&self, stream: &[u8], little_endian: bool) -> Dgblock {
-		if self.hd_dg_first == 0 {
-			panic!("No data group found!");
-		}
+    pub fn first_data_group(&self, stream: &[u8], little_endian: bool) -> Dgblock {
+        if self.hd_dg_first == 0 {
+            panic!("No data group found!");
+        }
 
-		let (_, block) = Dgblock::read(stream, self.hd_dg_first as usize, little_endian);
-		block
-	}
+        let (_, block) = Dgblock::read(stream, self.hd_dg_first as usize, little_endian);
+        block
+    }
 
-	pub fn comment(&self, stream: &[u8], little_endian: bool) -> String {
-		if self.hd_md_comment == 0 {
-			return "".to_string();
-		} 
+    pub fn comment(&self, stream: &[u8], little_endian: bool) -> String {
+        if self.hd_md_comment == 0 {
+            return "".to_string();
+        }
 
-		let (_, tx_block) = TxBlock::Txblock::read(stream, self.hd_md_comment as usize, little_endian);
+        let (_, tx_block) =
+            TxBlock::Txblock::read(stream, self.hd_md_comment as usize, little_endian);
 
-		tx_block.text()
-	}
+        tx_block.text()
+    }
 }
-
 
 impl Block for Hdblock {
     fn new() -> Self {

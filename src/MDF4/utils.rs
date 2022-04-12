@@ -9,9 +9,6 @@ unsafe fn str_from_u8_nul_utf8_unchecked(utf8_src: &[u8]) -> &str {
     ::std::str::from_utf8_unchecked(&utf8_src[0..nul_range_end])
 }
 
-pub fn str_from_u8(c_string: &[u8]) -> String{
-	unsafe {
-		str_from_u8_nul_utf8_unchecked(c_string).to_string()
-	}
+pub fn str_from_u8(c_string: &[u8]) -> String {
+    unsafe { str_from_u8_nul_utf8_unchecked(c_string).to_string() }
 }
-

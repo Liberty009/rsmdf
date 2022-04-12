@@ -1,10 +1,12 @@
-use crate::{MDF4::Block::Block, utils};
 use crate::MDF4::BlockHeader::*;
+use crate::{utils, MDF4::Block::Block};
 
-use super::Block::LinkedBlock;
 use super::mdf4::link_extract;
-use super::{mdf4_enums::{ChannelType, SyncType, DataType}, TxBlock::Txblock};
-
+use super::Block::LinkedBlock;
+use super::{
+    mdf4_enums::{ChannelType, DataType, SyncType},
+    TxBlock::Txblock,
+};
 
 #[derive(Debug, Clone)]
 pub struct Cnblock {
@@ -78,32 +80,31 @@ pub struct Cnblock {
                           // unit: String, // channel unit
 }
 
-impl LinkedBlock for Cnblock{
-	fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self> {
+impl LinkedBlock for Cnblock {
+    fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self> {
+        if self.cn_cn_next == 0 {
+            None
+        } else {
+            let (_, block) = Cnblock::read(stream, self.cn_cn_next as usize, little_endian);
+            Some(block)
+        }
+    }
 
-		if self.cn_cn_next == 0 {
-			None
-		} else {
-			let (_, block) = Cnblock::read(stream, self.cn_cn_next as usize, little_endian);
-			Some(block)
-		}
-	}
+    fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self> {
+        let mut all = Vec::new();
+        let next_block = self;
+        all.push(self.clone());
+        loop {
+            let next_block = next_block.next(stream, little_endian);
 
-	fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>{
-		let mut all = Vec::new();
-		let next_block = self;
-		all.push(self.clone());
-		loop {
-			let next_block = next_block.next(stream, little_endian);
+            match next_block {
+                Some(block) => all.push(block.clone()),
+                None => break,
+            }
+        }
 
-			match next_block {
-				Some(block) => all.push(block.clone()), 
-				None => break
-			}
-		}
-
-		all
-	}
+        all
+    }
 }
 
 impl Cnblock {
@@ -121,10 +122,9 @@ impl Cnblock {
         name
     }
 
-	pub fn channel_type(&self) -> ChannelType {
-		self.channel_type.clone()
-	}
-	
+    pub fn channel_type(&self) -> ChannelType {
+        self.channel_type.clone()
+    }
 }
 
 impl Block for Cnblock {

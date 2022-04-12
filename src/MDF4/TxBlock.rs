@@ -1,7 +1,7 @@
-use crate::utils;
-use super::BlockHeader::*;
-use super::{Block::Block};
 use super::utils as mdf4_utils;
+use super::Block::Block;
+use super::BlockHeader::*;
+use crate::utils;
 
 #[derive(Debug, Clone)]
 pub struct Txblock {
@@ -9,9 +9,9 @@ pub struct Txblock {
 }
 
 impl Txblock {
-	pub fn text(&self) -> String{
-		self.clone().tx_data
-	}
+    pub fn text(&self) -> String {
+        self.clone().tx_data
+    }
 }
 
 impl Block for Txblock {
@@ -32,10 +32,7 @@ impl Block for Txblock {
             panic!("Error type incorrect");
         }
 
-        let tx_data =
-            mdf4_utils::str_from_u8(&stream[pos..(pos + header.length as usize - 10)])
-                .to_string()
-        ;
+        let tx_data = mdf4_utils::str_from_u8(&stream[pos..(pos + header.length as usize - 10)]);
 
         (pos + header.length as usize, Self { tx_data })
     }

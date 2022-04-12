@@ -1,18 +1,17 @@
+use crate::mdf::{self, MDFFile, MdfChannel, RasterType};
+use crate::record::Record;
+use crate::signal::{self, Signal};
+use crate::utils;
 use crate::MDF4::CgBlock::Cgblock;
 use crate::MDF4::CnBlock::Cnblock;
-use crate::mdf::{MdfChannel, RasterType, MDFFile, self};
-use crate::record::Record;
-use crate::signal::{Signal, self};
-use crate::utils;
 use std::fs::File;
 use std::io::prelude::*;
 
+use super::mdf4_enums::ChannelType;
 use super::Block::{Block, LinkedBlock};
 use super::DgBlock::Dgblock;
 use super::HdBlock::Hdblock;
 use super::IdBlock::Idblock;
-use super::mdf4_enums::ChannelType;
-
 
 pub fn link_extract(
     stream: &[u8],
@@ -30,8 +29,6 @@ pub fn link_extract(
 
     (pos, links)
 }
-
-
 
 #[derive(Debug, Clone)]
 pub struct MDF4 {
@@ -59,31 +56,27 @@ impl MDFFile for MDF4 {
 
         let next_dg = hd_block.first_data_group(&self.file, little_endian);
 
-		let data_groups = next_dg.list(&self.file, little_endian);
+        let data_groups = next_dg.list(&self.file, little_endian);
 
-		for (dg_no, dg) in data_groups.iter().enumerate() {
-			let first_cg = dg.first(&self.file, little_endian);
-			let channel_groups = first_cg.list(&self.file, little_endian);
+        for (dg_no, dg) in data_groups.iter().enumerate() {
+            let first_cg = dg.first(&self.file, little_endian);
+            let channel_groups = first_cg.list(&self.file, little_endian);
 
-			for (cg_no, cg) in channel_groups.iter().enumerate() {
-				let first_cn = cg.first(&self.file, little_endian);
-				let channels = first_cn.list(&self.file, little_endian);
+            for (cg_no, cg) in channel_groups.iter().enumerate() {
+                let first_cn = cg.first(&self.file, little_endian);
+                let channels = first_cn.list(&self.file, little_endian);
 
-				for (cn_no, cn) in channels.iter().enumerate() {
-					let name = cn.clone().comment(&self.file, little_endian);
-					mdf_channels.push(
-						mdf::MdfChannel {
-							name, 
-							data_group: dg_no as u64, 
-							channel_group: cg_no as u64, 
-							channel: cn_no as u64
-						}
-					)
-				}
-
-			}
-		}
-
+                for (cn_no, cn) in channels.iter().enumerate() {
+                    let name = cn.clone().comment(&self.file, little_endian);
+                    mdf_channels.push(mdf::MdfChannel {
+                        name,
+                        data_group: dg_no as u64,
+                        channel_group: cg_no as u64,
+                        channel: cn_no as u64,
+                    })
+                }
+            }
+        }
 
         // while next_dg != 0 {
         //     let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
@@ -158,7 +151,9 @@ impl MDFFile for MDF4 {
             id,
             header: header.clone(),
             comment,
-            data_groups: header.first_data_group(&stream, little_endian).list(&stream, little_endian),
+            data_groups: header
+                .first_data_group(&stream, little_endian)
+                .list(&stream, little_endian),
             channels: Vec::new(),
             channel_groups: Vec::new(),
             little_endian,
@@ -197,7 +192,9 @@ impl MDFFile for MDF4 {
         let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
         //position += pos;
 
-        let dg = hd_block.first_data_group(&self.file, little_endian).list(&self.file, little_endian);
+        let dg = hd_block
+            .first_data_group(&self.file, little_endian)
+            .list(&self.file, little_endian);
         self.data_groups = dg;
     }
 
@@ -209,24 +206,24 @@ impl MDFFile for MDF4 {
 
         let next_dg = hd_block.first_data_group(&self.file, little_endian);
 
-		let data_groups = next_dg.list(&self.file, little_endian);
+        let data_groups = next_dg.list(&self.file, little_endian);
 
-		for dg in data_groups {
-			let first_cg = dg.first(&self.file, little_endian);
-			let channel_groups = first_cg.list(&self.file, little_endian);
+        for dg in data_groups {
+            let first_cg = dg.first(&self.file, little_endian);
+            let channel_groups = first_cg.list(&self.file, little_endian);
 
-			for cg in channel_groups {
-				let first_cn = cg.first(&self.file, little_endian);
-				let channels = first_cn.list(&self.file, little_endian);
+            for cg in channel_groups {
+                let first_cn = cg.first(&self.file, little_endian);
+                let channels = first_cn.list(&self.file, little_endian);
 
-				println!("Channel Group: {}", cg.comment(&self.file, little_endian));
+                println!("Channel Group: {}", cg.comment(&self.file, little_endian));
 
-				for cn in channels{
-					println!("Channel: {}", cn.comment(&self.file, little_endian)); //.comment);
-				}
-
-			}
-		}
+                for cn in channels {
+                    println!("Channel: {}", cn.comment(&self.file, little_endian));
+                    //.comment);
+                }
+            }
+        }
 
         // while next_dg != 0 {
         //     let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
@@ -289,9 +286,6 @@ impl MDFFile for MDF4 {
     }
 }
 
-
-
-
 // #[derive(Debug, Clone)]
 // struct DTBlock {
 // 	dt_data: Vec<Record>
@@ -313,4 +307,3 @@ struct Rdblock {}
 
 #[derive(Debug, Clone)]
 struct Sdblock {}
-

@@ -124,11 +124,7 @@ impl Signal {
     }
 
     #[must_use]
-    pub fn interp(
-        &self,
-        new_timestamps: Vec<f64>,
-        interpolation_mode: Interpolation,
-    ) -> Self {
+    pub fn interp(&self, new_timestamps: Vec<f64>, interpolation_mode: Interpolation) -> Self {
         if self.samples.is_empty() || new_timestamps.is_empty() {
             return self.clone();
         }

@@ -1,6 +1,5 @@
 use std::mem;
 
-
 pub enum ChannelHierarchyType {
     Group,
     Function,
@@ -29,9 +28,6 @@ impl ChannelHierarchyType {
         }
     }
 }
-
-
-
 
 #[derive(Debug, Clone)]
 
@@ -122,12 +118,6 @@ impl EventCause {
     }
 }
 
-
-
-
-
-
-
 #[derive(Debug, Clone)]
 pub enum SourceType {
     Other,
@@ -197,7 +187,6 @@ impl ZipType {
         }
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub enum ChannelType {
