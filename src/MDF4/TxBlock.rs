@@ -1,5 +1,3 @@
-use std::mem;
-
 use super::utils as mdf4_utils;
 use super::Block::Block;
 use super::BlockHeader::*;
@@ -30,16 +28,34 @@ impl Block for Txblock {
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
 
-        if !utils::eq(&header.id, "##MD".as_bytes()) {
+        if !utils::eq(&header.id, "##TX".as_bytes()) {
             panic!("Error type incorrect");
         }
 
-        let tx_data = mdf4_utils::str_from_u8(&stream[pos..(pos + header.length as usize - 10)]);
+		let length = header.length as usize - header.byte_len();
 
-        (pos + header.length as usize, Self { tx_data })
+        let tx_data = mdf4_utils::str_from_u8(
+			&stream[pos..(pos + length)]);
+
+        (pos + length, Self { tx_data })
     }
 
-	fn byte_len(&self) -> usize {
-		mem::size_of_val(&self.tx_data)
-	}
+    fn byte_len(&self) -> usize {
+		24 + &self.tx_data.len() + 1
+    }
+}
+
+#[test]
+fn tx_read_test() {
+    let raw: [u8; 40] = [
+        0x23, 0x23, 0x54, 0x58, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x45, 0x6E, 0x67, 0x69, 0x6E, 0x65,
+        0x5F, 0x31, 0x00, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
+    ];
+
+    let (pos, tx) = Txblock::read(&raw, 0, true);
+
+    assert_eq!(33, pos);
+	//println!("{}", tx.tx_data);
+    assert!(tx.tx_data.eq("Engine_1"))
 }
