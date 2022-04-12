@@ -1,5 +1,3 @@
-use std::mem;
-
 use super::utils as mdf4_utils;
 use super::Block::Block;
 use super::BlockHeader::*;
@@ -85,5 +83,5 @@ fn md_read_test() {
     assert_eq!(469, pos);
 	assert_eq!(469, md_block.byte_len());
 
-	
+
 }
