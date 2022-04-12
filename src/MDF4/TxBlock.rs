@@ -32,16 +32,15 @@ impl Block for Txblock {
             panic!("Error type incorrect");
         }
 
-		let length = header.length as usize - header.byte_len();
+        let length = header.length as usize - header.byte_len();
 
-        let tx_data = mdf4_utils::str_from_u8(
-			&stream[pos..(pos + length)]);
+        let tx_data = mdf4_utils::str_from_u8(&stream[pos..(pos + length)]);
 
         (pos + length, Self { tx_data })
     }
 
     fn byte_len(&self) -> usize {
-		24 + &self.tx_data.len() + 1
+        24 + &self.tx_data.len() + 1
     }
 }
 
@@ -56,6 +55,6 @@ fn tx_read_test() {
     let (pos, tx) = Txblock::read(&raw, 0, true);
 
     assert_eq!(33, pos);
-	//println!("{}", tx.tx_data);
+    //println!("{}", tx.tx_data);
     assert!(tx.tx_data.eq("Engine_1"))
 }
