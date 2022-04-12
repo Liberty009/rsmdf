@@ -91,8 +91,8 @@ impl LinkedBlock for Cnblock{
 
 	fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>{
 		let mut all = Vec::new();
-		all.push(self.clone());
 		let next_block = self;
+		all.push(self.clone());
 		loop {
 			let next_block = next_block.next(stream, little_endian);
 
@@ -107,7 +107,7 @@ impl LinkedBlock for Cnblock{
 }
 
 impl Cnblock {
-    pub fn name(self, stream: &[u8], little_endian: bool) -> String {
+    pub fn comment(self, stream: &[u8], little_endian: bool) -> String {
         let mut name = "".to_string();
 
         if matches!(self.channel_type, ChannelType::Master) {
@@ -122,7 +122,7 @@ impl Cnblock {
     }
 
 	pub fn channel_type(&self) -> ChannelType {
-		self.channel_type
+		self.channel_type.clone()
 	}
 	
 }

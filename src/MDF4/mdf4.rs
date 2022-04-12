@@ -70,7 +70,7 @@ impl MDFFile for MDF4 {
 				let channels = first_cn.list(&self.file, little_endian);
 
 				for (cn_no, cn) in channels.iter().enumerate() {
-					let name = cn.name(&self.file, little_endian);
+					let name = cn.clone().comment(&self.file, little_endian);
 					mdf_channels.push(
 						mdf::MdfChannel {
 							name, 
@@ -202,42 +202,56 @@ impl MDFFile for MDF4 {
     }
 
     fn list_channels(&self) {
-        let mut dg = Vec::new();
-        let mut cg = Vec::new();
-        let mut ch = Vec::new();
-
         let little_endian = true;
-        let postion = 0;
 
-        let (position, _id_block) = Idblock::read(&self.file, postion, little_endian);
+        let (position, _id_block) = Idblock::read(&self.file, 0, little_endian);
         let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
 
-        let mut next_dg = hd_block.first_data_group(&self.file, little_endian); // .data_group_block;
+        let next_dg = hd_block.first_data_group(&self.file, little_endian);
 
-        while next_dg != 0 {
-            let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
-            next_dg = dg_block.dg_dg_next; //  .next;
-            let mut next_cg = dg_block.dg_cg_first; // .first;
+		let data_groups = next_dg.list(&self.file, little_endian);
 
-            dg.push(dg_block);
+		for dg in data_groups {
+			let first_cg = dg.first(&self.file, little_endian);
+			let channel_groups = first_cg.list(&self.file, little_endian);
 
-            while next_cg != 0 {
-                let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
-                next_cg = cg_block.cg_cg_next; //.next;
-                let mut next_cn = cg_block.cg_cn_first; //.first;
-                cg.push(cg_block.clone());
+			for cg in channel_groups {
+				let first_cn = cg.first(&self.file, little_endian);
+				let channels = first_cn.list(&self.file, little_endian);
 
-                println!("Channel Group: {}", cg_block.cg_md_comment); //.comment);
+				println!("Channel Group: {}", cg.comment(&self.file, little_endian));
 
-                while next_cn != 0 {
-                    let (_pos, cn_block) =
-                        Cnblock::read(&self.file, next_cn as usize, little_endian);
-                    next_cn = cn_block.cn_cn_next; //.next;
+				for cn in channels{
+					println!("Channel: {}", cn.comment(&self.file, little_endian)); //.comment);
+				}
 
-                    ch.push(cn_block);
-                }
-            }
-        }
+			}
+		}
+
+        // while next_dg != 0 {
+        //     let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
+        //     next_dg = dg_block.dg_dg_next; //  .next;
+        //     let mut next_cg = dg_block.dg_cg_first; // .first;
+
+        //     dg.push(dg_block);
+
+        //     while next_cg != 0 {
+        //         let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
+        //         next_cg = cg_block.cg_cg_next; //.next;
+        //         let mut next_cn = cg_block.cg_cn_first; //.first;
+        //         cg.push(cg_block.clone());
+
+        //         println!("Channel Group: {}", cg_block.cg_md_comment); //.comment);
+
+        //         while next_cn != 0 {
+        //             let (_pos, cn_block) =
+        //                 Cnblock::read(&self.file, next_cn as usize, little_endian);
+        //             next_cn = cn_block.cn_cn_next; //.next;
+
+        //             ch.push(cn_block);
+        //         }
+        //     }
+        // }
 
         // (ch, cg, dg);
     }

@@ -10,7 +10,7 @@ pub struct Txblock {
 
 impl Txblock {
 	pub fn text(&self) -> String{
-		self.tx_data
+		self.clone().tx_data
 	}
 }
 

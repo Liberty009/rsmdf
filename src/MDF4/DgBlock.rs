@@ -32,8 +32,10 @@ impl LinkedBlock for Dgblock{
 	}
 	fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>{
 		let mut all = Vec::new();
-		all.push(self.clone());
+		
 		let next_block = self;
+
+		all.push(self.clone());
 		loop {
 			let next_block = next_block.next(stream, little_endian);
 
@@ -58,22 +60,22 @@ impl Dgblock {
 		block
 	}
 
-    pub fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {
-        let mut all = Vec::new();
-        let mut next_dg = position;
+    // pub fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {
+    //     let mut all = Vec::new();
+    //     let mut next_dg = position;
 
-        while next_dg != 0 {
-            let (_pos, dg_block) = Dgblock::read(stream, next_dg, little_endian);
-            next_dg = dg_block.dg_dg_next as usize;
-            all.push(dg_block);
-        }
+    //     while next_dg != 0 {
+    //         let (_pos, dg_block) = Dgblock::read(stream, next_dg, little_endian);
+    //         next_dg = dg_block.dg_dg_next as usize;
+    //         all.push(dg_block);
+    //     }
 
-        all
-    }
+    //     all
+    // }
 
     pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<Cgblock> {
         let mut channel_grps = Vec::new();
-        let mut next = self.first(stream, little_endian); //dg_cg_first as usize;
+        let next = self.first(stream, little_endian); //dg_cg_first as usize;
 		channel_grps.push(next.clone());
 
         loop {

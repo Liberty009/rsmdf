@@ -4,6 +4,7 @@ use crate::utils;
 
 use super::Block::LinkedBlock;
 use super::CnBlock::Cnblock;
+use super::TxBlock;
 use super::mdf4::link_extract;
 
 #[derive(Debug, Clone)]
@@ -57,8 +58,10 @@ impl LinkedBlock for Cgblock {
 
 	fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>{
 		let mut all = Vec::new();
-		all.push(self.clone());
+		
 		let next_block = self;
+
+		all.push(self.clone());
 		loop {
 			let next_block = next_block.next(stream, little_endian);
 
@@ -96,6 +99,18 @@ impl Cgblock {
 		}
         ch
     }
+
+	pub fn comment(&self, stream: &[u8], little_endian: bool) -> String{
+		if self.cg_md_comment == 0 {
+			return "".to_string();
+		}
+
+		let (_, tx_block) = TxBlock::Txblock::read(stream, self.cg_md_comment as usize, little_endian);
+
+		tx_block.text()
+
+		
+	}
 }
 
 impl Block for Cgblock {
