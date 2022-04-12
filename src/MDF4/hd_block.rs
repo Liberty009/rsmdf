@@ -1,11 +1,11 @@
 use std::mem;
 
+use super::{block::Block, block_header::*};
 use crate::utils;
-use crate::MDF4::{Block::Block, BlockHeader::*};
 
+use super::dg_block::Dgblock;
 use super::mdf4::link_extract;
-use super::DgBlock::Dgblock;
-use super::TxBlock;
+use super::tx_block;
 
 #[derive(Debug, Clone)]
 pub struct Hdblock {
@@ -57,7 +57,7 @@ impl Hdblock {
         }
 
         let (_, tx_block) =
-            TxBlock::Txblock::read(stream, self.hd_md_comment as usize, little_endian);
+            tx_block::Txblock::read(stream, self.hd_md_comment as usize, little_endian);
 
         tx_block.text()
     }

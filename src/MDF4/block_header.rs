@@ -1,7 +1,7 @@
 use std::mem;
 
+use super::block::Block;
 use crate::utils;
-use crate::MDF4::Block::Block;
 pub struct BlockHeader {
     pub id: [u8; 4],
     reserved0: [u8; 4],

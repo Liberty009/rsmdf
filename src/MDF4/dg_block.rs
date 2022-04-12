@@ -1,9 +1,9 @@
 use std::mem;
 
+use super::block::{Block, LinkedBlock};
+use super::block_header::*;
+use super::cg_block::Cgblock;
 use super::mdf4::link_extract;
-use super::Block::{Block, LinkedBlock};
-use super::BlockHeader::*;
-use super::CgBlock::Cgblock;
 use crate::utils;
 
 #[derive(Debug, Clone)]

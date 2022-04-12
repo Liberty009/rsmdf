@@ -1,8 +1,8 @@
 use std::mem;
 
+use super::block::Block;
+use super::block_header::*;
 use super::mdf4::link_extract;
-use super::Block::Block;
-use super::BlockHeader::*;
 use crate::utils;
 
 #[derive(Debug, Clone)]

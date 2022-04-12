@@ -1,6 +1,6 @@
+use super::block::Block;
+use super::block_header::*;
 use super::utils as mdf4_utils;
-use super::Block::Block;
-use super::BlockHeader::*;
 use crate::utils;
 
 #[derive(Debug, Clone)]

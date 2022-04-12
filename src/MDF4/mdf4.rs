@@ -1,17 +1,17 @@
+use super::cg_block::Cgblock;
+use super::cn_block::Cnblock;
 use crate::mdf::{self, MDFFile, MdfChannel, RasterType};
 use crate::record::Record;
 use crate::signal::{self, Signal};
 use crate::utils;
-use crate::MDF4::CgBlock::Cgblock;
-use crate::MDF4::CnBlock::Cnblock;
 use std::fs::File;
 use std::io::prelude::*;
 
+use super::block::{Block, LinkedBlock};
+use super::dg_block::Dgblock;
+use super::hd_block::Hdblock;
+use super::id_block::Idblock;
 use super::mdf4_enums::ChannelType;
-use super::Block::{Block, LinkedBlock};
-use super::DgBlock::Dgblock;
-use super::HdBlock::Hdblock;
-use super::IdBlock::Idblock;
 
 pub fn link_extract(
     stream: &[u8],

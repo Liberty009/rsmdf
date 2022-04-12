@@ -1,13 +1,14 @@
-use std::{default, mem};
+use std::mem;
 
-use crate::MDF4::BlockHeader::*;
-use crate::{utils, MDF4::Block::Block};
+use super::block::Block;
+use super::block_header::*;
+use crate::utils;
 
+use super::block::LinkedBlock;
 use super::mdf4::link_extract;
-use super::Block::LinkedBlock;
 use super::{
     mdf4_enums::{ChannelType, DataType, SyncType},
-    TxBlock::Txblock,
+    tx_block::Txblock,
 };
 
 #[derive(Debug, Clone)]

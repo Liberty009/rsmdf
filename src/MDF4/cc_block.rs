@@ -1,6 +1,6 @@
+use super::block::Block;
+use super::block_header::*;
 use crate::utils;
-use crate::MDF4::Block::Block;
-use crate::MDF4::BlockHeader::*;
 
 use super::mdf4_enums::CCType;
 
@@ -142,7 +142,7 @@ fn cc_read_test() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x40,
     ];
 
-    let (pos, cc) = Ccblock::read(&raw, 0, true);
+    let (pos, _cc) = Ccblock::read(&raw, 0, true);
 
     assert_eq!(96, pos);
 }

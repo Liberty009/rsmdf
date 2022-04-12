@@ -1,7 +1,7 @@
 use std::mem;
 
+use super::block::Block;
 use crate::utils;
-use crate::MDF4::Block::Block;
 
 #[derive(Debug, Clone)]
 pub struct Idblock {

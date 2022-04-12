@@ -1,13 +1,13 @@
 use std::mem;
 
+use super::block::Block;
+use super::block_header::*;
 use crate::utils;
-use crate::MDF4::Block::Block;
-use crate::MDF4::BlockHeader::*;
 
+use super::block::LinkedBlock;
+use super::cn_block::Cnblock;
 use super::mdf4::link_extract;
-use super::Block::LinkedBlock;
-use super::CnBlock::Cnblock;
-use super::TxBlock;
+use super::tx_block;
 
 #[derive(Debug, Clone)]
 pub struct Cgblock {
@@ -106,7 +106,7 @@ impl Cgblock {
         }
 
         let (_, tx_block) =
-            TxBlock::Txblock::read(stream, self.cg_md_comment as usize, little_endian);
+            tx_block::Txblock::read(stream, self.cg_md_comment as usize, little_endian);
 
         tx_block.text()
     }
