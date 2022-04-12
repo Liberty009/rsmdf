@@ -320,11 +320,11 @@ fn cn_read_test() {
     let (pos, cn) = Cnblock::read(&raw, 0, true);
 
     assert_eq!(pos, 160);
-	assert_eq!(cn.cn_cn_next, 25384);
-	assert_eq!(cn.cn_composition, 0);
-	assert_eq!(cn.cn_tx_name, 17728);
-	assert_eq!(cn.cn_si_source, 25112);
-	assert_eq!(cn.cn_cc_conversion, 23488);
-	assert_eq!(cn.cn_md_unit, 17984);
-	assert_eq!(cn.cn_md_comment, 17840);
+    assert_eq!(cn.cn_cn_next, 25384);
+    assert_eq!(cn.cn_composition, 0);
+    assert_eq!(cn.cn_tx_name, 17728);
+    assert_eq!(cn.cn_si_source, 25112);
+    assert_eq!(cn.cn_cc_conversion, 23488);
+    assert_eq!(cn.cn_md_unit, 17984);
+    assert_eq!(cn.cn_md_comment, 17840);
 }
