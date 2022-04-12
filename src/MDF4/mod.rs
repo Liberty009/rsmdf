@@ -1,5 +1,6 @@
 mod Block;
 mod BlockHeader;
+mod CcBlock;
 mod CgBlock;
 mod CnBlock;
 mod DgBlock;
@@ -11,4 +12,3 @@ mod TxBlock;
 pub mod mdf4;
 mod mdf4_enums;
 mod utils;
-mod CcBlock;
