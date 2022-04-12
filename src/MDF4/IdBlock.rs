@@ -9,11 +9,11 @@ pub struct Idblock {
     id_vers: [u8; 8],
     #[allow(dead_code)]
     id_prog: [u8; 8],
-	#[allow(dead_code)]
+    #[allow(dead_code)]
     id_reserved1: [u8; 4],
     #[allow(dead_code)]
     id_ver: u16,
-	#[allow(dead_code)]
+    #[allow(dead_code)]
     id_reserved2: [u8; 34],
 }
 impl Block for Idblock {
@@ -74,10 +74,10 @@ fn id_read_test() {
     let (pos, id_result) = Idblock::read(&raw, 0, true);
 
     assert_eq!(64, pos);
-	assert!(utils::eq("MDF     ".as_bytes(), &id_result.id_file));
-	assert!(utils::eq("4.10    ".as_bytes(), &id_result.id_vers));
-	assert!(utils::eq("TGT 15.0".as_bytes(), &id_result.id_prog));
-	assert!(utils::eq(&[0_u8; 4], &id_result.id_reserved1));
-	assert_eq!(410, id_result.id_ver);
-	assert!(utils::eq(&[0_u8; 34], &id_result.id_reserved2));
+    assert!(utils::eq("MDF     ".as_bytes(), &id_result.id_file));
+    assert!(utils::eq("4.10    ".as_bytes(), &id_result.id_vers));
+    assert!(utils::eq("TGT 15.0".as_bytes(), &id_result.id_prog));
+    assert!(utils::eq(&[0_u8; 4], &id_result.id_reserved1));
+    assert_eq!(410, id_result.id_ver);
+    assert!(utils::eq(&[0_u8; 34], &id_result.id_reserved2));
 }
