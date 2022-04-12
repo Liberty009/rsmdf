@@ -3,6 +3,7 @@ mod BlockHeader;
 mod CgBlock;
 mod CnBlock;
 mod DgBlock;
+mod FhBlock;
 mod HdBlock;
 mod IdBlock;
 mod TxBlock;
