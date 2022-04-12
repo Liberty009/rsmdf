@@ -31,7 +31,8 @@ pub struct Hdblock {
     hd_time_class: u8,
     #[allow(dead_code)]
     hd_flags: u8,
-    //hd_reserved: u8,
+	#[allow(dead_code)]
+    hd_reserved: u8,
     #[allow(dead_code)]
     hd_start_angle_rad: f64,
     #[allow(dead_code)]
@@ -75,7 +76,7 @@ impl Block for Hdblock {
             hd_time_flags: 0,
             hd_time_class: 0,
             hd_flags: 0,
-            //hd_reserved: 0,
+            hd_reserved: 0,
             hd_start_angle_rad: 0.0,
             hd_start_distance_m: 0.0,
         }
@@ -94,7 +95,7 @@ impl Block for Hdblock {
             hd_time_flags: 0,
             hd_time_class: 0,
             hd_flags: 0,
-            //hd_reserved: 0,
+            hd_reserved: 0,
             hd_start_angle_rad: 0.0,
             hd_start_distance_m: 0.0,
         }
@@ -121,7 +122,7 @@ impl Block for Hdblock {
         let hd_time_flags = utils::read(stream, little_endian, &mut pos);
         let hd_time_class = utils::read(stream, little_endian, &mut pos);
         let hd_flags = utils::read(stream, little_endian, &mut pos);
-        let _hd_reserved: u8 = utils::read(stream, little_endian, &mut pos);
+        let hd_reserved: u8 = utils::read(stream, little_endian, &mut pos);
         let hd_start_angle_rad = utils::read(stream, little_endian, &mut pos);
         let hd_start_distance_m = utils::read(stream, little_endian, &mut pos);
 
@@ -140,10 +141,48 @@ impl Block for Hdblock {
                 hd_time_flags,
                 hd_time_class,
                 hd_flags,
-                //hd_reserved,
+                hd_reserved,
                 hd_start_angle_rad,
                 hd_start_distance_m,
             },
         )
     }
+}
+
+
+#[test]
+fn hd_read_test(){
+	let raw: [u8; 104] = [
+	 0x23, 0x23, 0x48, 0x44, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00,
+	 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	 0xB0, 0x8D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA8, 0x00, 0x00, 0x00,
+	 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xB0, 0x8E, 0x00, 0x00,
+	 0x00, 0x00, 0x00, 0x00, 0x98, 0xC8, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00,
+	 0x6F, 0x29, 0x46, 0xF9, 0x75, 0x78, 0x69, 0x15, 0x3C, 0x00, 0x00, 0x00,
+	 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	];
+
+	let (pos, hd_block) = Hdblock::read(&raw, 0, true);
+ 
+
+	assert_eq!(pos, raw.len());
+
+    assert_eq!(36272, hd_block.hd_dg_first);
+    assert_eq!(168, hd_block.hd_fh_first);
+    assert_eq!(0, hd_block.hd_ch_first);
+    assert_eq!(0, hd_block.hd_at_first);
+    assert_eq!(36528, hd_block.hd_ev_first);
+    assert_eq!(1165464, hd_block.hd_md_comment);
+    assert_eq!(1542896795439737199, hd_block.hd_start_time_ns);
+    assert_eq!(60, hd_block.hd_tz_offset_min);
+    assert_eq!(0, hd_block.hd_dst_offset_min);
+    assert_eq!(2, hd_block.hd_time_flags);
+    assert_eq!(0, hd_block.hd_time_class);
+    assert_eq!(0, hd_block.hd_flags);
+    assert_eq!(0, hd_block.hd_reserved);
+    assert_eq!(0.0, hd_block.hd_start_angle_rad);
+    assert_eq!(0.0, hd_block.hd_start_distance_m);
+
 }
