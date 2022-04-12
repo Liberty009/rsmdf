@@ -6,6 +6,7 @@ mod DgBlock;
 mod FhBlock;
 mod HdBlock;
 mod IdBlock;
+mod MdBlock;
 mod TxBlock;
 pub mod mdf4;
 mod mdf4_enums;

@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::utils;
 use crate::MDF4::Block::Block;
 use crate::MDF4::BlockHeader::*;
@@ -192,4 +194,19 @@ impl Block for Cgblock {
             },
         )
     }
+
+	fn byte_len(&self) -> usize {
+		mem::size_of_val(&self.cg_cg_next) +
+		mem::size_of_val(&self.cg_cn_first) +
+		mem::size_of_val(&self.cg_tx_acq_name) +
+		mem::size_of_val(&self.cg_si_acq_source) +
+		mem::size_of_val(&self.cg_sr_first) +
+		mem::size_of_val(&self.cg_md_comment) +
+		mem::size_of_val(&self.cg_record_id) +
+		mem::size_of_val(&self.cg_cycle_count) +
+		mem::size_of_val(&self.cg_flags) +
+		mem::size_of_val(&self.cg_path_separator) +
+		mem::size_of_val(&self.cg_data_bytes) +
+		mem::size_of_val(&self.cg_inval_bytes) 
+	}
 }

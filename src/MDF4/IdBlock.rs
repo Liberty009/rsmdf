@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::utils;
 use crate::MDF4::Block::Block;
 
@@ -59,6 +61,15 @@ impl Block for Idblock {
             },
         )
     }
+
+	fn byte_len(&self) -> usize {
+		mem::size_of_val(&self.id_file) +
+		mem::size_of_val(&self.id_vers) +
+		mem::size_of_val(&self.id_prog) +
+		mem::size_of_val(&self.id_reserved1) +
+		mem::size_of_val(&self.id_ver) +
+		mem::size_of_val(&self.id_reserved2) 
+	}
 }
 
 #[test]

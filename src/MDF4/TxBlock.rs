@@ -1,3 +1,5 @@
+use std::mem;
+
 use super::utils as mdf4_utils;
 use super::Block::Block;
 use super::BlockHeader::*;
@@ -36,4 +38,8 @@ impl Block for Txblock {
 
         (pos + header.length as usize, Self { tx_data })
     }
+
+	fn byte_len(&self) -> usize {
+		mem::size_of_val(&self.tx_data)
+	}
 }

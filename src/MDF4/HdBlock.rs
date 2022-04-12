@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::utils;
 use crate::MDF4::{Block::Block, BlockHeader::*};
 
@@ -147,6 +149,24 @@ impl Block for Hdblock {
             },
         )
     }
+
+	fn byte_len(&self) -> usize {
+		mem::size_of_val(&self.hd_dg_first) +
+		mem::size_of_val(&self.hd_fh_first) +
+		mem::size_of_val(&self.hd_ch_first) +
+		mem::size_of_val(&self.hd_at_first) +
+		mem::size_of_val(&self.hd_ev_first) +
+		mem::size_of_val(&self.hd_md_comment) +
+		mem::size_of_val(&self.hd_start_time_ns) +
+		mem::size_of_val(&self.hd_tz_offset_min) +
+		mem::size_of_val(&self.hd_dst_offset_min) +
+		mem::size_of_val(&self.hd_time_flags) +
+		mem::size_of_val(&self.hd_time_class) +
+		mem::size_of_val(&self.hd_flags) +
+		mem::size_of_val(&self.hd_reserved) +
+		mem::size_of_val(&self.hd_start_angle_rad) +
+		mem::size_of_val(&self.hd_start_distance_m) 
+	}
 }
 
 #[test]

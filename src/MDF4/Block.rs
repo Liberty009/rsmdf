@@ -2,6 +2,8 @@ pub trait Block {
     fn new() -> Self;
     fn default() -> Self;
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self);
+	fn byte_len(&self) -> usize;
+	//fn is_empty(&self) -> bool;
 }
 
 pub trait LinkedBlock {
