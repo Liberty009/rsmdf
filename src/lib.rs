@@ -5,4 +5,4 @@ pub mod record;
 pub mod signal;
 pub mod utils;
 
-pub mod mdf4;
+pub mod MDF4;
