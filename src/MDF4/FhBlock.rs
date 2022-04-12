@@ -77,15 +77,15 @@ impl Block for Fhblock {
         )
     }
 
-	fn byte_len(&self) -> usize {
-		mem::size_of_val(&self.fh_fh_next) +
-		mem::size_of_val(&self.fh_md_comment) +
-		mem::size_of_val(&self.fh_time_ns) +
-		mem::size_of_val(&self.fh_tz_offset_min) +
-		mem::size_of_val(&self.fh_dst_offset_min) +
-		mem::size_of_val(&self.fh_time_flags) +
-		mem::size_of_val(&self.fh_reserved) 
-	}
+    fn byte_len(&self) -> usize {
+        mem::size_of_val(&self.fh_fh_next)
+            + mem::size_of_val(&self.fh_md_comment)
+            + mem::size_of_val(&self.fh_time_ns)
+            + mem::size_of_val(&self.fh_tz_offset_min)
+            + mem::size_of_val(&self.fh_dst_offset_min)
+            + mem::size_of_val(&self.fh_time_flags)
+            + mem::size_of_val(&self.fh_reserved)
+    }
 }
 
 #[test]

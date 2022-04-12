@@ -45,10 +45,10 @@ impl Block for BlockHeader {
         )
     }
 
-	fn byte_len(&self) -> usize {
-		self.id.len()+
-		self.reserved0.len() + 
-		mem::size_of_val(&self.length) + 
-		mem::size_of_val(&self.link_count)
-	}
+    fn byte_len(&self) -> usize {
+        self.id.len()
+            + self.reserved0.len()
+            + mem::size_of_val(&self.length)
+            + mem::size_of_val(&self.link_count)
+    }
 }

@@ -268,31 +268,31 @@ impl Block for Cnblock {
         )
     }
 
-	fn byte_len(&self) -> usize {
-		mem::size_of_val(&self.cn_cn_next) + 
-		mem::size_of_val(&self.cn_composition) + 
-		mem::size_of_val(&self.cn_tx_name) + 
-		mem::size_of_val(&self.cn_si_source) + 
-		mem::size_of_val(&self.cn_cc_conversion) + 
-		mem::size_of_val(&self.cn_data) + 
-		mem::size_of_val(&self.cn_md_unit) + 
-		mem::size_of_val(&self.cn_md_comment) + 
-		mem::size_of_val(&self.cn_at_reference) + 
-		mem::size_of_val(&self.cn_default_x) + 
-		mem::size_of_val(&self.channel_type) + 
-		mem::size_of_val(&self.sync_type) + 
-		mem::size_of_val(&self.data_type) + 
-		mem::size_of_val(&self.bit_offset) + 
-		mem::size_of_val(&self.byte_offset) + 
-		mem::size_of_val(&self.bit_count) + 
-		mem::size_of_val(&self.flags) + 
-		mem::size_of_val(&self.pos_invalidation_bit) + 
-		mem::size_of_val(&self.precision) + 
-		mem::size_of_val(&self.min_raw_value) + 
-		mem::size_of_val(&self.max_raw_value) + 
-		mem::size_of_val(&self.lower_limit) + 
-		mem::size_of_val(&self.upper_limit) + 
-		mem::size_of_val(&self.lower_ext_limit) + 
-		mem::size_of_val(&self.upper_ext_limit) 
-	}
+    fn byte_len(&self) -> usize {
+        mem::size_of_val(&self.cn_cn_next)
+            + mem::size_of_val(&self.cn_composition)
+            + mem::size_of_val(&self.cn_tx_name)
+            + mem::size_of_val(&self.cn_si_source)
+            + mem::size_of_val(&self.cn_cc_conversion)
+            + mem::size_of_val(&self.cn_data)
+            + mem::size_of_val(&self.cn_md_unit)
+            + mem::size_of_val(&self.cn_md_comment)
+            + mem::size_of_val(&self.cn_at_reference)
+            + mem::size_of_val(&self.cn_default_x)
+            + mem::size_of_val(&self.channel_type)
+            + mem::size_of_val(&self.sync_type)
+            + mem::size_of_val(&self.data_type)
+            + mem::size_of_val(&self.bit_offset)
+            + mem::size_of_val(&self.byte_offset)
+            + mem::size_of_val(&self.bit_count)
+            + mem::size_of_val(&self.flags)
+            + mem::size_of_val(&self.pos_invalidation_bit)
+            + mem::size_of_val(&self.precision)
+            + mem::size_of_val(&self.min_raw_value)
+            + mem::size_of_val(&self.max_raw_value)
+            + mem::size_of_val(&self.lower_limit)
+            + mem::size_of_val(&self.upper_limit)
+            + mem::size_of_val(&self.lower_ext_limit)
+            + mem::size_of_val(&self.upper_ext_limit)
+    }
 }

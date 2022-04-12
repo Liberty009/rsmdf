@@ -127,12 +127,11 @@ impl Block for Dgblock {
         )
     }
 
-	
-	fn byte_len(&self) -> usize {
-		mem::size_of_val(&self.dg_dg_next) +
-		mem::size_of_val(&self.dg_cg_first) +
-		mem::size_of_val(&self.dg_data) +
-		mem::size_of_val(&self.dg_md_comment) +
-		mem::size_of_val(&self.dg_rec_id_size)
-	}
+    fn byte_len(&self) -> usize {
+        mem::size_of_val(&self.dg_dg_next)
+            + mem::size_of_val(&self.dg_cg_first)
+            + mem::size_of_val(&self.dg_data)
+            + mem::size_of_val(&self.dg_md_comment)
+            + mem::size_of_val(&self.dg_rec_id_size)
+    }
 }

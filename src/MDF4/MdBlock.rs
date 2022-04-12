@@ -27,18 +27,15 @@ impl Block for Mdblock {
             panic!("Error type incorrect");
         }
 
-		let string_length = header.length as usize - header.byte_len();
-        let md_data: String =
-            mdf4_utils::str_from_u8(&stream[pos..(pos + string_length)]);
+        let string_length = header.length as usize - header.byte_len();
+        let md_data: String = mdf4_utils::str_from_u8(&stream[pos..(pos + string_length)]);
 
         ((pos + string_length), Self { md_data })
     }
 
-	fn byte_len(&self) -> usize{
-		24 + 
-		self.md_data.len() +
-		1
-	}
+    fn byte_len(&self) -> usize {
+        24 + self.md_data.len() + 1
+    }
 }
 
 #[test]
@@ -81,7 +78,5 @@ fn md_read_test() {
     let (pos, md_block) = Mdblock::read(&raw, 0, true);
 
     assert_eq!(469, pos);
-	assert_eq!(469, md_block.byte_len());
-
-
+    assert_eq!(469, md_block.byte_len());
 }
