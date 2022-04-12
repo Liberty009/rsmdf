@@ -32,13 +32,13 @@ pub struct Cgblock {
     #[allow(dead_code)]
     cg_cycle_count: u64, //- int : number of cycles for this channel group
     #[allow(dead_code)]
-    cg_flags: u64, //- int : channel group flags
+    cg_flags: u16, //- int : channel group flags
     #[allow(dead_code)]
-    cg_path_separator: u8,
+    cg_path_separator: u16,
     #[allow(dead_code)]
-    cg_data_bytes: u64,
+    cg_data_bytes: u32,
     #[allow(dead_code)]
-    cg_inval_bytes: u64, // - int : number of bytes used for invalidation
+    cg_inval_bytes: u32, // - int : number of bytes used for invalidation
                          // bits by this channel group
 
                          //Other attributes
@@ -209,4 +209,33 @@ impl Block for Cgblock {
             + mem::size_of_val(&self.cg_data_bytes)
             + mem::size_of_val(&self.cg_inval_bytes)
     }
+}
+
+#[test]
+fn cg_read_test() {
+    let raw: [u8; 104] = [
+        0x23, 0x23, 0x43, 0x47, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0xA0, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xD0, 0x3F, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0xF0, 0x66, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0xD8, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    ];
+
+    let (pos, cg) = Cgblock::read(&raw, 0, true);
+
+    assert_eq!(pos, 104);
+    assert_eq!(cg.cg_cg_next, 0);
+    assert_eq!(cg.cg_cn_first, 25760);
+    assert_eq!(cg.cg_tx_acq_name, 16336);
+    assert_eq!(cg.cg_si_acq_source, 26352);
+    assert_eq!(cg.cg_sr_first, 0);
+    assert_eq!(cg.cg_md_comment, 16376);
+
+    assert_eq!(cg.cg_record_id, 0);
+    assert_eq!(cg.cg_cycle_count, 1240);
+    assert_eq!(cg.cg_flags, 0);
+    // assert_eq!(cg.cg_path_separator, 10);
+    assert_eq!(cg.cg_data_bytes, 10);
 }
