@@ -5,10 +5,17 @@ use super::utils as mdf4_utils;
 use crate::utils;
 
 #[derive(Debug, Clone)]
-struct Mdblock {
+pub struct Mdblock {
     #[allow(dead_code)]
     md_data: String,
 }
+
+impl Mdblock{
+    pub fn text(&self) -> String{
+        self.clone().md_data
+    }
+}
+
 impl Block for Mdblock {
     fn new() -> Self {
         Self {

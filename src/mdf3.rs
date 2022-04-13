@@ -204,7 +204,7 @@ impl mdf::MDFFile for MDF3 {
         self.channels = channels;
     }
 
-    fn list(&mut self) {
+    fn list_data_groups(&mut self) {
         let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
         let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
         //position += pos;

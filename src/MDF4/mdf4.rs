@@ -184,7 +184,7 @@ impl MDFFile for MDF4 {
         self.channels = channels;
     }
 
-    fn list(&mut self) {
+    fn list_data_groups(&mut self) {
         let little_endian = true;
         let position = 0;
 
