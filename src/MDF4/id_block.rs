@@ -72,9 +72,15 @@ impl Block for Idblock {
     }
 }
 
-#[test]
-fn id_read_test() {
-    let raw: [u8; 64] = [
+#[cfg(test)]
+
+mod tests {
+    use crate::{
+        utils,
+        MDF4::{block::Block, id_block::Idblock},
+    };
+
+    static RAW: [u8; 64] = [
         0x4D, 0x44, 0x46, 0x20, 0x20, 0x20, 0x20, 0x20, 0x34, 0x2E, 0x31, 0x30, 0x20, 0x20, 0x20,
         0x20, 0x54, 0x47, 0x54, 0x20, 0x31, 0x35, 0x2E, 0x30, 0x00, 0x00, 0x00, 0x00, 0x9A, 0x01,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -82,13 +88,16 @@ fn id_read_test() {
         0x00, 0x00, 0x00, 0x00,
     ];
 
-    let (pos, id_result) = Idblock::read(&raw, 0, true);
+    #[test]
+    fn id_read_test() {
+        let (pos, id_result) = Idblock::read(&RAW, 0, true);
 
-    assert_eq!(64, pos);
-    assert!(utils::eq("MDF     ".as_bytes(), &id_result.id_file));
-    assert!(utils::eq("4.10    ".as_bytes(), &id_result.id_vers));
-    assert!(utils::eq("TGT 15.0".as_bytes(), &id_result.id_prog));
-    assert!(utils::eq(&[0_u8; 4], &id_result.id_reserved1));
-    assert_eq!(410, id_result.id_ver);
-    assert!(utils::eq(&[0_u8; 34], &id_result.id_reserved2));
+        assert_eq!(64, pos);
+        assert!(utils::eq("MDF     ".as_bytes(), &id_result.id_file));
+        assert!(utils::eq("4.10    ".as_bytes(), &id_result.id_vers));
+        assert!(utils::eq("TGT 15.0".as_bytes(), &id_result.id_prog));
+        assert!(utils::eq(&[0_u8; 4], &id_result.id_reserved1));
+        assert_eq!(410, id_result.id_ver);
+        assert!(utils::eq(&[0_u8; 34], &id_result.id_reserved2));
+    }
 }
