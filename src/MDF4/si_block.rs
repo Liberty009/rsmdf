@@ -97,11 +97,11 @@ let raw: [u8; 56] = [
 let (pos, si) = Siblock::read(&raw, 0, true);
 
 assert_eq!(pos, 56);
-//assert_eq!(0, si.si_tx_name);
-// assert_eq!(si.si_tx_path);
-// assert_eq!(si.si_md_comment);
-// assert_eq!(si.si_type);
-assert!(BusType::Other == si.si_bus_type);
+assert_eq!(17648, si.si_tx_name);
+assert_eq!(17680, si.si_tx_path);
+assert_eq!(0, si.si_md_comment);
+assert_eq!(SourceType::Ecu, si.si_type);
+assert_eq!(BusType::Other, si.si_bus_type);
 assert_eq!(0, si.si_flags);
 assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
 
