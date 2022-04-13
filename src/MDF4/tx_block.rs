@@ -45,17 +45,22 @@ impl Block for Txblock {
     }
 }
 
-#[test]
-fn tx_read_test() {
-    let raw: [u8; 40] = [
+#[cfg(test)]
+mod tests {
+    use crate::MDF4::{block::Block, tx_block::Txblock};
+
+    static RAW: [u8; 40] = [
         0x23, 0x23, 0x54, 0x58, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x45, 0x6E, 0x67, 0x69, 0x6E, 0x65,
         0x5F, 0x31, 0x00, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
     ];
 
-    let (pos, tx) = Txblock::read(&raw, 0, true);
+    #[test]
+    fn tx_read_test() {
+        let (pos, tx) = Txblock::read(&RAW, 0, true);
 
-    assert_eq!(33, pos);
-    //println!("{}", tx.tx_data);
-    assert!(tx.tx_data.eq("Engine_1"))
+        assert_eq!(33, pos);
+        //println!("{}", tx.tx_data);
+        assert!(tx.tx_data.eq("Engine_1"))
+    }
 }
