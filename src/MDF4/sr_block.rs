@@ -32,7 +32,7 @@ impl Block for Srblock {
             sr_interval: 0_f64,
             sr_sync_type: 0_u8,
             sr_flags: 0_u8,
-            sr_reserved: [0_u8; 6]
+            sr_reserved: [0_u8; 6],
         }
     }
     fn default() -> Self {
