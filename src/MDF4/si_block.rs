@@ -76,23 +76,35 @@ impl Block for Siblock {
     }
 }
 
-#[test]
-fn si_read_test() {
-    let raw: [u8; 56] = [
+#[cfg(test)]
+mod tests {
+    use crate::{
+        utils,
+        MDF4::{
+            block::Block,
+            mdf4_enums::{BusType, SourceType},
+            si_block::Siblock,
+        },
+    };
+
+    static RAW: [u8; 56] = [
         0x23, 0x23, 0x53, 0x49, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x44, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x10, 0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let (pos, si) = Siblock::read(&raw, 0, true);
+    #[test]
+    fn si_read_test() {
+        let (pos, si) = Siblock::read(&RAW, 0, true);
 
-    assert_eq!(pos, 56);
-    assert_eq!(17648, si.si_tx_name);
-    assert_eq!(17680, si.si_tx_path);
-    assert_eq!(0, si.si_md_comment);
-    assert_eq!(SourceType::Ecu, si.si_type);
-    assert_eq!(BusType::Other, si.si_bus_type);
-    assert_eq!(0, si.si_flags);
-    assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
+        assert_eq!(pos, 56);
+        assert_eq!(17648, si.si_tx_name);
+        assert_eq!(17680, si.si_tx_path);
+        assert_eq!(0, si.si_md_comment);
+        assert_eq!(SourceType::Ecu, si.si_type);
+        assert_eq!(BusType::Other, si.si_bus_type);
+        assert_eq!(0, si.si_flags);
+        assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
+    }
 }
