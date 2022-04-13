@@ -62,7 +62,7 @@ impl Block for Ccblock {
         }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-        let (mut pos, header) = BlockHeader::read(stream, position, little_endian);
+        let (pos, header) = BlockHeader::read(stream, position, little_endian);
 
         if !utils::eq(&header.id[..], "##CC".as_bytes()) {
             panic!("Error: id incorrect");
