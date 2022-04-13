@@ -209,9 +209,12 @@ impl Block for Cgblock {
     }
 }
 
-#[test]
-fn cg_read_test() {
-    let raw: [u8; 104] = [
+#[cfg(test)]
+mod tests{
+    use crate::MDF4::{cg_block::Cgblock, block::Block};
+
+
+    static RAW: [u8; 104] = [
         0x23, 0x23, 0x43, 0x47, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0xA0, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xD0, 0x3F, 0x00, 0x00, 0x00,
@@ -221,19 +224,25 @@ fn cg_read_test() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let (pos, cg) = Cgblock::read(&raw, 0, true);
+    #[test]
+    fn cg_read_test() {
 
-    assert_eq!(pos, 104);
-    assert_eq!(cg.cg_cg_next, 0);
-    assert_eq!(cg.cg_cn_first, 25760);
-    assert_eq!(cg.cg_tx_acq_name, 16336);
-    assert_eq!(cg.cg_si_acq_source, 26352);
-    assert_eq!(cg.cg_sr_first, 0);
-    assert_eq!(cg.cg_md_comment, 16376);
-
-    assert_eq!(cg.cg_record_id, 0);
-    assert_eq!(cg.cg_cycle_count, 1240);
-    assert_eq!(cg.cg_flags, 0);
-    // assert_eq!(cg.cg_path_separator, 10);
-    assert_eq!(cg.cg_data_bytes, 10);
+        let (pos, cg) = Cgblock::read(&RAW, 0, true);
+    
+        assert_eq!(pos, 104);
+        assert_eq!(cg.cg_cg_next, 0);
+        assert_eq!(cg.cg_cn_first, 25760);
+        assert_eq!(cg.cg_tx_acq_name, 16336);
+        assert_eq!(cg.cg_si_acq_source, 26352);
+        assert_eq!(cg.cg_sr_first, 0);
+        assert_eq!(cg.cg_md_comment, 16376);
+    
+        assert_eq!(cg.cg_record_id, 0);
+        assert_eq!(cg.cg_cycle_count, 1240);
+        assert_eq!(cg.cg_flags, 0);
+        // assert_eq!(cg.cg_path_separator, 10);
+        assert_eq!(cg.cg_data_bytes, 10);
+    }
 }
+
+
