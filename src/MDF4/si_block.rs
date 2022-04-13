@@ -3,7 +3,7 @@ use crate::utils;
 use super::block::Block;
 use super::block_header::*;
 use super::mdf4::link_extract;
-use super::mdf4_enums::{SourceType, BusType};
+use super::mdf4_enums::{BusType, SourceType};
 
 #[derive(Debug, Clone)]
 pub struct Siblock {
@@ -79,6 +79,4 @@ impl Block for Siblock {
 }
 
 #[test]
-fn si_read_test(){
-    
-}
+fn si_read_test() {}

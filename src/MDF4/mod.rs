@@ -1,4 +1,3 @@
-
 mod at_block;
 mod block;
 mod block_header;
@@ -14,11 +13,10 @@ mod fh_block;
 mod hd_block;
 mod hl_block;
 mod id_block;
+mod md_block;
 pub mod mdf4;
 mod mdf4_enums;
-mod md_block;
 mod si_block;
 mod sr_block;
 mod tx_block;
 mod utils;
-

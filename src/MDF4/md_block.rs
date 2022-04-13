@@ -10,8 +10,8 @@ pub struct Mdblock {
     md_data: String,
 }
 
-impl Mdblock{
-    pub fn text(&self) -> String{
+impl Mdblock {
+    pub fn text(&self) -> String {
         self.clone().md_data
     }
 }

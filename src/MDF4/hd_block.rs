@@ -4,8 +4,8 @@ use super::{block::Block, block_header::*};
 use crate::utils;
 
 use super::dg_block::Dgblock;
-use super::mdf4::link_extract;
 use super::md_block;
+use super::mdf4::link_extract;
 
 #[derive(Debug, Clone)]
 pub struct Hdblock {

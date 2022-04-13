@@ -1,9 +1,9 @@
 use crate::utils;
 
-use super::block_header::*;
 use super::block::Block;
+use super::block_header::*;
 use super::mdf4::link_extract;
-use super::mdf4_enums::{EventType, EventSyncType, RangeType, EventCause};
+use super::mdf4_enums::{EventCause, EventSyncType, EventType, RangeType};
 
 #[derive(Debug, Clone)]
 pub struct EVBlock {
