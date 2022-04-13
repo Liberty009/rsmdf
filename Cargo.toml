@@ -2,6 +2,11 @@
 name = "rsmdf"
 version = "0.1.0"
 edition = "2021"
+license = "LICENSE"
+keywords = ["ASAM", "MDF", "Reader"]
+description = "ASAM MDF file reader and writer library, based on ASAMMDF for python"
+readme = "README.md"
+repository = "https://github.com/Liberty009/rsmdf"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
