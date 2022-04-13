@@ -150,9 +150,12 @@ impl Block for Dgblock {
     }
 }
 
-#[test]
-fn dg_read_test() {
-    let raw: [u8; 64] = [
+#[cfg(test)]
+mod tests {
+    use super::Dgblock;
+    use crate::MDF4::block::Block;
+
+    static RAW: [u8; 64] = [
         0x23, 0x23, 0x44, 0x47, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x8D, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x90, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA8, 0x00, 0x00, 0x00,
@@ -160,13 +163,16 @@ fn dg_read_test() {
         0x00, 0x00, 0x00, 0x00,
     ];
 
-    let (pos, dg) = Dgblock::read(&raw, 0, true);
+    #[test]
+    fn dg_read_test() {
+        let (pos, dg) = Dgblock::read(&RAW, 0, true);
 
-    assert_eq!(64, pos);
-    assert_eq!(36336, dg.dg_dg_next);
-    assert_eq!(34448, dg.dg_cg_first);
-    assert_eq!(43168, dg.dg_data);
-    assert_eq!(0, dg.dg_md_comment);
-    assert_eq!(0, dg.dg_rec_id_size);
-    assert_eq!([0_u8; 7], dg.dg_reserved);
+        assert_eq!(64, pos);
+        assert_eq!(36336, dg.dg_dg_next);
+        assert_eq!(34448, dg.dg_cg_first);
+        assert_eq!(43168, dg.dg_data);
+        assert_eq!(0, dg.dg_md_comment);
+        assert_eq!(0, dg.dg_rec_id_size);
+        assert_eq!([0_u8; 7], dg.dg_reserved);
+    }
 }
