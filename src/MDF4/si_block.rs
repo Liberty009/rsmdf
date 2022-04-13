@@ -7,19 +7,12 @@ use super::mdf4_enums::{SourceType, BusType};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Siblock {
-    #[allow(dead_code)]
     si_tx_name: u64,
-    #[allow(dead_code)]
     si_tx_path: u64,
-    #[allow(dead_code)]
     si_md_comment: u64,
-    #[allow(dead_code)]
     si_type: SourceType,
-    #[allow(dead_code)]
     si_bus_type: BusType,
-    #[allow(dead_code)]
     si_flags: u8,
-    #[allow(dead_code)]
     si_reserved: [u8; 5],
 }
 impl Block for Siblock {
