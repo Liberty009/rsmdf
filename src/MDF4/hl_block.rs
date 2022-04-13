@@ -1,5 +1,9 @@
+use crate::utils;
+
 use super::block::Block;
 use super::block_header::*;
+use super::mdf4::link_extract;
+use super::mdf4_enums::ZipType;
 
 
 #[derive(Debug, Clone)]
@@ -52,5 +56,9 @@ impl Block for Hlblock {
                 //hl_reserved,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }

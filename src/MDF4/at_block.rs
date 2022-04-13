@@ -1,5 +1,8 @@
+use crate::utils;
+
 use super::block::Block;
 use super::block_header::BlockHeader;
+use super::mdf4::link_extract;
 
 #[derive(Debug, Clone)]
 pub struct Atblock {
@@ -103,5 +106,9 @@ impl Block for Atblock {
                 embedded_data,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }

@@ -1,5 +1,8 @@
+use crate::utils;
+
 use super::block::Block;
 use super::block_header::*;
+use super::mdf4_enums::ZipType;
 
 #[derive(Debug, Clone)]
 struct DZBlock {
@@ -69,5 +72,9 @@ impl Block for DZBlock {
                 dz_data,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }

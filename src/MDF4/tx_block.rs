@@ -29,6 +29,7 @@ impl Block for Txblock {
         let (pos, header) = BlockHeader::read(stream, position, little_endian);
 
         if !utils::eq(&header.id, "##TX".as_bytes()) {
+            println!("Found: {:?} at {}", &header.id, position);
             panic!("Error type incorrect");
         }
 

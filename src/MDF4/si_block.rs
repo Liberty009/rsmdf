@@ -1,5 +1,9 @@
+use crate::utils;
+
 use super::block::Block;
 use super::block_header::*;
+use super::mdf4::link_extract;
+use super::mdf4_enums::{SourceType, BusType};
 
 #[derive(Debug, Clone)]
 pub struct Siblock {
@@ -68,4 +72,13 @@ impl Block for Siblock {
             },
         )
     }
+
+    fn byte_len(&self) -> usize {
+        todo!()
+    }
+}
+
+#[test]
+fn si_read_test(){
+    
 }

@@ -1,5 +1,8 @@
+use crate::utils;
+
 use super::block::Block;
 use super::block_header::*;
+use super::mdf4::link_extract;
 
 
 #[derive(Debug, Clone)]
@@ -68,5 +71,9 @@ impl Block for Srblock {
                 sr_flags,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }
