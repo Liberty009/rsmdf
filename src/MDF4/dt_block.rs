@@ -125,7 +125,7 @@ mod test {
 
     #[test]
     fn dt_read_test() {
-        let (pos, dt) = Dtblock::read(&RAW, 0, true);
+        let (pos, _dt) = Dtblock::read(&RAW, 0, true);
 
         assert_eq!(pos, 1140);
     }
