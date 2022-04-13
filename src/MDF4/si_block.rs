@@ -101,8 +101,7 @@ assert_eq!(pos, 56);
 // assert_eq!(si.si_tx_path);
 // assert_eq!(si.si_md_comment);
 // assert_eq!(si.si_type);
-let bus = si.si_bus_type;
-assert!(BusType::Ethernet == bus);
+assert!(BusType::Other == si.si_bus_type);
 assert_eq!(0, si.si_flags);
 assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
 
