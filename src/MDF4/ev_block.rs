@@ -5,7 +5,7 @@ use super::block::Block;
 use super::mdf4::link_extract;
 use super::mdf4_enums::{EventType, EventSyncType, RangeType, EventCause};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EVBlock {
     #[allow(dead_code)]
     ev_ev_next: u64,

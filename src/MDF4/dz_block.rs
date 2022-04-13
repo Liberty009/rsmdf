@@ -4,7 +4,7 @@ use super::block::Block;
 use super::block_header::*;
 use super::mdf4_enums::ZipType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct DZBlock {
     #[allow(dead_code)]
     dz_org_block_type: [u8; 2],

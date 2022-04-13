@@ -2,7 +2,7 @@ use std::mem;
 
 use crate::utils;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy,PartialEq)]
 pub enum DataType {
     UnsignedInt,
     SignedInt,
@@ -52,6 +52,7 @@ pub fn _print_record(value: Record) {
     };
 }
 
+#[derive(PartialEq)]
 pub enum Record {
     Uint(u8),
     Int(i8),

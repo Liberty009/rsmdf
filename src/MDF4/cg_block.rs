@@ -9,7 +9,7 @@ use super::cn_block::Cnblock;
 use super::mdf4::link_extract;
 use super::tx_block;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Cgblock {
     //id: [u8; 4],        //- bytes : block ID; always b'##CG'
     //reserved0: u64,     //- int : reserved bytes

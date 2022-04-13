@@ -4,7 +4,7 @@ use super::block::Block;
 use super::block_header::BlockHeader;
 use super::mdf4::link_extract;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Atblock {
     //id: [u8; 4],
     //reserved0: [u8; 4],

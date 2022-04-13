@@ -3,7 +3,7 @@ use super::block_header::*;
 use super::utils as mdf4_utils;
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Txblock {
     tx_data: String,
 }

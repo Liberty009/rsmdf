@@ -4,7 +4,7 @@ use crate::utils;
 
 use super::mdf4_enums::CCType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Ccblock {
     #[allow(dead_code)]
     name_addr: u64,

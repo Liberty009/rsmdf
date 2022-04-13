@@ -3,7 +3,7 @@ use super::block_header::*;
 use super::mdf4::link_extract;
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Cablock {
     #[allow(dead_code)]
     ca_composition: u64,

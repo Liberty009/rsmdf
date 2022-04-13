@@ -6,7 +6,7 @@ use super::cg_block::Cgblock;
 use super::mdf4::link_extract;
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Dgblock {
     #[allow(dead_code)]
     dg_dg_next: u64,

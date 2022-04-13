@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Signal {
     pub samples: Vec<f64>,
     pub timestamps: Vec<f64>,
@@ -155,6 +155,7 @@ impl Signal {
     }
 }
 
+#[derive(PartialEq)]
 pub enum Interpolation {
     RepeatPreviousSample,
     LinearInterpolation,

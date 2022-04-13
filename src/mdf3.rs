@@ -26,7 +26,7 @@ const SIGNED_INT_LITTLEENDIAN: u16 = 14;
 const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
 const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone,)]
 pub struct MDF3 {
     #[allow(dead_code)]
     pub id: IDBLOCK,
@@ -300,7 +300,7 @@ impl mdf::MDFFile for MDF3 {
     // }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IDBLOCK {
     pub file_id: [u8; 8],
     pub format_id: [u8; 8],
@@ -445,7 +445,7 @@ impl HDBLOCK {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TXBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,
@@ -498,7 +498,7 @@ impl TXBLOCK {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PRBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,
@@ -543,7 +543,7 @@ impl PRBLOCK {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone,)]
 pub struct TRBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,
@@ -1033,7 +1033,7 @@ impl CNBLOCK {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CCBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,
@@ -1088,6 +1088,7 @@ impl CCBLOCK {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[derive(PartialEq)]
 pub enum ConversionData {
     Parameters,
     Table,
@@ -1105,6 +1106,7 @@ impl ConversionData {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[derive(PartialEq)]
 pub enum Parameters {
     ConversionLinear,
     ConversionPoly,
@@ -1278,11 +1280,12 @@ impl ConversionRational {
 }
 
 #[derive(Debug, Clone, Copy)]
+#[derive(PartialEq)]
 pub enum Table {
     ConversionTabular,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone,)]
 pub struct ConversionTabular {
     pub value: Vec<TableEntry>,
 }
@@ -1317,7 +1320,7 @@ impl TableEntry {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Text {
     ConversionTextFormula,
     ConversionTextRangeTable,
@@ -1476,7 +1479,7 @@ impl TimeStruct {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CDBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,
@@ -1528,7 +1531,7 @@ impl CDBLOCK {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Signals {
     pub data_group: u32,
     pub channel_group: u32,
@@ -1553,7 +1556,7 @@ impl Signals {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CEBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,

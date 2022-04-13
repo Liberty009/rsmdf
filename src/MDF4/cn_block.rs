@@ -11,7 +11,7 @@ use super::{
     tx_block::Txblock,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Cnblock {
     //id: [u8; 4],        //block ID; always b'##CN'
     //reserved0: u32,      //reserved bytes

@@ -5,7 +5,7 @@ use super::block_header::*;
 use super::mdf4::link_extract;
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Srblock {
     #[allow(dead_code)]
     sr_sr_next: u64,

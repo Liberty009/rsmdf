@@ -4,7 +4,7 @@ use super::utils as mdf4_utils;
 
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Mdblock {
     #[allow(dead_code)]
     md_data: String,

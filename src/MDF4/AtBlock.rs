@@ -1,7 +1,7 @@
 use crate::MDF4::Block::Block;
 use crate::MDF4::BlockHeader::BlockHeader;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Atblock {
     //id: [u8; 4],
     //reserved0: [u8; 4],

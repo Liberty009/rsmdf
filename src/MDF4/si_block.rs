@@ -5,7 +5,7 @@ use super::block_header::*;
 use super::mdf4::link_extract;
 use super::mdf4_enums::{SourceType, BusType};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Siblock {
     #[allow(dead_code)]
     si_tx_name: u64,
@@ -19,6 +19,8 @@ pub struct Siblock {
     si_bus_type: BusType,
     #[allow(dead_code)]
     si_flags: u8,
+    #[allow(dead_code)]
+    si_reserved: [u8; 5],
 }
 impl Block for Siblock {
     fn new() -> Self {
@@ -29,6 +31,7 @@ impl Block for Siblock {
             si_type: SourceType::Bus,
             si_bus_type: BusType::Can,
             si_flags: 0_u8,
+            si_reserved: [0_u8; 5],
         }
     }
     fn default() -> Self {
@@ -39,6 +42,7 @@ impl Block for Siblock {
             si_type: SourceType::Bus,
             si_bus_type: BusType::Can,
             si_flags: 0_u8,
+            si_reserved: [0_u8; 5],
         }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
@@ -58,7 +62,7 @@ impl Block for Siblock {
         let si_bus_type = BusType::new(utils::read(stream, little_endian, &mut pos));
         let si_flags = utils::read(stream, little_endian, &mut pos);
 
-        let _si_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
+        let si_reserved = utils::read(stream, little_endian, &mut pos);
 
         (
             pos,
@@ -69,6 +73,7 @@ impl Block for Siblock {
                 si_type,
                 si_bus_type,
                 si_flags,
+                si_reserved,
             },
         )
     }
@@ -79,6 +84,26 @@ impl Block for Siblock {
 }
 
 #[test]
-fn si_read_test(){
-    
+fn si_read_test() {
+
+let raw: [u8; 56] = [
+	0x23, 0x23, 0x53, 0x49, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0xF0, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x45, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+];
+
+let (pos, si) = Siblock::read(&raw, 0, true);
+
+assert_eq!(pos, 56);
+//assert_eq!(0, si.si_tx_name);
+// assert_eq!(si.si_tx_path);
+// assert_eq!(si.si_md_comment);
+// assert_eq!(si.si_type);
+let bus = si.si_bus_type;
+assert!(BusType::Ethernet == bus);
+assert_eq!(0, si.si_flags);
+assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
+
 }

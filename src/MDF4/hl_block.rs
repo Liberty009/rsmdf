@@ -6,7 +6,7 @@ use super::mdf4::link_extract;
 use super::mdf4_enums::ZipType;
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Hlblock {
     #[allow(dead_code)]
     hl_dl_first: u64,

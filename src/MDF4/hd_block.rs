@@ -7,7 +7,7 @@ use super::dg_block::Dgblock;
 use super::mdf4::link_extract;
 use super::md_block;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Hdblock {
     #[allow(dead_code)]
     hd_dg_first: u64,
