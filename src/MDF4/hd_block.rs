@@ -169,9 +169,11 @@ impl Block for Hdblock {
     }
 }
 
-#[test]
-fn hd_read_test() {
-    let raw: [u8; 104] = [
+#[cfg(test)]
+mod tests {
+    use crate::MDF4::{block::Block, hd_block::Hdblock};
+
+    static RAW: [u8; 104] = [
         0x23, 0x23, 0x48, 0x44, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xB0, 0x8D, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0xA8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -181,23 +183,26 @@ fn hd_read_test() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let (pos, hd_block) = Hdblock::read(&raw, 0, true);
+    #[test]
+    fn hd_read_test() {
+        let (pos, hd_block) = Hdblock::read(&RAW, 0, true);
 
-    assert_eq!(pos, raw.len());
+        assert_eq!(pos, RAW.len());
 
-    assert_eq!(36272, hd_block.hd_dg_first);
-    assert_eq!(168, hd_block.hd_fh_first);
-    assert_eq!(0, hd_block.hd_ch_first);
-    assert_eq!(0, hd_block.hd_at_first);
-    assert_eq!(36528, hd_block.hd_ev_first);
-    assert_eq!(1165464, hd_block.hd_md_comment);
-    assert_eq!(1542896795439737199, hd_block.hd_start_time_ns);
-    assert_eq!(60, hd_block.hd_tz_offset_min);
-    assert_eq!(0, hd_block.hd_dst_offset_min);
-    assert_eq!(2, hd_block.hd_time_flags);
-    assert_eq!(0, hd_block.hd_time_class);
-    assert_eq!(0, hd_block.hd_flags);
-    assert_eq!(0, hd_block.hd_reserved);
-    assert_eq!(0.0_f64, hd_block.hd_start_angle_rad);
-    assert_eq!(0.0_f64, hd_block.hd_start_distance_m);
+        assert_eq!(36272, hd_block.hd_dg_first);
+        assert_eq!(168, hd_block.hd_fh_first);
+        assert_eq!(0, hd_block.hd_ch_first);
+        assert_eq!(0, hd_block.hd_at_first);
+        assert_eq!(36528, hd_block.hd_ev_first);
+        assert_eq!(1165464, hd_block.hd_md_comment);
+        assert_eq!(1542896795439737199, hd_block.hd_start_time_ns);
+        assert_eq!(60, hd_block.hd_tz_offset_min);
+        assert_eq!(0, hd_block.hd_dst_offset_min);
+        assert_eq!(2, hd_block.hd_time_flags);
+        assert_eq!(0, hd_block.hd_time_class);
+        assert_eq!(0, hd_block.hd_flags);
+        assert_eq!(0, hd_block.hd_reserved);
+        assert_eq!(0.0_f64, hd_block.hd_start_angle_rad);
+        assert_eq!(0.0_f64, hd_block.hd_start_distance_m);
+    }
 }
