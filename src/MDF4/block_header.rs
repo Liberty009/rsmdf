@@ -11,6 +11,25 @@ pub struct BlockHeader {
     pub link_count: u64,
 }
 
+impl BlockHeader {
+    pub fn create(id: &str, length: usize, link_count: usize) -> Self{
+
+        if id.len() != 4 {
+            panic!("Incorrect ID type provided: {}", id);
+        }
+
+        let id = id.as_bytes().try_into().unwrap();
+
+
+        Self {
+            id,
+            reserved0: [0; 4],
+            length: length as u64,
+            link_count: link_count as u64,
+        }
+    }
+}
+
 impl Block for BlockHeader {
     fn new() -> Self {
         Self {

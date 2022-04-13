@@ -10,7 +10,7 @@ pub struct Dtblock {
 impl Block for Dtblock {
     fn new() -> Self {
         Self {
-            header: BlockHeader::new(),
+            header: BlockHeader::create("##DT", 24, 0),
             dt_data: Vec::new(),
         }
     }
