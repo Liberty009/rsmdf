@@ -10,14 +10,14 @@ pub struct Dtblock {
 impl Block for Dtblock {
     fn new() -> Self {
         Self {
-            header: BlockHeader::new(), 
+            header: BlockHeader::new(),
             dt_data: Vec::new(),
         }
     }
 
     fn default() -> Self {
         Self {
-            header: BlockHeader::new(), 
+            header: BlockHeader::new(),
             dt_data: Vec::new(),
         }
     }
