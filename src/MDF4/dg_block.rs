@@ -6,8 +6,9 @@ use super::cg_block::Cgblock;
 use super::mdf4::link_extract;
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Dgblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     dg_dg_next: u64,
     #[allow(dead_code)]
@@ -18,6 +19,7 @@ pub struct Dgblock {
     dg_md_comment: u64,
     #[allow(dead_code)]
     dg_rec_id_size: u8,
+    dg_reserved: [u8; 7],
 }
 
 impl LinkedBlock for Dgblock {
@@ -97,20 +99,24 @@ impl Dgblock {
 impl Block for Dgblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##DG", 50, 0),
             dg_dg_next: 0_u64,
             dg_cg_first: 0_u64,
             dg_data: 0_u64,
             dg_md_comment: 0_u64,
             dg_rec_id_size: 0_u8,
+            dg_reserved: [0_u8; 7],
         }
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##DG", 50, 0),
             dg_dg_next: 0_u64,
             dg_cg_first: 0_u64,
             dg_data: 0_u64,
             dg_md_comment: 0_u64,
             dg_rec_id_size: 0_u8,
+            dg_reserved: [0_u8; 7],
         }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
@@ -118,7 +124,7 @@ impl Block for Dgblock {
         let (mut pos, mut address) = link_extract(stream, pos, little_endian, header.link_count);
 
         let dg_rec_id_size = utils::read(stream, little_endian, &mut pos);
-        let _dg_reserved: [u8; 7] = utils::read(stream, little_endian, &mut pos);
+        let dg_reserved = utils::read(stream, little_endian, &mut pos);
 
         let dg_dg_next = address.remove(0);
         let dg_cg_first = address.remove(0);
@@ -128,11 +134,13 @@ impl Block for Dgblock {
         (
             pos,
             Self {
+                header,
                 dg_dg_next,
                 dg_cg_first,
                 dg_data,
                 dg_md_comment,
                 dg_rec_id_size,
+                dg_reserved,
             },
         )
     }
@@ -143,5 +151,32 @@ impl Block for Dgblock {
             + mem::size_of_val(&self.dg_data)
             + mem::size_of_val(&self.dg_md_comment)
             + mem::size_of_val(&self.dg_rec_id_size)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Dgblock;
+    use crate::MDF4::block::Block;
+
+    static RAW: [u8; 64] = [
+        0x23, 0x23, 0x44, 0x47, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x8D, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x90, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xA0, 0xA8, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+    ];
+
+    #[test]
+    fn dg_read_test() {
+        let (pos, dg) = Dgblock::read(&RAW, 0, true);
+
+        assert_eq!(64, pos);
+        assert_eq!(36336, dg.dg_dg_next);
+        assert_eq!(34448, dg.dg_cg_first);
+        assert_eq!(43168, dg.dg_data);
+        assert_eq!(0, dg.dg_md_comment);
+        assert_eq!(0, dg.dg_rec_id_size);
+        assert_eq!([0_u8; 7], dg.dg_reserved);
     }
 }

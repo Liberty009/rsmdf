@@ -1,6 +1,7 @@
 use std::mem;
 
 #[allow(dead_code)]
+#[derive(PartialEq)]
 pub enum ChannelHierarchyType {
     Group,
     Function,
@@ -31,8 +32,7 @@ impl ChannelHierarchyType {
     }
 }
 
-#[derive(Debug, Clone)]
-
+#[derive(Debug, Clone, PartialEq)]
 pub enum EventType {
     #[allow(dead_code)]
     Recording,
@@ -66,7 +66,7 @@ impl EventType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 
 pub enum EventSyncType {
     #[allow(dead_code)]
@@ -92,7 +92,7 @@ impl EventSyncType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 
 pub enum RangeType {
     #[allow(dead_code)]
@@ -115,7 +115,7 @@ impl RangeType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum EventCause {
     #[allow(dead_code)]
     Other,
@@ -143,7 +143,7 @@ impl EventCause {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SourceType {
     #[allow(dead_code)]
     Other,
@@ -174,7 +174,7 @@ impl SourceType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BusType {
     #[allow(dead_code)]
     None,
@@ -214,7 +214,7 @@ impl BusType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ZipType {
     #[allow(dead_code)]
     Deflate,
@@ -233,7 +233,7 @@ impl ZipType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ChannelType {
     FixedLength,
     VariableLength,
@@ -258,7 +258,7 @@ impl ChannelType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SyncType {
     None,
     Time,
@@ -279,7 +279,7 @@ impl SyncType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum DataType {
     UnsignedByteLE,
     UnsignedByteBE,
@@ -342,7 +342,7 @@ impl DataType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CCType {
     Direct,
     Parametic,

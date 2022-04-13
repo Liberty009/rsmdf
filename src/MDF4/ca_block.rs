@@ -3,8 +3,9 @@ use super::block_header::*;
 use super::mdf4::link_extract;
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Cablock {
+    header: BlockHeader,
     #[allow(dead_code)]
     ca_composition: u64,
     #[allow(dead_code)]
@@ -43,6 +44,7 @@ struct Cablock {
 impl Block for Cablock {
     fn new() -> Self {
         Cablock {
+            header: BlockHeader::create("##CA", 50, 0),
             ca_composition: 0,
             ca_data: Vec::new(),
             ca_dynamic_size: Vec::new(),
@@ -64,6 +66,7 @@ impl Block for Cablock {
     }
     fn default() -> Self {
         Cablock {
+            header: BlockHeader::create("##CA", 50, 0),
             ca_composition: 0,
             ca_data: Vec::new(),
             ca_dynamic_size: Vec::new(),
@@ -152,6 +155,7 @@ impl Block for Cablock {
         (
             pos,
             Cablock {
+                header,
                 ca_composition,
                 ca_data,
                 ca_dynamic_size,

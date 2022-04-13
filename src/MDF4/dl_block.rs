@@ -4,8 +4,9 @@ use super::block::Block;
 use super::block_header::*;
 use super::mdf4::link_extract;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Dlblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     dl_dl_next: u64,
     #[allow(dead_code)]
@@ -22,6 +23,7 @@ struct Dlblock {
 impl Block for Dlblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##DL", 50, 0),
             dl_dl_next: 0_u64,
             dl_data: Vec::new(),
             dl_flags: 0_u8,
@@ -32,6 +34,7 @@ impl Block for Dlblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##DL", 50, 0),
             dl_dl_next: 0_u64,
             dl_data: Vec::new(),
             dl_flags: 0_u8,
@@ -66,6 +69,7 @@ impl Block for Dlblock {
         (
             pos,
             Self {
+                header,
                 dl_dl_next,
                 dl_data,
                 dl_flags,

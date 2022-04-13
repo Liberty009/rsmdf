@@ -30,7 +30,7 @@ pub fn link_extract(
     (pos, links)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MDF4 {
     #[allow(dead_code)]
     id: Idblock,
@@ -286,7 +286,7 @@ impl MDFFile for MDF4 {
     }
 }
 
-// #[derive(Debug, Clone)]
+// #[derive(Debug, Clone, PartialEq)]
 // struct DTBlock {
 // 	dt_data: Vec<Record>
 // }
@@ -302,8 +302,8 @@ impl MDFFile for MDF4 {
 //     }
 // }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Rdblock {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Sdblock {}

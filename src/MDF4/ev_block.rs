@@ -5,8 +5,9 @@ use super::block_header::*;
 use super::mdf4::link_extract;
 use super::mdf4_enums::{EventCause, EventSyncType, EventType, RangeType};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EVBlock {
+    header: BlockHeader,
     #[allow(dead_code)]
     ev_ev_next: u64,
     #[allow(dead_code)]
@@ -31,6 +32,7 @@ pub struct EVBlock {
     ev_cause: EventCause,
     #[allow(dead_code)]
     ev_flags: u8,
+    ev_reserved: [u8; 3],
     #[allow(dead_code)]
     ev_scope_count: u32,
     #[allow(dead_code)]
@@ -46,6 +48,7 @@ pub struct EVBlock {
 impl Block for EVBlock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##EV", 50, 0),
             ev_ev_next: 0_u64,
             ev_ev_parent: 0_u64,
             ev_ev_range: 0_u64,
@@ -58,6 +61,7 @@ impl Block for EVBlock {
             ev_range_type: RangeType::Point,
             ev_cause: EventCause::Error,
             ev_flags: 0_u8,
+            ev_reserved: [0_u8; 3],
             ev_scope_count: 0_u32,
             ev_attachment_count: 0_u16,
             ev_creator_index: 0_u16,
@@ -67,6 +71,7 @@ impl Block for EVBlock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##EV", 50, 0),
             ev_ev_next: 0_u64,
             ev_ev_parent: 0_u64,
             ev_ev_range: 0_u64,
@@ -79,6 +84,7 @@ impl Block for EVBlock {
             ev_range_type: RangeType::Point,
             ev_cause: EventCause::Error,
             ev_flags: 0_u8,
+            ev_reserved: [0_u8; 3],
             ev_scope_count: 0_u32,
             ev_attachment_count: 0_u16,
             ev_creator_index: 0_u16,
@@ -96,7 +102,7 @@ impl Block for EVBlock {
         let ev_cause = EventCause::new(utils::read(stream, little_endian, &mut pos));
         let ev_flags = utils::read(stream, little_endian, &mut pos);
 
-        let _ev_reserved: [u8; 3] = utils::read(stream, little_endian, &mut pos);
+        let ev_reserved: [u8; 3] = utils::read(stream, little_endian, &mut pos);
 
         let ev_scope_count = utils::read(stream, little_endian, &mut pos);
         let ev_attachment_count = utils::read(stream, little_endian, &mut pos);
@@ -121,6 +127,7 @@ impl Block for EVBlock {
         (
             pos,
             Self {
+                header,
                 ev_ev_next,
                 ev_ev_parent,
                 ev_ev_range,
@@ -129,6 +136,7 @@ impl Block for EVBlock {
                 ev_scope,
                 ev_at_reference,
                 ev_type,
+                ev_reserved,
                 ev_sync_type,
                 ev_range_type,
                 ev_cause,

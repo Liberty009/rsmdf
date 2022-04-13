@@ -7,6 +7,7 @@ use crate::signal::Signal;
 use crate::utils;
 use crate::MDF4::mdf4::MDF4;
 
+#[derive(PartialEq)]
 enum MDFVersion {
     MDF3,
     MDF4,
@@ -352,7 +353,7 @@ impl TimeChannel {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MdfChannel {
     pub name: String,
     pub data_group: u64,

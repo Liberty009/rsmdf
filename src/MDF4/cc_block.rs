@@ -4,8 +4,9 @@ use crate::utils;
 
 use super::mdf4_enums::CCType;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Ccblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     name_addr: u64,
     #[allow(dead_code)]
@@ -36,6 +37,7 @@ struct Ccblock {
 impl Block for Ccblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##DZ", 50, 0),
             name_addr: 0,
             unit_addr: 0,
             comment_addr: 0,
@@ -54,6 +56,7 @@ impl Block for Ccblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##DZ", 50, 0),
             name_addr: 0,
             unit_addr: 0,
             comment_addr: 0,
@@ -108,6 +111,7 @@ impl Block for Ccblock {
         (
             pos,
             Self {
+                header,
                 name_addr,
                 unit_addr,
                 comment_addr,
@@ -130,9 +134,11 @@ impl Block for Ccblock {
     }
 }
 
-#[test]
-fn cc_read_test() {
-    let raw: [u8; 96] = [
+#[cfg(test)]
+mod tests {
+    use crate::MDF4::{block::Block, cc_block::Ccblock};
+
+    static RAW: [u8; 96] = [
         0x23, 0x23, 0x43, 0x43, 0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -142,7 +148,10 @@ fn cc_read_test() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x40,
     ];
 
-    let (pos, _cc) = Ccblock::read(&raw, 0, true);
+    #[test]
+    fn cc_read_test() {
+        let (pos, _cc) = Ccblock::read(&RAW, 0, true);
 
-    assert_eq!(96, pos);
+        assert_eq!(96, pos);
+    }
 }

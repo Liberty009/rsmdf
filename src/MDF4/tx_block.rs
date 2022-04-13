@@ -3,8 +3,9 @@ use super::block_header::*;
 use super::utils as mdf4_utils;
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Txblock {
+    header: BlockHeader,
     tx_data: String,
 }
 
@@ -17,11 +18,13 @@ impl Txblock {
 impl Block for Txblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##TX", 24, 0),
             tx_data: String::new(),
         }
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##TX", 24, 0),
             tx_data: String::new(),
         }
     }
@@ -37,7 +40,7 @@ impl Block for Txblock {
 
         let tx_data = mdf4_utils::str_from_u8(&stream[pos..(pos + length)]);
 
-        (pos + length, Self { tx_data })
+        (pos + length, Self { header, tx_data })
     }
 
     fn byte_len(&self) -> usize {
@@ -45,17 +48,22 @@ impl Block for Txblock {
     }
 }
 
-#[test]
-fn tx_read_test() {
-    let raw: [u8; 40] = [
+#[cfg(test)]
+mod tests {
+    use crate::MDF4::{block::Block, tx_block::Txblock};
+
+    static RAW: [u8; 40] = [
         0x23, 0x23, 0x54, 0x58, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x45, 0x6E, 0x67, 0x69, 0x6E, 0x65,
         0x5F, 0x31, 0x00, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40,
     ];
 
-    let (pos, tx) = Txblock::read(&raw, 0, true);
+    #[test]
+    fn tx_read_test() {
+        let (pos, tx) = Txblock::read(&RAW, 0, true);
 
-    assert_eq!(33, pos);
-    //println!("{}", tx.tx_data);
-    assert!(tx.tx_data.eq("Engine_1"))
+        assert_eq!(33, pos);
+        //println!("{}", tx.tx_data);
+        assert!(tx.tx_data.eq("Engine_1"))
+    }
 }

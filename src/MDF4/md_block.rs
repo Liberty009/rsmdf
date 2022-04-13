@@ -4,8 +4,9 @@ use super::utils as mdf4_utils;
 
 use crate::utils;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Mdblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     md_data: String,
 }
@@ -19,11 +20,13 @@ impl Mdblock {
 impl Block for Mdblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##MD", 50, 0),
             md_data: "".to_string(),
         }
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##MD", 50, 0),
             md_data: "".to_string(),
         }
     }
@@ -37,7 +40,7 @@ impl Block for Mdblock {
         let string_length = header.length as usize - header.byte_len();
         let md_data: String = mdf4_utils::str_from_u8(&stream[pos..(pos + string_length)]);
 
-        ((pos + string_length), Self { md_data })
+        ((pos + string_length), Self { header, md_data })
     }
 
     fn byte_len(&self) -> usize {
@@ -45,9 +48,11 @@ impl Block for Mdblock {
     }
 }
 
-#[test]
-fn md_read_test() {
-    let raw: [u8; 472] = [
+#[cfg(test)]
+mod tests {
+    use crate::MDF4::{block::Block, md_block::Mdblock};
+
+    static RAW: [u8; 472] = [
         0x23, 0x23, 0x4D, 0x44, 0x00, 0x00, 0x00, 0x00, 0xD5, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3C, 0x46, 0x48, 0x63, 0x6F, 0x6D,
         0x6D, 0x65, 0x6E, 0x74, 0x20, 0x78, 0x6D, 0x6C, 0x6E, 0x73, 0x3D, 0x27, 0x68, 0x74, 0x74,
@@ -82,8 +87,11 @@ fn md_read_test() {
         0x6E, 0x74, 0x3E, 0x00, 0x40, 0x40, 0x40,
     ];
 
-    let (pos, md_block) = Mdblock::read(&raw, 0, true);
+    #[test]
+    fn md_read_test() {
+        let (pos, md_block) = Mdblock::read(&RAW, 0, true);
 
-    assert_eq!(469, pos);
-    assert_eq!(469, md_block.byte_len());
+        assert_eq!(469, pos);
+        assert_eq!(469, md_block.byte_len());
+    }
 }

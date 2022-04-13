@@ -5,40 +5,40 @@ use super::block_header::*;
 use super::mdf4::link_extract;
 use super::mdf4_enums::{BusType, SourceType};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Siblock {
-    #[allow(dead_code)]
+    header: BlockHeader,
     si_tx_name: u64,
-    #[allow(dead_code)]
     si_tx_path: u64,
-    #[allow(dead_code)]
     si_md_comment: u64,
-    #[allow(dead_code)]
     si_type: SourceType,
-    #[allow(dead_code)]
     si_bus_type: BusType,
-    #[allow(dead_code)]
     si_flags: u8,
+    si_reserved: [u8; 5],
 }
 impl Block for Siblock {
     fn new() -> Self {
         Siblock {
+            header: BlockHeader::create("##SI", 50, 0),
             si_tx_name: 0_u64,
             si_tx_path: 0_u64,
             si_md_comment: 0_u64,
             si_type: SourceType::Bus,
             si_bus_type: BusType::Can,
             si_flags: 0_u8,
+            si_reserved: [0_u8; 5],
         }
     }
     fn default() -> Self {
         Siblock {
+            header: BlockHeader::create("##SI", 50, 0),
             si_tx_name: 0_u64,
             si_tx_path: 0_u64,
             si_md_comment: 0_u64,
             si_type: SourceType::Bus,
             si_bus_type: BusType::Can,
             si_flags: 0_u8,
+            si_reserved: [0_u8; 5],
         }
     }
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
@@ -58,17 +58,19 @@ impl Block for Siblock {
         let si_bus_type = BusType::new(utils::read(stream, little_endian, &mut pos));
         let si_flags = utils::read(stream, little_endian, &mut pos);
 
-        let _si_reserved: [u8; 5] = utils::read(stream, little_endian, &mut pos);
+        let si_reserved = utils::read(stream, little_endian, &mut pos);
 
         (
             pos,
             Siblock {
+                header,
                 si_tx_name,
                 si_tx_path,
                 si_md_comment,
                 si_type,
                 si_bus_type,
                 si_flags,
+                si_reserved,
             },
         )
     }
@@ -78,5 +80,35 @@ impl Block for Siblock {
     }
 }
 
-#[test]
-fn si_read_test() {}
+#[cfg(test)]
+mod tests {
+    use crate::{
+        utils,
+        MDF4::{
+            block::Block,
+            mdf4_enums::{BusType, SourceType},
+            si_block::Siblock,
+        },
+    };
+
+    static RAW: [u8; 56] = [
+        0x23, 0x23, 0x53, 0x49, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x44, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x10, 0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    ];
+
+    #[test]
+    fn si_read_test() {
+        let (pos, si) = Siblock::read(&RAW, 0, true);
+
+        assert_eq!(pos, 56);
+        assert_eq!(17648, si.si_tx_name);
+        assert_eq!(17680, si.si_tx_path);
+        assert_eq!(0, si.si_md_comment);
+        assert_eq!(SourceType::Ecu, si.si_type);
+        assert_eq!(BusType::Other, si.si_bus_type);
+        assert_eq!(0, si.si_flags);
+        assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
+    }
+}

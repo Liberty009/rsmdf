@@ -11,12 +11,9 @@ use super::{
     tx_block::Txblock,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Cnblock {
-    //id: [u8; 4],        //block ID; always b'##CN'
-    //reserved0: u32,      //reserved bytes
-    //block_len: u64,      //block bytes size
-    //links_nr: u64,       //number of links
+    header: BlockHeader,
     #[allow(dead_code)]
     cn_cn_next: u64, //next ATBLOCK address
     #[allow(dead_code)]
@@ -131,6 +128,7 @@ impl Cnblock {
 impl Block for Cnblock {
     fn new() -> Self {
         Cnblock {
+            header: BlockHeader::create("##CN", 50, 0),
             cn_cn_next: 0,
             cn_composition: 0,
             cn_tx_name: 0,
@@ -160,6 +158,7 @@ impl Block for Cnblock {
     }
     fn default() -> Self {
         Cnblock {
+            header: BlockHeader::create("##CN", 50, 0),
             cn_cn_next: 0,
             cn_composition: 0,
             cn_tx_name: 0,
@@ -241,6 +240,7 @@ impl Block for Cnblock {
         (
             pos,
             Cnblock {
+                header,
                 cn_cn_next,
                 cn_composition,
                 cn_tx_name,
@@ -300,9 +300,11 @@ impl Block for Cnblock {
     }
 }
 
-#[test]
-fn cn_read_test() {
-    let raw: [u8; 160] = [
+#[cfg(test)]
+mod tests {
+    use crate::MDF4::{block::Block, cn_block::Cnblock};
+
+    static RAW: [u8; 160] = [
         0x23, 0x23, 0x43, 0x4E, 0x00, 0x00, 0x00, 0x00, 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x28, 0x63, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x45, 0x00, 0x00, 0x00,
@@ -316,14 +318,17 @@ fn cn_read_test() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let (pos, cn) = Cnblock::read(&raw, 0, true);
+    #[test]
+    fn cn_read_test() {
+        let (pos, cn) = Cnblock::read(&RAW, 0, true);
 
-    assert_eq!(pos, 160);
-    assert_eq!(cn.cn_cn_next, 25384);
-    assert_eq!(cn.cn_composition, 0);
-    assert_eq!(cn.cn_tx_name, 17728);
-    assert_eq!(cn.cn_si_source, 25112);
-    assert_eq!(cn.cn_cc_conversion, 23488);
-    assert_eq!(cn.cn_md_unit, 17984);
-    assert_eq!(cn.cn_md_comment, 17840);
+        assert_eq!(pos, 160);
+        assert_eq!(cn.cn_cn_next, 25384);
+        assert_eq!(cn.cn_composition, 0);
+        assert_eq!(cn.cn_tx_name, 17728);
+        assert_eq!(cn.cn_si_source, 25112);
+        assert_eq!(cn.cn_cc_conversion, 23488);
+        assert_eq!(cn.cn_md_unit, 17984);
+        assert_eq!(cn.cn_md_comment, 17840);
+    }
 }
