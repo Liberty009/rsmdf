@@ -5,6 +5,7 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Txblock {
+    header: BlockHeader,
     tx_data: String,
 }
 
@@ -17,11 +18,13 @@ impl Txblock {
 impl Block for Txblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##TX", 24, 0),
             tx_data: String::new(),
         }
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##TX", 24, 0),
             tx_data: String::new(),
         }
     }
@@ -37,7 +40,7 @@ impl Block for Txblock {
 
         let tx_data = mdf4_utils::str_from_u8(&stream[pos..(pos + length)]);
 
-        (pos + length, Self { tx_data })
+        (pos + length, Self { header, tx_data })
     }
 
     fn byte_len(&self) -> usize {

@@ -8,6 +8,7 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dgblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     dg_dg_next: u64,
     #[allow(dead_code)]
@@ -98,6 +99,7 @@ impl Dgblock {
 impl Block for Dgblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##DG", 50, 0),
             dg_dg_next: 0_u64,
             dg_cg_first: 0_u64,
             dg_data: 0_u64,
@@ -108,6 +110,7 @@ impl Block for Dgblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##DG", 50, 0),
             dg_dg_next: 0_u64,
             dg_cg_first: 0_u64,
             dg_data: 0_u64,
@@ -131,6 +134,7 @@ impl Block for Dgblock {
         (
             pos,
             Self {
+                header,
                 dg_dg_next,
                 dg_cg_first,
                 dg_data,

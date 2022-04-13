@@ -6,6 +6,7 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Mdblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     md_data: String,
 }
@@ -19,11 +20,13 @@ impl Mdblock {
 impl Block for Mdblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##MD", 50, 0),
             md_data: "".to_string(),
         }
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##MD", 50, 0),
             md_data: "".to_string(),
         }
     }
@@ -37,7 +40,7 @@ impl Block for Mdblock {
         let string_length = header.length as usize - header.byte_len();
         let md_data: String = mdf4_utils::str_from_u8(&stream[pos..(pos + string_length)]);
 
-        ((pos + string_length), Self { md_data })
+        ((pos + string_length), Self { header, md_data })
     }
 
     fn byte_len(&self) -> usize {

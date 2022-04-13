@@ -6,11 +6,13 @@ use super::mdf4_enums::ZipType;
 
 #[derive(Debug, Clone, PartialEq)]
 struct DZBlock {
+    header: BlockHeader,
+
     #[allow(dead_code)]
     dz_org_block_type: [u8; 2],
     #[allow(dead_code)]
     dz_zip_type: ZipType,
-    //dz_reserved: u8,
+    dz_reserved: u8,
     #[allow(dead_code)]
     dz_zip_parameter: u32,
     #[allow(dead_code)]
@@ -23,9 +25,10 @@ struct DZBlock {
 impl Block for DZBlock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##DZ", 50, 0),
             dz_org_block_type: [0_u8; 2],
             dz_zip_type: ZipType::Deflate,
-            //dz_reserved: 0_u8,
+            dz_reserved: 0_u8,
             dz_zip_parameter: 0_u32,
             dz_org_data_length: 0_u64,
             dz_data_length: 0_u64,
@@ -34,9 +37,10 @@ impl Block for DZBlock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##DZ", 50, 0),
             dz_org_block_type: [0_u8; 2],
             dz_zip_type: ZipType::Deflate,
-            //dz_reserved: 0_u8,
+            dz_reserved: 0_u8,
             dz_zip_parameter: 0_u32,
             dz_org_data_length: 0_u64,
             dz_data_length: 0_u64,
@@ -52,7 +56,7 @@ impl Block for DZBlock {
 
         let dz_org_block_type = utils::read(stream, little_endian, &mut pos);
         let dz_zip_type = ZipType::new(utils::read(stream, little_endian, &mut pos));
-        let _dz_reserved: u8 = utils::read(stream, little_endian, &mut pos);
+        let dz_reserved = utils::read(stream, little_endian, &mut pos);
         let dz_zip_parameter = utils::read(stream, little_endian, &mut pos);
         let dz_org_data_length = utils::read(stream, little_endian, &mut pos);
         let dz_data_length = utils::read(stream, little_endian, &mut pos);
@@ -63,9 +67,10 @@ impl Block for DZBlock {
         (
             pos,
             Self {
+                header,
                 dz_org_block_type,
                 dz_zip_type,
-                //dz_reserved,
+                dz_reserved,
                 dz_zip_parameter,
                 dz_org_data_length,
                 dz_data_length,

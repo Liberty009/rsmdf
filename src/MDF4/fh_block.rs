@@ -7,6 +7,7 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 struct Fhblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     fh_fh_next: u64,
     #[allow(dead_code)]
@@ -25,6 +26,7 @@ struct Fhblock {
 impl Block for Fhblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##FH", 50, 0),
             fh_fh_next: 0_u64,
             fh_md_comment: 0_u64,
             fh_time_ns: 0_u64,
@@ -36,6 +38,7 @@ impl Block for Fhblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##FH", 50, 0),
             fh_fh_next: 0_u64,
             fh_md_comment: 0_u64,
             fh_time_ns: 0_u64,
@@ -66,6 +69,7 @@ impl Block for Fhblock {
         (
             pos,
             Self {
+                header,
                 fh_fh_next,
                 fh_md_comment,
                 fh_time_ns,

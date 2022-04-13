@@ -6,6 +6,7 @@ use super::mdf4_enums::CCType;
 
 #[derive(Debug, Clone, PartialEq)]
 struct Ccblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     name_addr: u64,
     #[allow(dead_code)]
@@ -36,6 +37,7 @@ struct Ccblock {
 impl Block for Ccblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##DZ", 50, 0),
             name_addr: 0,
             unit_addr: 0,
             comment_addr: 0,
@@ -54,6 +56,7 @@ impl Block for Ccblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##DZ", 50, 0),
             name_addr: 0,
             unit_addr: 0,
             comment_addr: 0,
@@ -108,6 +111,7 @@ impl Block for Ccblock {
         (
             pos,
             Self {
+                header,
                 name_addr,
                 unit_addr,
                 comment_addr,

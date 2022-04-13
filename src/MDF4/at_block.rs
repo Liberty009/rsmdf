@@ -6,10 +6,7 @@ use super::mdf4::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Atblock {
-    //id: [u8; 4],
-    //reserved0: [u8; 4],
-    //block_len: u64,
-    //links_nr: u64,
+    header: BlockHeader,
     #[allow(dead_code)]
     next_at_addr: u64,
     #[allow(dead_code)]
@@ -22,7 +19,7 @@ pub struct Atblock {
     flags: u16,
     #[allow(dead_code)]
     creator_index: u16,
-    //reserved1: [u8; 4],
+    reserved1: [u8; 4],
     #[allow(dead_code)]
     md5_sum: [u8; 16],
     #[allow(dead_code)]
@@ -36,13 +33,14 @@ pub struct Atblock {
 impl Block for Atblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##AT", 50, 0),
             next_at_addr: 0,
             file_name_addr: 0,
             mime_addr: 0,
             comment_addr: 0,
             flags: 0,
             creator_index: 0,
-            //reserved1: [0; 4],
+            reserved1: [0; 4],
             md5_sum: [0; 16],
             original_size: 0,
             embedded_size: 0,
@@ -51,13 +49,14 @@ impl Block for Atblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##AT", 50, 0),
             next_at_addr: 0,
             file_name_addr: 0,
             mime_addr: 0,
             comment_addr: 0,
             flags: 0,
             creator_index: 0,
-            //reserved1: [0; 4],
+            reserved1: [0; 4],
             md5_sum: [0; 16],
             original_size: 0,
             embedded_size: 0,
@@ -80,7 +79,7 @@ impl Block for Atblock {
 
         let flags = utils::read(stream, little_endian, &mut pos);
         let creator_index = utils::read(stream, little_endian, &mut pos);
-        let _reserved1: [u8; 4] = utils::read(stream, little_endian, &mut pos);
+        let reserved1 = utils::read(stream, little_endian, &mut pos);
         let md5_sum = utils::read(stream, little_endian, &mut pos);
         let original_size = utils::read(stream, little_endian, &mut pos);
         let embedded_size = utils::read(stream, little_endian, &mut pos);
@@ -89,17 +88,14 @@ impl Block for Atblock {
         (
             pos,
             Self {
-                //id: header.id,
-                //reserved0: header.reserved0,
-                //block_len: header.length,
-                //links_nr: header.link_count,
+                header,
                 next_at_addr,
                 file_name_addr,
                 mime_addr,
                 comment_addr,
                 flags,
                 creator_index,
-                //reserved1,
+                reserved1,
                 md5_sum,
                 original_size,
                 embedded_size,

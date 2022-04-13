@@ -11,10 +11,7 @@ use super::tx_block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cgblock {
-    //id: [u8; 4],        //- bytes : block ID; always b'##CG'
-    //reserved0: u64,     //- int : reserved bytes
-    //block_len: u64,     //- int : block bytes size
-    //links_nr: u64,      //- int : number of links
+    header: BlockHeader,
     #[allow(dead_code)]
     cg_cg_next: u64, //- int : next channel group address
     #[allow(dead_code)]
@@ -35,6 +32,7 @@ pub struct Cgblock {
     cg_flags: u16, //- int : channel group flags
     #[allow(dead_code)]
     cg_path_separator: u16,
+    cg_reserved: [u8; 4],
     #[allow(dead_code)]
     cg_data_bytes: u32,
     #[allow(dead_code)]
@@ -113,6 +111,7 @@ impl Cgblock {
 impl Block for Cgblock {
     fn new() -> Self {
         Cgblock {
+            header: BlockHeader::create("##CG", 50, 0),
             cg_cg_next: 0,
             cg_cn_first: 0,
             cg_tx_acq_name: 0,
@@ -123,12 +122,14 @@ impl Block for Cgblock {
             cg_cycle_count: 0,
             cg_flags: 0,
             cg_path_separator: 0,
+            cg_reserved: [0_u8; 4],
             cg_data_bytes: 0,
             cg_inval_bytes: 0,
         }
     }
     fn default() -> Self {
         Cgblock {
+            header: BlockHeader::create("##CG", 50, 0),
             cg_cg_next: 0,
             cg_cn_first: 0,
             cg_tx_acq_name: 0,
@@ -139,6 +140,7 @@ impl Block for Cgblock {
             cg_cycle_count: 0,
             cg_flags: 0,
             cg_path_separator: 0,
+            cg_reserved: [0_u8; 4],
             cg_data_bytes: 0,
             cg_inval_bytes: 0,
         }
@@ -163,17 +165,14 @@ impl Block for Cgblock {
         let cycles_nr = utils::read(stream, little_endian, &mut pos);
         let flags = utils::read(stream, little_endian, &mut pos);
         let path_separator = utils::read(stream, little_endian, &mut pos);
-        let _reserved1: [u8; 4] = utils::read(stream, little_endian, &mut pos);
+        let cg_reserved: [u8; 4] = utils::read(stream, little_endian, &mut pos);
         let samples_byte_nr = utils::read(stream, little_endian, &mut pos);
         let invalidation_bytes_nr = utils::read(stream, little_endian, &mut pos);
 
         (
             pos,
             Cgblock {
-                // id,
-                // reserved0,
-                // block_len,
-                // links_nr,
+                header,
                 cg_cg_next: next_cg_addr,
                 cg_cn_first: first_ch_addr,
                 cg_tx_acq_name: acq_name_addr,
@@ -184,7 +183,7 @@ impl Block for Cgblock {
                 cg_cycle_count: cycles_nr,
                 cg_flags: flags,
                 cg_path_separator: path_separator,
-                //reserved1,
+                cg_reserved,
                 cg_data_bytes: samples_byte_nr,
                 cg_inval_bytes: invalidation_bytes_nr,
                 // acq_name,

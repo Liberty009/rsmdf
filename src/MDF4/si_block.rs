@@ -7,6 +7,7 @@ use super::mdf4_enums::{BusType, SourceType};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Siblock {
+    header: BlockHeader,
     si_tx_name: u64,
     si_tx_path: u64,
     si_md_comment: u64,
@@ -18,6 +19,7 @@ pub struct Siblock {
 impl Block for Siblock {
     fn new() -> Self {
         Siblock {
+            header: BlockHeader::create("##SI", 50, 0),
             si_tx_name: 0_u64,
             si_tx_path: 0_u64,
             si_md_comment: 0_u64,
@@ -29,6 +31,7 @@ impl Block for Siblock {
     }
     fn default() -> Self {
         Siblock {
+            header: BlockHeader::create("##SI", 50, 0),
             si_tx_name: 0_u64,
             si_tx_path: 0_u64,
             si_md_comment: 0_u64,
@@ -60,6 +63,7 @@ impl Block for Siblock {
         (
             pos,
             Siblock {
+                header,
                 si_tx_name,
                 si_tx_path,
                 si_md_comment,

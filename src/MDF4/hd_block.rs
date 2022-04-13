@@ -9,6 +9,7 @@ use super::mdf4::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hdblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     hd_dg_first: u64,
     #[allow(dead_code)]
@@ -66,6 +67,7 @@ impl Hdblock {
 impl Block for Hdblock {
     fn new() -> Self {
         Hdblock {
+            header: BlockHeader::create("##HD", 50, 0),
             hd_dg_first: 0,
             hd_fh_first: 0,
             hd_ch_first: 0,
@@ -85,6 +87,7 @@ impl Block for Hdblock {
     }
     fn default() -> Self {
         Hdblock {
+            header: BlockHeader::create("##HD", 50, 0),
             hd_dg_first: 0,
             hd_fh_first: 0,
             hd_ch_first: 0,
@@ -131,6 +134,7 @@ impl Block for Hdblock {
         (
             pos,
             Hdblock {
+                header,
                 hd_dg_first,
                 hd_fh_first,
                 hd_ch_first,

@@ -13,10 +13,7 @@ use super::{
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cnblock {
-    //id: [u8; 4],        //block ID; always b'##CN'
-    //reserved0: u32,      //reserved bytes
-    //block_len: u64,      //block bytes size
-    //links_nr: u64,       //number of links
+    header: BlockHeader,
     #[allow(dead_code)]
     cn_cn_next: u64, //next ATBLOCK address
     #[allow(dead_code)]
@@ -131,6 +128,7 @@ impl Cnblock {
 impl Block for Cnblock {
     fn new() -> Self {
         Cnblock {
+            header: BlockHeader::create("##CN", 50, 0),
             cn_cn_next: 0,
             cn_composition: 0,
             cn_tx_name: 0,
@@ -160,6 +158,7 @@ impl Block for Cnblock {
     }
     fn default() -> Self {
         Cnblock {
+            header: BlockHeader::create("##CN", 50, 0),
             cn_cn_next: 0,
             cn_composition: 0,
             cn_tx_name: 0,
@@ -241,6 +240,7 @@ impl Block for Cnblock {
         (
             pos,
             Cnblock {
+                header,
                 cn_cn_next,
                 cn_composition,
                 cn_tx_name,
