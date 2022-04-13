@@ -210,9 +210,8 @@ impl Block for Cgblock {
 }
 
 #[cfg(test)]
-mod tests{
-    use crate::MDF4::{cg_block::Cgblock, block::Block};
-
+mod tests {
+    use crate::MDF4::{block::Block, cg_block::Cgblock};
 
     static RAW: [u8; 104] = [
         0x23, 0x23, 0x43, 0x47, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -226,9 +225,8 @@ mod tests{
 
     #[test]
     fn cg_read_test() {
-
         let (pos, cg) = Cgblock::read(&RAW, 0, true);
-    
+
         assert_eq!(pos, 104);
         assert_eq!(cg.cg_cg_next, 0);
         assert_eq!(cg.cg_cn_first, 25760);
@@ -236,7 +234,7 @@ mod tests{
         assert_eq!(cg.cg_si_acq_source, 26352);
         assert_eq!(cg.cg_sr_first, 0);
         assert_eq!(cg.cg_md_comment, 16376);
-    
+
         assert_eq!(cg.cg_record_id, 0);
         assert_eq!(cg.cg_cycle_count, 1240);
         assert_eq!(cg.cg_flags, 0);
@@ -244,5 +242,3 @@ mod tests{
         assert_eq!(cg.cg_data_bytes, 10);
     }
 }
-
-
