@@ -61,16 +61,12 @@ impl LinkedBlock for Cgblock {
     fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self> {
         let mut all = Vec::new();
 
-        let next_block = self;
+        let next = self.next(stream, little_endian);
 
         all.push(self.clone());
-        loop {
-            let next_block = next_block.next(stream, little_endian);
-
-            match next_block {
-                Some(block) => all.push(block.clone()),
-                None => break,
-            }
+        match next {
+            None => {}, 
+            Some(block) => all.append(&mut block.list(stream, little_endian))
         }
 
         all
@@ -84,20 +80,22 @@ impl Cgblock {
     }
 
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
-        let mut ch = Vec::new();
+        //let mut ch = Vec::new();
         let first = self.first(stream, little_endian);
-        ch.push(first.clone());
+        // ch.push(first.clone());
 
-        let next = first;
-        loop {
-            let next = next.next(stream, little_endian);
+        // let next = first;
+        // loop {
+        //     let next = next.next(stream, little_endian);
 
-            match next {
-                Some(cn) => ch.push(cn.clone()),
-                None => break,
-            }
-        }
-        ch
+        //     match next {
+        //         Some(cn) => ch.push(cn.clone()),
+        //         None => break,
+        //     }
+        // }
+        // ch
+
+        first.list(stream, little_endian)
     }
 
     pub fn comment(&self, stream: &[u8], little_endian: bool) -> String {

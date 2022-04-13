@@ -151,7 +151,7 @@ impl Signal {
 
     #[must_use]
     pub fn max_time(&self) -> f64 {
-        *self.timestamps.last().unwrap()
+        *self.timestamps.last().expect("No time value found")
     }
 }
 

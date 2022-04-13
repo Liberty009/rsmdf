@@ -5,7 +5,7 @@ use crate::utils;
 
 use super::dg_block::Dgblock;
 use super::mdf4::link_extract;
-use super::tx_block;
+use super::md_block;
 
 #[derive(Debug, Clone)]
 pub struct Hdblock {
@@ -56,10 +56,10 @@ impl Hdblock {
             return "".to_string();
         }
 
-        let (_, tx_block) =
-            tx_block::Txblock::read(stream, self.hd_md_comment as usize, little_endian);
+        let (_, md_block) =
+            md_block::Mdblock::read(stream, self.hd_md_comment as usize, little_endian);
 
-        tx_block.text()
+        md_block.text()
     }
 }
 

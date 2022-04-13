@@ -1,5 +1,7 @@
-use crate::MDF4::Block::Block;
-use crate::MDF4::BlockHeader::*;
+use super::block::Block;
+use super::block_header::*;
+use super::mdf4::link_extract;
+use crate::utils;
 
 #[derive(Debug, Clone)]
 struct Cablock {
@@ -169,5 +171,9 @@ impl Block for Cablock {
                 ca_cycle_count,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }

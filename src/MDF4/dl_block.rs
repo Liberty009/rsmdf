@@ -1,5 +1,8 @@
+use crate::utils;
+
 use super::block::Block;
-use super::blockHeader::*;
+use super::block_header::*;
+use super::mdf4::link_extract;
 
 
 #[derive(Debug, Clone)]
@@ -72,5 +75,9 @@ impl Block for Dlblock {
                 dl_offset,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }

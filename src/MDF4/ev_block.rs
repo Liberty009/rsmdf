@@ -1,5 +1,9 @@
-use crate::MDF4::BlockHeader::*;
-use crate::MDF4::Block::Block;
+use crate::utils;
+
+use super::block_header::*;
+use super::block::Block;
+use super::mdf4::link_extract;
+use super::mdf4_enums::{EventType, EventSyncType, RangeType, EventCause};
 
 #[derive(Debug, Clone)]
 pub struct EVBlock {
@@ -136,5 +140,9 @@ impl Block for EVBlock {
                 ev_sync_factor,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }

@@ -204,7 +204,7 @@ impl mdf::MDFFile for MDF3 {
         self.channels = channels;
     }
 
-    fn list(&mut self) {
+    fn list_data_groups(&mut self) {
         let (_id_block, position, little_endian) = IDBLOCK::read(&self.file);
         let (hd_block, _pos) = HDBLOCK::read(&self.file, position, little_endian);
         //position += pos;
@@ -277,8 +277,8 @@ impl mdf::MDFFile for MDF3 {
         )
     }
 
-    fn cut(&self, start: f64, _end: f64, _include_ends: bool, time_from_zero: bool) {
-        let _delta = if time_from_zero { start } else { 0.0 };
+    fn cut(&self, _start: f64, _end: f64, _include_ends: bool, _time_from_zero: bool) {
+        // let _delta = if time_from_zero { start } else { 0.0 };
     }
 
     fn export(&self, _format: &str, _filename: &str) {}

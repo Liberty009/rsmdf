@@ -95,10 +95,10 @@ impl MDFFile for MDFType {
         }
     }
 
-    fn list(&mut self) {
+    fn list_data_groups(&mut self) {
         match self {
-            Self::MDF3(file) => file.list(),
-            Self::MDF4(file) => file.list(),
+            Self::MDF3(file) => file.list_data_groups(),
+            Self::MDF4(file) => file.list_data_groups(),
         }
     }
 
@@ -230,8 +230,8 @@ impl MDFFile for MDF {
         self.file.read_all();
     }
 
-    fn list(&mut self) {
-        self.file.list();
+    fn list_data_groups(&mut self) {
+        self.file.list_data_groups();
     }
 
     fn list_channels(&self) {
@@ -296,7 +296,7 @@ pub trait MDFFile {
 
     fn read_all(&mut self);
 
-    fn list(&mut self);
+    fn list_data_groups(&mut self);
 
     fn list_channels(&self);
 
