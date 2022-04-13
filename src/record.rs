@@ -2,7 +2,7 @@ use std::mem;
 
 use crate::utils;
 
-#[derive(Debug, Clone, Copy,PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DataType {
     UnsignedInt,
     SignedInt,

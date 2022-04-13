@@ -13,7 +13,6 @@ enum MDFVersion {
     MDF4,
 }
 
-
 enum MDFType {
     MDF3(MDF3),
     MDF4(MDF4),

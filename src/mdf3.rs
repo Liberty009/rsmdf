@@ -26,7 +26,7 @@ const SIGNED_INT_LITTLEENDIAN: u16 = 14;
 const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
 const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 
-#[derive(Debug, Clone,)]
+#[derive(Debug, Clone)]
 pub struct MDF3 {
     #[allow(dead_code)]
     pub id: IDBLOCK,
@@ -543,7 +543,7 @@ impl PRBLOCK {
     }
 }
 
-#[derive(Debug, Clone,)]
+#[derive(Debug, Clone)]
 pub struct TRBLOCK {
     pub block_type: [u8; 2],
     pub block_size: u16,
@@ -1087,8 +1087,7 @@ impl CCBLOCK {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ConversionData {
     Parameters,
     Table,
@@ -1105,8 +1104,7 @@ impl ConversionData {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Parameters {
     ConversionLinear,
     ConversionPoly,
@@ -1279,13 +1277,12 @@ impl ConversionRational {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Table {
     ConversionTabular,
 }
 
-#[derive(Debug, Clone,)]
+#[derive(Debug, Clone)]
 pub struct ConversionTabular {
     pub value: Vec<TableEntry>,
 }

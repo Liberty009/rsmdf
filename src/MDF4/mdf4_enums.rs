@@ -143,7 +143,7 @@ impl EventCause {
     }
 }
 
-#[derive(Debug, Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SourceType {
     #[allow(dead_code)]
     Other,
@@ -214,7 +214,7 @@ impl BusType {
     }
 }
 
-#[derive(Debug, Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ZipType {
     #[allow(dead_code)]
     Deflate,

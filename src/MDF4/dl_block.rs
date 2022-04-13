@@ -4,7 +4,6 @@ use super::block::Block;
 use super::block_header::*;
 use super::mdf4::link_extract;
 
-
 #[derive(Debug, Clone, PartialEq)]
 struct Dlblock {
     #[allow(dead_code)]

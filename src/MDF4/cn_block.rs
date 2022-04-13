@@ -100,8 +100,8 @@ impl LinkedBlock for Cnblock {
 
         all.push(self.clone());
         match next {
-            None => {}, 
-            Some(block) => all.append(&mut block.list(stream, little_endian))
+            None => {}
+            Some(block) => all.append(&mut block.list(stream, little_endian)),
         }
 
         all
