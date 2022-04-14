@@ -7,6 +7,7 @@ use super::mdf4_enums::ChannelHierarchyType;
 
 
 pub struct Chblock {
+    header: BlockHeader,
     #[allow(dead_code)]
     ch_ch_next: u64,
     #[allow(dead_code)]
@@ -25,6 +26,7 @@ pub struct Chblock {
 impl Block for Chblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##CH", 50, 0),
             ch_ch_next: 0_u64,
             ch_ch_first: 0_u64,
             ch_tx_name: 0_u64,
@@ -36,6 +38,7 @@ impl Block for Chblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##CH", 50, 0),
             ch_ch_next: 0_u64,
             ch_ch_first: 0_u64,
             ch_tx_name: 0_u64,
@@ -69,6 +72,7 @@ impl Block for Chblock {
         (
             pos,
             Self {
+                header,
                 ch_ch_next,
                 ch_ch_first,
                 ch_tx_name,
