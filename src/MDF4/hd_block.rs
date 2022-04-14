@@ -207,8 +207,8 @@ mod tests {
         assert_eq!(0, hd_block.hd_time_class);
         assert_eq!(0, hd_block.hd_flags);
         assert_eq!(0, hd_block.hd_reserved);
-        assert_eq!((0.0_f64 - hd_block.hd_start_angle_rad).abs() < 0.1);
-        assert_eq!((0.0_f64 - hd_block.hd_start_distance_m).abs() < 0.1);
+        assert!((0.0_f64 - hd_block.hd_start_angle_rad).abs() < 0.1);
+        assert!((0.0_f64 - hd_block.hd_start_distance_m).abs() < 0.1);
     }
 
     #[test]
