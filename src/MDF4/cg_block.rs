@@ -165,7 +165,7 @@ impl Block for Cgblock {
         let cycles_nr = utils::read(stream, little_endian, &mut pos);
         let flags = utils::read(stream, little_endian, &mut pos);
         let path_separator = utils::read(stream, little_endian, &mut pos);
-        let cg_reserved: [u8; 4] = utils::read(stream, little_endian, &mut pos);
+        let cg_reserved = utils::read(stream, little_endian, &mut pos);
         let samples_byte_nr = utils::read(stream, little_endian, &mut pos);
         let invalidation_bytes_nr = utils::read(stream, little_endian, &mut pos);
 
@@ -193,6 +193,7 @@ impl Block for Cgblock {
     }
 
     fn byte_len(&self) -> usize {
+        self.header.byte_len() + 
         mem::size_of_val(&self.cg_cg_next)
             + mem::size_of_val(&self.cg_cn_first)
             + mem::size_of_val(&self.cg_tx_acq_name)
@@ -205,6 +206,7 @@ impl Block for Cgblock {
             + mem::size_of_val(&self.cg_path_separator)
             + mem::size_of_val(&self.cg_data_bytes)
             + mem::size_of_val(&self.cg_inval_bytes)
+            + mem::size_of_val(&self.cg_reserved)
     }
 }
 
@@ -239,5 +241,13 @@ mod tests {
         assert_eq!(cg.cg_flags, 0);
         // assert_eq!(cg.cg_path_separator, 10);
         assert_eq!(cg.cg_data_bytes, 10);
+    }
+
+    #[test]
+    fn byte_len() {
+        let (pos, cg) = Cgblock::read(&RAW, 0, true);
+
+        assert_eq!(pos, cg.byte_len());
+
     }
 }
