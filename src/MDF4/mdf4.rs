@@ -78,39 +78,6 @@ impl MDFFile for MDF4 {
             }
         }
 
-        // while next_dg != 0 {
-        //     let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
-        //     next_dg = dg_block.dg_dg_next;
-        //     let mut next_cg = dg_block.dg_cg_first;
-
-        //     dg.push(dg_block);
-
-        //     while next_cg != 0 {
-        //         let (_position, cg_block) =
-        //             Cgblock::read(&self.file, next_cg as usize, little_endian);
-        //         next_cg = cg_block.cg_cg_next;
-        //         let mut next_cn = cg_block.cg_cn_first;
-        //         cg.push(cg_block.clone());
-
-        //         println!("Channel Group: {}", cg_block.cg_md_comment);
-
-        //         while next_cn != 0 {
-        //             let (_position, cn_block) =
-        //                 Cnblock::read(&self.file, next_cn as usize, little_endian);
-        //             next_cn = cn_block.cn_cn_next;
-        //             ch.push(cn_block.clone());
-
-        //             let name = cn_block.name(&self.file, little_endian);
-        //             mdf_channels.push(mdf::MdfChannel {
-        //                 name,
-        //                 data_group: (dg.len() - 1) as u64,
-        //                 channel_group: (cg.len() - 1) as u64,
-        //                 channel: (ch.len() - 1) as u64,
-        //             });
-        //         }
-        //     }
-        // }
-
         mdf_channels
     }
     fn find_time_channel(
@@ -123,7 +90,6 @@ impl MDFFile for MDF4 {
             .channels(&self.file, self.little_endian);
         for (i, channel) in channel_group.iter().enumerate() {
             if matches!(channel.channel_type(), ChannelType::Master) {
-                //channel.channel_type == TIME_CHANNEL_TYPE {
                 return Ok(i);
             }
         }
@@ -190,7 +156,6 @@ impl MDFFile for MDF4 {
 
         let (position, _id_block) = Idblock::read(&self.file, position, little_endian);
         let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
-        //position += pos;
 
         let dg = hd_block
             .first_data_group(&self.file, little_endian)
@@ -220,37 +185,9 @@ impl MDFFile for MDF4 {
 
                 for cn in channels {
                     println!("Channel: {}", cn.comment(&self.file, little_endian));
-                    //.comment);
                 }
             }
         }
-
-        // while next_dg != 0 {
-        //     let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
-        //     next_dg = dg_block.dg_dg_next; //  .next;
-        //     let mut next_cg = dg_block.dg_cg_first; // .first;
-
-        //     dg.push(dg_block);
-
-        //     while next_cg != 0 {
-        //         let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
-        //         next_cg = cg_block.cg_cg_next; //.next;
-        //         let mut next_cn = cg_block.cg_cn_first; //.first;
-        //         cg.push(cg_block.clone());
-
-        //         println!("Channel Group: {}", cg_block.cg_md_comment); //.comment);
-
-        //         while next_cn != 0 {
-        //             let (_pos, cn_block) =
-        //                 Cnblock::read(&self.file, next_cn as usize, little_endian);
-        //             next_cn = cn_block.cn_cn_next; //.next;
-
-        //             ch.push(cn_block);
-        //         }
-        //     }
-        // }
-
-        // (ch, cg, dg);
     }
 
     #[must_use]
@@ -286,21 +223,6 @@ impl MDFFile for MDF4 {
     }
 }
 
-// #[derive(Debug, Clone, PartialEq)]
-// struct DTBlock {
-// 	dt_data: Vec<Record>
-// }
-// impl Block for DTBlock {
-//     fn new() -> Self {
-//         Self {}
-//     }
-//     fn default() -> Self {
-//         Self {}
-//     }
-//     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
-//         (1, Self {})
-//     }
-// }
 
 #[derive(Debug, Clone, PartialEq)]
 struct Rdblock {}
