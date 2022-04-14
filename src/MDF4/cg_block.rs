@@ -223,7 +223,7 @@ mod tests {
     ];
 
     #[test]
-    fn cg_read_test() {
+    fn read() {
         let (pos, cg) = Cgblock::read(&RAW, 0, true);
 
         assert_eq!(pos, 104);

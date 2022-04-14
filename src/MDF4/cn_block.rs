@@ -272,7 +272,8 @@ impl Block for Cnblock {
     }
 
     fn byte_len(&self) -> usize {
-        mem::size_of_val(&self.cn_cn_next)
+        let mut length = self.header.byte_len()
+            + mem::size_of_val(&self.cn_cn_next)
             + mem::size_of_val(&self.cn_composition)
             + mem::size_of_val(&self.cn_tx_name)
             + mem::size_of_val(&self.cn_si_source)
@@ -280,8 +281,6 @@ impl Block for Cnblock {
             + mem::size_of_val(&self.cn_data)
             + mem::size_of_val(&self.cn_md_unit)
             + mem::size_of_val(&self.cn_md_comment)
-            + mem::size_of_val(&self.cn_at_reference)
-            + mem::size_of_val(&self.cn_default_x)
             + mem::size_of_val(&self.channel_type)
             + mem::size_of_val(&self.sync_type)
             + mem::size_of_val(&self.data_type)
@@ -296,12 +295,23 @@ impl Block for Cnblock {
             + mem::size_of_val(&self.lower_limit)
             + mem::size_of_val(&self.upper_limit)
             + mem::size_of_val(&self.lower_ext_limit)
-            + mem::size_of_val(&self.upper_ext_limit)
+            + mem::size_of_val(&self.upper_ext_limit);
+
+        if !&self.cn_at_reference.is_empty() {
+            length += mem::size_of_val(&self.cn_at_reference[0]) * self.cn_at_reference.len();
+        }
+        if !&self.cn_default_x.is_empty() {
+            length += mem::size_of_val(&self.cn_default_x[0]) * self.cn_default_x.len();
+        }
+
+        length
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::mem;
+
     use crate::MDF4::{block::Block, cn_block::Cnblock};
 
     static RAW: [u8; 160] = [
@@ -319,7 +329,7 @@ mod tests {
     ];
 
     #[test]
-    fn cn_read_test() {
+    fn read() {
         let (pos, cn) = Cnblock::read(&RAW, 0, true);
 
         assert_eq!(pos, 160);
@@ -331,4 +341,38 @@ mod tests {
         assert_eq!(cn.cn_md_unit, 17984);
         assert_eq!(cn.cn_md_comment, 17840);
     }
+
+    // #[test]
+    // fn byte_len() {
+    //     let (pos, cn) = Cnblock::read(&RAW, 0, true);
+
+    //     assert_eq!(pos, 160);
+    //     assert_eq!(24, cn.header.byte_len());
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_cn_next));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_composition));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_tx_name));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_si_source));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_cc_conversion));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_data));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_md_unit));
+    //     assert_eq!(8, mem::size_of_val(&cn.cn_md_comment));
+    //     assert_eq!(0, cn.cn_at_reference.len());
+    //     assert_eq!(0, cn.cn_default_x.len());
+    //     assert_eq!(1, mem::size_of_val(&cn.channel_type));
+    //     assert_eq!(1, mem::size_of_val(&cn.sync_type));
+    //     assert_eq!(1, mem::size_of_val(&cn.data_type));
+    //     assert_eq!(1, mem::size_of_val(&cn.bit_offset));
+    //     assert_eq!(4, mem::size_of_val(&cn.byte_offset));
+    //     assert_eq!(4, mem::size_of_val(&cn.bit_count));
+    //     assert_eq!(4, mem::size_of_val(&cn.flags));
+    //     assert_eq!(4, mem::size_of_val(&cn.pos_invalidation_bit));
+    //     assert_eq!(1, mem::size_of_val(&cn.precision));
+    //     assert_eq!(8, mem::size_of_val(&cn.min_raw_value));
+    //     assert_eq!(8, mem::size_of_val(&cn.max_raw_value));
+    //     assert_eq!(8, mem::size_of_val(&cn.lower_limit));
+    //     assert_eq!(8, mem::size_of_val(&cn.upper_limit));
+    //     assert_eq!(8, mem::size_of_val(&cn.lower_ext_limit));
+    //     assert_eq!(8, mem::size_of_val(&cn.upper_ext_limit));
+    //     assert_eq!(160, cn.byte_len());
+    // }
 }

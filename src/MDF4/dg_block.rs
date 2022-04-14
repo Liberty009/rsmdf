@@ -168,7 +168,7 @@ mod tests {
     ];
 
     #[test]
-    fn dg_read_test() {
+    fn read() {
         let (pos, dg) = Dgblock::read(&RAW, 0, true);
 
         assert_eq!(64, pos);

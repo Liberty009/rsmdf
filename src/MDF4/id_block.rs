@@ -75,6 +75,8 @@ impl Block for Idblock {
 #[cfg(test)]
 
 mod tests {
+    use std::process::id;
+
     use crate::{
         utils,
         MDF4::{block::Block, id_block::Idblock},
@@ -89,7 +91,7 @@ mod tests {
     ];
 
     #[test]
-    fn id_read_test() {
+    fn read() {
         let (pos, id_result) = Idblock::read(&RAW, 0, true);
 
         assert_eq!(64, pos);
@@ -99,5 +101,12 @@ mod tests {
         assert!(utils::eq(&[0_u8; 4], &id_result.id_reserved1));
         assert_eq!(410, id_result.id_ver);
         assert!(utils::eq(&[0_u8; 34], &id_result.id_reserved2));
+    }
+
+    #[test]
+    fn byte_len() {
+        let (_pos, id_result) = Idblock::read(&RAW, 0, true);
+
+        assert_eq!(64, id_result.byte_len());
     }
 }

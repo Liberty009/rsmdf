@@ -155,14 +155,14 @@ mod tests {
     ];
 
     #[test]
-    fn cc_read_test() {
+    fn read() {
         let (pos, _cc) = Ccblock::read(&RAW, 0, true);
 
         assert_eq!(96, pos);
     }
 
     #[test]
-    fn cc_byte_len() {
+    fn byte_len() {
         let (_pos, cc) = Ccblock::read(&RAW, 0, true);
 
         println!(

@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::utils;
 
 use super::block::Block;
@@ -76,7 +78,14 @@ impl Block for Siblock {
     }
 
     fn byte_len(&self) -> usize {
-        todo!()
+        self.header.byte_len()
+            + mem::size_of_val(&self.si_tx_name)
+            + mem::size_of_val(&self.si_tx_path)
+            + mem::size_of_val(&self.si_md_comment)
+            + mem::size_of_val(&self.si_type)
+            + mem::size_of_val(&self.si_bus_type)
+            + mem::size_of_val(&self.si_flags)
+            + mem::size_of_val(&self.si_reserved)
     }
 }
 
@@ -99,7 +108,7 @@ mod tests {
     ];
 
     #[test]
-    fn si_read_test() {
+    fn read() {
         let (pos, si) = Siblock::read(&RAW, 0, true);
 
         assert_eq!(pos, 56);
@@ -110,5 +119,12 @@ mod tests {
         assert_eq!(BusType::Other, si.si_bus_type);
         assert_eq!(0, si.si_flags);
         assert!(utils::eq(&si.si_reserved, &[0_u8; 5]));
+    }
+
+    #[test]
+    fn byte_len() {
+        let (pos, si) = Siblock::read(&RAW, 0, true);
+
+        assert_eq!(pos, si.byte_len());
     }
 }

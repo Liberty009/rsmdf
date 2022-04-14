@@ -88,7 +88,14 @@ mod tests {
     ];
 
     #[test]
-    fn md_read_test() {
+    fn read() {
+        let (pos, _md_block) = Mdblock::read(&RAW, 0, true);
+
+        assert_eq!(469, pos);
+    }
+
+    #[test]
+    fn byte_len() {
         let (pos, md_block) = Mdblock::read(&RAW, 0, true);
 
         assert_eq!(469, pos);
