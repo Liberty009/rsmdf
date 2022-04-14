@@ -4,6 +4,7 @@ mod block_header;
 mod ca_block;
 mod cc_block;
 mod cg_block;
+mod ch_block;
 mod cn_block;
 mod dg_block;
 mod dl_block;

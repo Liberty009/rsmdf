@@ -1,5 +1,9 @@
-use crate::MDF4::BlockHeader::*;
-use crate::MDF4::Block::Block;
+use crate::utils;
+
+use super::block_header::*;
+use super::block::Block;
+use super::mdf4::link_extract;
+use super::mdf4_enums::ChannelHierarchyType;
 
 
 pub struct Chblock {
@@ -74,5 +78,9 @@ impl Block for Chblock {
                 ch_type,
             },
         )
+    }
+
+    fn byte_len(&self) -> usize {
+        todo!()
     }
 }
