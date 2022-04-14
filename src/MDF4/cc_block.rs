@@ -113,8 +113,6 @@ impl Block for Ccblock {
     }
 
     fn byte_len(&self) -> usize {
-
-
         let mut length = self.header.byte_len()
             + mem::size_of_val(&self.cc_tx_name)
             + mem::size_of_val(&self.cc_md_unit)
