@@ -75,8 +75,6 @@ impl Block for Idblock {
 #[cfg(test)]
 
 mod tests {
-    use std::process::id;
-
     use crate::{
         utils,
         MDF4::{block::Block, id_block::Idblock},
