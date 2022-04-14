@@ -80,7 +80,7 @@ impl MDFFile for MDF4 {
 
         mdf_channels
     }
-    
+
     fn find_time_channel(
         &self,
         _datagroup: usize,
@@ -269,6 +269,3 @@ impl MDFFile for MDF4 {
 
 #[derive(Debug, Clone, PartialEq)]
 struct Rdblock {}
-
-#[derive(Debug, Clone, PartialEq)]
-struct Sdblock {}
