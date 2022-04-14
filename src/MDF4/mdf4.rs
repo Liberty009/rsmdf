@@ -223,7 +223,6 @@ impl MDFFile for MDF4 {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq)]
 struct Rdblock {}
 

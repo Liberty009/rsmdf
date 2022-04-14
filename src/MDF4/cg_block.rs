@@ -193,8 +193,8 @@ impl Block for Cgblock {
     }
 
     fn byte_len(&self) -> usize {
-        self.header.byte_len() + 
-        mem::size_of_val(&self.cg_cg_next)
+        self.header.byte_len()
+            + mem::size_of_val(&self.cg_cg_next)
             + mem::size_of_val(&self.cg_cn_first)
             + mem::size_of_val(&self.cg_tx_acq_name)
             + mem::size_of_val(&self.cg_si_acq_source)
@@ -248,6 +248,5 @@ mod tests {
         let (pos, cg) = Cgblock::read(&RAW, 0, true);
 
         assert_eq!(pos, cg.byte_len());
-
     }
 }
