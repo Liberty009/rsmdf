@@ -18,6 +18,7 @@ mod id_block;
 mod md_block;
 pub mod mdf4;
 mod mdf4_enums;
+mod sd_block;
 mod si_block;
 mod sr_block;
 mod tx_block;
