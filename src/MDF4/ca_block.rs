@@ -1,3 +1,5 @@
+use std::mem;
+
 use super::block::Block;
 use super::block_header::*;
 use super::mdf4::link_extract;
@@ -6,39 +8,22 @@ use crate::utils;
 #[derive(Debug, Clone, PartialEq)]
 struct Cablock {
     header: BlockHeader,
-    #[allow(dead_code)]
     ca_composition: u64,
-    #[allow(dead_code)]
     ca_data: Vec<u64>,
-    #[allow(dead_code)]
     ca_dynamic_size: Vec<u64>,
-    #[allow(dead_code)]
     ca_input_quantity: Vec<u64>,
-    #[allow(dead_code)]
     ca_output_quantity: Vec<u64>,
-    #[allow(dead_code)]
     ca_comparison_quantity: Vec<u64>,
-    #[allow(dead_code)]
     ca_cc_axis_conversion: Vec<u64>,
-    #[allow(dead_code)]
     ca_axis: Vec<u64>,
-    #[allow(dead_code)]
     ca_type: u8,
-    #[allow(dead_code)]
     ca_storage: u8,
-    #[allow(dead_code)]
     ca_ndim: u16,
-    #[allow(dead_code)]
     ca_flags: u32,
-    #[allow(dead_code)]
     ca_byte_offset_base: i32,
-    #[allow(dead_code)]
     ca_inval_bit_pos_base: u32,
-    #[allow(dead_code)]
     ca_dim_size: Vec<u64>,
-    #[allow(dead_code)]
     ca_axis_value: Vec<f64>,
-    #[allow(dead_code)]
     ca_cycle_count: Vec<u64>,
 }
 impl Block for Cablock {
@@ -178,6 +163,47 @@ impl Block for Cablock {
     }
 
     fn byte_len(&self) -> usize {
-        todo!()
+        let mut length = self.header.byte_len()
+            + mem::size_of_val(&self.ca_composition)
+            + mem::size_of_val(&self.ca_type)
+            + mem::size_of_val(&self.ca_storage)
+            + mem::size_of_val(&self.ca_ndim)
+            + mem::size_of_val(&self.ca_flags)
+            + mem::size_of_val(&self.ca_byte_offset_base)
+            + mem::size_of_val(&self.ca_inval_bit_pos_base);
+        if !self.ca_data.is_empty() {
+            length += mem::size_of_val(&self.ca_data[0]) * self.ca_data.len();
+        }
+        if !self.ca_dynamic_size.is_empty() {
+            length += mem::size_of_val(&self.ca_dynamic_size[0]) * self.ca_dynamic_size.len();
+        }
+        if !self.ca_input_quantity.is_empty() {
+            length += mem::size_of_val(&self.ca_input_quantity[0]) * self.ca_input_quantity.len();
+        }
+        if !self.ca_output_quantity.is_empty() {
+            length += mem::size_of_val(&self.ca_output_quantity[0]) * self.ca_output_quantity.len();
+        }
+        if !self.ca_comparison_quantity.is_empty() {
+            length += mem::size_of_val(&self.ca_comparison_quantity[0])
+                * self.ca_comparison_quantity.len();
+        }
+        if !self.ca_cc_axis_conversion.is_empty() {
+            length +=
+                mem::size_of_val(&self.ca_cc_axis_conversion[0]) * self.ca_cc_axis_conversion.len();
+        }
+        if !self.ca_axis.is_empty() {
+            length += mem::size_of_val(&self.ca_axis[0]) * self.ca_axis.len();
+        }
+        if !self.ca_dim_size.is_empty() {
+            length += mem::size_of_val(&self.ca_dim_size[0]) * self.ca_dim_size.len();
+        }
+        if !self.ca_axis_value.is_empty() {
+            length += mem::size_of_val(&self.ca_axis_value[0]) * self.ca_axis_value.len();
+        }
+        if !self.ca_cycle_count.is_empty() {
+            length += mem::size_of_val(&self.ca_cycle_count[0]) * self.ca_cycle_count.len();
+        }
+
+        length
     }
 }

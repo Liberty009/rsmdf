@@ -38,7 +38,7 @@ impl Block for Dtblock {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::MDF4::block::Block;
 
     use super::Dtblock;
@@ -124,7 +124,7 @@ mod test {
     ];
 
     #[test]
-    fn dt_read_test() {
+    fn read() {
         let (pos, _dt) = Dtblock::read(&RAW, 0, true);
 
         assert_eq!(pos, 1140);

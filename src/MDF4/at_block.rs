@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::utils;
 
 use super::block::Block;
@@ -7,26 +9,16 @@ use super::mdf4::link_extract;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Atblock {
     header: BlockHeader,
-    #[allow(dead_code)]
     next_at_addr: u64,
-    #[allow(dead_code)]
     file_name_addr: u64,
-    #[allow(dead_code)]
     mime_addr: u64,
-    #[allow(dead_code)]
     comment_addr: u64,
-    #[allow(dead_code)]
     flags: u16,
-    #[allow(dead_code)]
     creator_index: u16,
     reserved1: [u8; 4],
-    #[allow(dead_code)]
     md5_sum: [u8; 16],
-    #[allow(dead_code)]
     original_size: u64,
-    #[allow(dead_code)]
     embedded_size: u64,
-    #[allow(dead_code)]
     embedded_data: Vec<u8>,
 }
 
@@ -105,6 +97,21 @@ impl Block for Atblock {
     }
 
     fn byte_len(&self) -> usize {
-        todo!()
+        let mut length = self.header.byte_len()
+            + mem::size_of_val(&self.next_at_addr)
+            + mem::size_of_val(&self.file_name_addr)
+            + mem::size_of_val(&self.mime_addr)
+            + mem::size_of_val(&self.comment_addr)
+            + mem::size_of_val(&self.flags)
+            + mem::size_of_val(&self.creator_index)
+            + mem::size_of_val(&self.reserved1)
+            + mem::size_of_val(&self.md5_sum)
+            + mem::size_of_val(&self.original_size)
+            + mem::size_of_val(&self.embedded_size);
+        if !self.embedded_data.is_empty() {
+            length += mem::size_of_val(&self.embedded_data[0]) * self.embedded_data.len();
+        }
+
+        length
     }
 }

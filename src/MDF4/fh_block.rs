@@ -8,19 +8,19 @@ use crate::utils;
 #[derive(Debug, Clone, PartialEq)]
 struct Fhblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     fh_fh_next: u64,
-    #[allow(dead_code)]
+
     fh_md_comment: u64,
-    #[allow(dead_code)]
+
     fh_time_ns: u64,
-    #[allow(dead_code)]
+
     fh_tz_offset_min: i16,
-    #[allow(dead_code)]
+
     fh_dst_offset_min: i16,
-    #[allow(dead_code)]
+
     fh_time_flags: u8,
-    #[allow(dead_code)]
+
     fh_reserved: [u8; 3],
 }
 impl Block for Fhblock {
@@ -82,7 +82,8 @@ impl Block for Fhblock {
     }
 
     fn byte_len(&self) -> usize {
-        mem::size_of_val(&self.fh_fh_next)
+        self.header.byte_len()
+            + mem::size_of_val(&self.fh_fh_next)
             + mem::size_of_val(&self.fh_md_comment)
             + mem::size_of_val(&self.fh_time_ns)
             + mem::size_of_val(&self.fh_tz_offset_min)
@@ -104,7 +105,7 @@ mod tests {
     ];
 
     #[test]
-    fn fh_read_test() {
+    fn read() {
         let (pos, fh) = Fhblock::read(&RAW, 0, true);
 
         assert_eq!(pos, RAW.len());
@@ -114,5 +115,12 @@ mod tests {
         assert_eq!(60, fh.fh_tz_offset_min);
         assert_eq!(0, fh.fh_dst_offset_min);
         assert_eq!(2, fh.fh_time_flags);
+    }
+
+    #[test]
+    fn byte_len() {
+        let (pos, fh) = Fhblock::read(&RAW, 0, true);
+
+        assert_eq!(pos, fh.byte_len());
     }
 }

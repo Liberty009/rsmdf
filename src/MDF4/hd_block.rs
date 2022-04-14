@@ -155,7 +155,8 @@ impl Block for Hdblock {
     }
 
     fn byte_len(&self) -> usize {
-        mem::size_of_val(&self.hd_dg_first)
+        self.header.byte_len()
+            + mem::size_of_val(&self.hd_dg_first)
             + mem::size_of_val(&self.hd_fh_first)
             + mem::size_of_val(&self.hd_ch_first)
             + mem::size_of_val(&self.hd_at_first)
@@ -188,7 +189,7 @@ mod tests {
     ];
 
     #[test]
-    fn hd_read_test() {
+    fn read() {
         let (pos, hd_block) = Hdblock::read(&RAW, 0, true);
 
         assert_eq!(pos, RAW.len());
@@ -206,7 +207,14 @@ mod tests {
         assert_eq!(0, hd_block.hd_time_class);
         assert_eq!(0, hd_block.hd_flags);
         assert_eq!(0, hd_block.hd_reserved);
-        assert!((0.0_f64 - hd_block.hd_start_angle_rad).abs() < 0.1 );
-        assert!((0.0_f64 - hd_block.hd_start_distance_m).abs() < 0.1 );
+        assert_eq!(0.0_f64, hd_block.hd_start_angle_rad);
+        assert_eq!(0.0_f64, hd_block.hd_start_distance_m);
+    }
+
+    #[test]
+    fn byte_len() {
+        let (pos, hd_block) = Hdblock::read(&RAW, 0, true);
+
+        assert_eq!(pos, hd_block.byte_len());
     }
 }

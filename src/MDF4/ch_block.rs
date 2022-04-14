@@ -1,30 +1,26 @@
+use std::mem;
+
 use crate::utils;
 
-use super::block_header::*;
 use super::block::Block;
+use super::block_header::*;
 use super::mdf4::link_extract;
 use super::mdf4_enums::ChannelHierarchyType;
 
-
 pub struct Chblock {
-    #[allow(dead_code)]
+    header: BlockHeader,
     ch_ch_next: u64,
-    #[allow(dead_code)]
     ch_ch_first: u64,
-    #[allow(dead_code)]
     ch_tx_name: u64,
-    #[allow(dead_code)]
     ch_md_comment: u64,
-    #[allow(dead_code)]
     ch_element: Vec<u64>,
-    #[allow(dead_code)]
     ch_element_count: u32,
-    #[allow(dead_code)]
     ch_type: ChannelHierarchyType,
 }
 impl Block for Chblock {
     fn new() -> Self {
         Self {
+            header: BlockHeader::create("##CH", 50, 0),
             ch_ch_next: 0_u64,
             ch_ch_first: 0_u64,
             ch_tx_name: 0_u64,
@@ -36,6 +32,7 @@ impl Block for Chblock {
     }
     fn default() -> Self {
         Self {
+            header: BlockHeader::create("##CH", 50, 0),
             ch_ch_next: 0_u64,
             ch_ch_first: 0_u64,
             ch_tx_name: 0_u64,
@@ -69,6 +66,7 @@ impl Block for Chblock {
         (
             pos,
             Self {
+                header,
                 ch_ch_next,
                 ch_ch_first,
                 ch_tx_name,
@@ -81,6 +79,17 @@ impl Block for Chblock {
     }
 
     fn byte_len(&self) -> usize {
-        todo!()
+        let mut length = self.header.byte_len()
+            + mem::size_of_val(&self.ch_ch_next)
+            + mem::size_of_val(&self.ch_ch_first)
+            + mem::size_of_val(&self.ch_tx_name)
+            + mem::size_of_val(&self.ch_md_comment)
+            + mem::size_of_val(&self.ch_element_count)
+            + mem::size_of_val(&self.ch_type);
+
+        if !self.ch_element.is_empty() {
+            length += mem::size_of_val(&self.ch_element[0]) * self.ch_element.len();
+        }
+        length
     }
 }

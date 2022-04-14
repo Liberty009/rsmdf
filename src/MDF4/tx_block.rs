@@ -44,7 +44,7 @@ impl Block for Txblock {
     }
 
     fn byte_len(&self) -> usize {
-        24 + &self.tx_data.len() + 1
+        self.header.byte_len() + self.tx_data.len() + 1 // add 1 for the trailing null on a c string
     }
 }
 
@@ -59,11 +59,19 @@ mod tests {
     ];
 
     #[test]
-    fn tx_read_test() {
+    fn read() {
         let (pos, tx) = Txblock::read(&RAW, 0, true);
 
         assert_eq!(33, pos);
         //println!("{}", tx.tx_data);
         assert!(tx.tx_data.eq("Engine_1"))
+    }
+
+    #[test]
+    fn byte_len() {
+        let (pos, tx) = Txblock::read(&RAW, 0, true);
+
+        assert_eq!(33, pos);
+        assert_eq!(33, tx.byte_len());
     }
 }
