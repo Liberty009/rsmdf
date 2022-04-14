@@ -52,6 +52,8 @@ pub struct Cnblock {
     pos_invalidation_bit: u32, //invalidation bit position for the current
     #[allow(dead_code)]
     precision: u8, //integer code for the precision
+    reserved1: u8,
+    attachment_nr: u16,
     #[allow(dead_code)]
     min_raw_value: f64, //min raw value of all samples
     #[allow(dead_code)]
@@ -148,6 +150,8 @@ impl Block for Cnblock {
             flags: 0,
             pos_invalidation_bit: 0,
             precision: 0,
+            reserved1: 0,
+            attachment_nr: 0,
             min_raw_value: 0.0,
             max_raw_value: 0.0,
             lower_limit: 0.0,
@@ -178,6 +182,8 @@ impl Block for Cnblock {
             flags: 0,
             pos_invalidation_bit: 0,
             precision: 0,
+            reserved1: 0,
+            attachment_nr: 0,
             min_raw_value: 0.0,
             max_raw_value: 0.0,
             lower_limit: 0.0,
@@ -205,8 +211,8 @@ impl Block for Cnblock {
         let flags = utils::read(stream, little_endian, &mut pos);
         let invalidation_bit_pos = utils::read(stream, little_endian, &mut pos);
         let precision = utils::read(stream, little_endian, &mut pos);
-        let _reserved1: u8 = utils::read(stream, little_endian, &mut pos);
-        let attachment_nr: u16 = utils::read(stream, little_endian, &mut pos);
+        let reserved1 = utils::read(stream, little_endian, &mut pos);
+        let attachment_nr = utils::read(stream, little_endian, &mut pos);
         let min_raw_value = utils::read(stream, little_endian, &mut pos);
         let max_raw_value = utils::read(stream, little_endian, &mut pos);
         let lower_limit = utils::read(stream, little_endian, &mut pos);
@@ -260,7 +266,8 @@ impl Block for Cnblock {
                 flags,
                 pos_invalidation_bit: invalidation_bit_pos,
                 precision,
-                //reserved1,
+                reserved1,
+                attachment_nr,
                 min_raw_value,
                 max_raw_value,
                 lower_limit,
@@ -290,6 +297,8 @@ impl Block for Cnblock {
             + mem::size_of_val(&self.flags)
             + mem::size_of_val(&self.pos_invalidation_bit)
             + mem::size_of_val(&self.precision)
+            + mem::size_of_val(&self.reserved1)
+            + mem::size_of_val(&self.attachment_nr)
             + mem::size_of_val(&self.min_raw_value)
             + mem::size_of_val(&self.max_raw_value)
             + mem::size_of_val(&self.lower_limit)
@@ -342,37 +351,37 @@ mod tests {
         assert_eq!(cn.cn_md_comment, 17840);
     }
 
-    // #[test]
-    // fn byte_len() {
-    //     let (pos, cn) = Cnblock::read(&RAW, 0, true);
+    #[test]
+    fn byte_len() {
+        let (pos, cn) = Cnblock::read(&RAW, 0, true);
 
-    //     assert_eq!(pos, 160);
-    //     assert_eq!(24, cn.header.byte_len());
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_cn_next));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_composition));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_tx_name));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_si_source));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_cc_conversion));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_data));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_md_unit));
-    //     assert_eq!(8, mem::size_of_val(&cn.cn_md_comment));
-    //     assert_eq!(0, cn.cn_at_reference.len());
-    //     assert_eq!(0, cn.cn_default_x.len());
-    //     assert_eq!(1, mem::size_of_val(&cn.channel_type));
-    //     assert_eq!(1, mem::size_of_val(&cn.sync_type));
-    //     assert_eq!(1, mem::size_of_val(&cn.data_type));
-    //     assert_eq!(1, mem::size_of_val(&cn.bit_offset));
-    //     assert_eq!(4, mem::size_of_val(&cn.byte_offset));
-    //     assert_eq!(4, mem::size_of_val(&cn.bit_count));
-    //     assert_eq!(4, mem::size_of_val(&cn.flags));
-    //     assert_eq!(4, mem::size_of_val(&cn.pos_invalidation_bit));
-    //     assert_eq!(1, mem::size_of_val(&cn.precision));
-    //     assert_eq!(8, mem::size_of_val(&cn.min_raw_value));
-    //     assert_eq!(8, mem::size_of_val(&cn.max_raw_value));
-    //     assert_eq!(8, mem::size_of_val(&cn.lower_limit));
-    //     assert_eq!(8, mem::size_of_val(&cn.upper_limit));
-    //     assert_eq!(8, mem::size_of_val(&cn.lower_ext_limit));
-    //     assert_eq!(8, mem::size_of_val(&cn.upper_ext_limit));
-    //     assert_eq!(160, cn.byte_len());
-    // }
+        assert_eq!(pos, 160);
+        assert_eq!(24, cn.header.byte_len());
+        assert_eq!(8, mem::size_of_val(&cn.cn_cn_next));
+        assert_eq!(8, mem::size_of_val(&cn.cn_composition));
+        assert_eq!(8, mem::size_of_val(&cn.cn_tx_name));
+        assert_eq!(8, mem::size_of_val(&cn.cn_si_source));
+        assert_eq!(8, mem::size_of_val(&cn.cn_cc_conversion));
+        assert_eq!(8, mem::size_of_val(&cn.cn_data));
+        assert_eq!(8, mem::size_of_val(&cn.cn_md_unit));
+        assert_eq!(8, mem::size_of_val(&cn.cn_md_comment));
+        assert_eq!(0, cn.cn_at_reference.len());
+        assert_eq!(0, cn.cn_default_x.len());
+        assert_eq!(1, mem::size_of_val(&cn.channel_type));
+        assert_eq!(1, mem::size_of_val(&cn.sync_type));
+        assert_eq!(1, mem::size_of_val(&cn.data_type));
+        assert_eq!(1, mem::size_of_val(&cn.bit_offset));
+        assert_eq!(4, mem::size_of_val(&cn.byte_offset));
+        assert_eq!(4, mem::size_of_val(&cn.bit_count));
+        assert_eq!(4, mem::size_of_val(&cn.flags));
+        assert_eq!(4, mem::size_of_val(&cn.pos_invalidation_bit));
+        assert_eq!(1, mem::size_of_val(&cn.precision));
+        assert_eq!(8, mem::size_of_val(&cn.min_raw_value));
+        assert_eq!(8, mem::size_of_val(&cn.max_raw_value));
+        assert_eq!(8, mem::size_of_val(&cn.lower_limit));
+        assert_eq!(8, mem::size_of_val(&cn.upper_limit));
+        assert_eq!(8, mem::size_of_val(&cn.lower_ext_limit));
+        assert_eq!(8, mem::size_of_val(&cn.upper_ext_limit));
+        assert_eq!(160, cn.byte_len());
+    }
 }
