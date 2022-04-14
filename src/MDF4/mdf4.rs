@@ -80,6 +80,7 @@ impl MDFFile for MDF4 {
 
         mdf_channels
     }
+    
     fn find_time_channel(
         &self,
         _datagroup: usize,
@@ -94,11 +95,54 @@ impl MDFFile for MDF4 {
             }
         }
 
-        Err("No time series found for the channel selected")
+        Err("No time series found for the channel group selected")
     }
 
-    fn read_channel(&self, _datagroup: usize, _channel_grp: usize, _channel: usize) -> Vec<Record> {
-        Vec::new()
+    fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
+        let channel_group = &self.channel_groups[channel_grp];
+        let data_length = channel_group.data_length();
+        let channels = channel_group
+            .first(&self.file, self.little_endian)
+            .list(&self.file, self.little_endian);
+        let dg = &self.data_groups[datagroup];
+        let cn = &channels[channel];
+
+        let data =
+            &self.file[dg.data_location() as usize..(dg.data_location() as usize + data_length)];
+
+        println!("Record Number: {}", channel_group.record_number());
+
+        // let mut data_blocks: Vec<&[u8]> = vec![&[0_u8]; channel_group.record_number()];
+        let mut data_blocks = Vec::new();
+
+        println!("Vec len: {}", data_blocks.len());
+
+        for (i, db) in data_blocks.iter_mut().enumerate() {
+            *db = &data[(i * channel_group.record_size())..((i + 1) * channel_group.record_size())];
+        }
+
+        let byte_offset = cn.byte_offset();
+
+        let mut records = Vec::new();
+        let mut pos = 0;
+        for _i in 0..channel_group.record_number() {
+            records.push(&data[pos..pos + channel_group.record_size()]);
+            pos += channel_group.record_size();
+        }
+
+        let mut raw_data = Vec::new();
+        let end = byte_offset + cn.data_type_len();
+
+        for rec in records {
+            raw_data.push(&rec[byte_offset..end]);
+        }
+
+        let mut extracted_data = Vec::new();
+        for raw in raw_data {
+            extracted_data.push(Record::new(raw, cn.data_type().copy_to_DataTypeRead()));
+        }
+
+        extracted_data
     }
 
     #[must_use]

@@ -1,5 +1,7 @@
 use std::mem;
 
+use crate::record;
+
 #[allow(dead_code)]
 #[derive(PartialEq)]
 pub enum ChannelHierarchyType {
@@ -279,7 +281,7 @@ impl SyncType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DataType {
     UnsignedByteLE,
     UnsignedByteBE,
@@ -316,7 +318,48 @@ impl DataType {
             _ => panic!("Error: Unknown data type"),
         }
     }
-    #[allow(dead_code)]
+
+    pub fn copy_to_DataTypeRead(&self) -> record::DataTypeRead {
+        let dt = match self {
+            Self::UnsignedByteLE => record::DataType::UnsignedInt,
+            Self::UnsignedByteBE => record::DataType::UnsignedInt,
+            Self::SignedLE => record::DataType::SignedInt,
+            Self::SignedBE => record::DataType::SignedInt,
+            Self::FloatLE => record::DataType::Float32,
+            Self::FloatBE => record::DataType::Float32,
+            Self::StringLatin => record::DataType::StringNullTerm,
+            Self::StringUTF8 => panic!(""),
+            Self::StringUTF16LE => panic!(""),
+            Self::StringUTF16BE => panic!(""),
+            Self::ByteArray => record::DataType::ByteArray,
+            Self::MIMESample => panic!(""),
+            Self::CANopenData => panic!(""),
+            Self::CANopenTime => panic!(""),
+        };
+
+        let end = match self {
+            Self::UnsignedByteLE => true,
+            Self::UnsignedByteBE => false,
+            Self::SignedLE => true,
+            Self::SignedBE => false,
+            Self::FloatLE => true,
+            Self::FloatBE => false,
+            Self::StringLatin => false,
+            Self::StringUTF8 => panic!(""),
+            Self::StringUTF16LE => panic!(""),
+            Self::StringUTF16BE => panic!(""),
+            Self::ByteArray => false,
+            Self::MIMESample => panic!(""),
+            Self::CANopenData => panic!(""),
+            Self::CANopenTime => panic!(""),
+        };
+
+        record::DataTypeRead {
+            data_type: dt,
+            little_endian: end,
+        }
+    }
+
     pub fn len(&self) -> usize {
         match self {
             Self::UnsignedByteLE => mem::size_of::<u8>() / mem::size_of::<u8>(),

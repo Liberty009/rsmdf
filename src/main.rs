@@ -3,7 +3,7 @@ use std::time::Instant;
 use rsmdf::{mdf::MDFFile, mdf::MDF};
 
 fn main() {
-    let mdf = MDF::new("./example_files/Single_Channel.dat");
+    let mdf = MDF::new("./example_files/ASAP2_Demo_V171.mf4");
 
     mdf.list_channels();
 

@@ -72,6 +72,18 @@ impl LinkedBlock for Cgblock {
 }
 
 impl Cgblock {
+    pub fn data_length(&self) -> usize {
+        (self.cg_record_id * self.cg_data_bytes as u64) as usize
+    }
+
+    pub fn record_number(&self) -> usize {
+        self.cg_record_id as usize
+    }
+
+    pub fn record_size(&self) -> usize {
+        self.cg_data_bytes as usize
+    }
+
     pub fn first(&self, stream: &[u8], little_endian: bool) -> Cnblock {
         let (_, block) = Cnblock::read(stream, self.cg_cn_first as usize, little_endian);
         block

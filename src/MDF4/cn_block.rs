@@ -108,6 +108,18 @@ impl LinkedBlock for Cnblock {
 }
 
 impl Cnblock {
+    pub fn byte_offset(&self) -> usize {
+        self.bit_offset as usize
+    }
+
+    pub fn data_type(&self) -> DataType {
+        self.data_type
+    }
+
+    pub fn data_type_len(&self) -> usize {
+        self.data_type.len()
+    }
+
     pub fn comment(self, stream: &[u8], little_endian: bool) -> String {
         let mut name = "".to_string();
 

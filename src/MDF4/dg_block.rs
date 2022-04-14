@@ -66,6 +66,10 @@ impl Dgblock {
         block
     }
 
+    pub fn data_location(&self) -> usize {
+        self.dg_data as usize
+    }
+
     // pub fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {
     //     let mut all = Vec::new();
     //     let mut next_dg = position;
