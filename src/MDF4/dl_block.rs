@@ -1,30 +1,33 @@
 use crate::utils;
 
 use super::block::{Block, DataBlock, LinkedBlock};
-use super::block_header::*;
+use super::dt_block::Dtblock;
+use super::{block_header::*};
 use super::mdf4::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dlblock {
     header: BlockHeader,
-    #[allow(dead_code)]
     dl_dl_next: u64,
-    #[allow(dead_code)]
     dl_data: Vec<u64>,
-    #[allow(dead_code)]
     dl_flags: u8,
     dl_reserved: [u8; 3],
-    #[allow(dead_code)]
     dl_count: u32,
-    #[allow(dead_code)]
     dl_equal_length: u64,
-    #[allow(dead_code)]
     dl_offset: Vec<u64>,
 }
 
 impl DataBlock for Dlblock {
-    fn data_array(&self) -> Vec<u8> {
-        todo!()
+    fn data_array(&self, stream: &[u8], little_endian: bool) -> Vec<u8> {
+
+        let mut data_list = Vec::new();
+
+        for data_block in &self.dl_data{
+            let (_pos, block) = Dtblock::read(stream, *data_block as usize, little_endian);
+            data_list.append(&mut block.data_array(stream, little_endian));
+        }
+
+        data_list
     }
 }
 

@@ -8,7 +8,7 @@ pub struct Dtblock {
 }
 
 impl DataBlock for Dtblock {
-    fn data_array(&self) -> Vec<u8> {
+    fn data_array(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
         self.dt_data.clone()
     }
 }

@@ -1,5 +1,5 @@
 use super::{
-    block::{Block, DataBlock},
+    block::{Block, DataBlock, LinkedBlock},
     block_header::BlockHeader,
     dl_block::Dlblock,
     dt_block::Dtblock,
@@ -13,11 +13,21 @@ pub enum DataBlockType {
 }
 
 impl DataBlockType {
-    pub fn data_array(&self) -> Vec<u8> {
+    pub fn data_array(&self, stream: &[u8], little_endian: bool) -> Vec<u8> {
         match self {
-            Self::Block(block) => block.data_array(),
-            Self::BlockComp(block) => block.data_array(),
-            Self::List(block) => block.data_array(),
+            Self::Block(block) => block.data_array(stream, little_endian),
+            Self::BlockComp(block) => block.data_array(stream, little_endian),
+            Self::List(block) => {
+                let dl_list = block.list(stream, little_endian);
+
+                let mut data = Vec::new();
+
+                for dl in dl_list {
+                    data.append(&mut dl.data_array(stream, little_endian));
+                }
+                
+                
+               data},
         }
     }
 

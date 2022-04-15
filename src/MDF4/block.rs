@@ -16,5 +16,5 @@ pub trait LinkedBlock {
 }
 
 pub trait DataBlock {
-    fn data_array(&self) -> Vec<u8>;
+    fn data_array(&self, stream: &[u8], little_endian: bool) -> Vec<u8>;
 }

@@ -26,7 +26,7 @@ pub struct Dzblock {
 }
 
 impl DataBlock for Dzblock {
-    fn data_array(&self) -> Vec<u8> {
+    fn data_array(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
         let decompressed =
             decompress_to_vec(self.dz_data.as_slice()).expect("Failed to decompress!");
         decompressed
