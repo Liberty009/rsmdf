@@ -32,11 +32,11 @@ pub fn link_extract(
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MDF4 {
-    #[allow(dead_code)]
+
     id: Idblock,
-    #[allow(dead_code)]
+
     header: Hdblock,
-    #[allow(dead_code)]
+
     comment: String,
     data_groups: Vec<Dgblock>,
     channels: Vec<Cnblock>,

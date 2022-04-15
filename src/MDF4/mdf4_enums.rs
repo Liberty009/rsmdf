@@ -17,7 +17,7 @@ pub enum ChannelHierarchyType {
 }
 
 impl ChannelHierarchyType {
-    #[allow(dead_code)]
+
     pub fn new(ch_type: u8) -> Self {
         match ch_type {
             0 => Self::Group,
@@ -36,24 +36,24 @@ impl ChannelHierarchyType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EventType {
-    #[allow(dead_code)]
+
     Recording,
-    #[allow(dead_code)]
+
     RecordingInterrupt,
-    #[allow(dead_code)]
+
     AcquistionInterrupt,
-    #[allow(dead_code)]
+
     StartRecordingTrigger,
-    #[allow(dead_code)]
+
     StopRecordingTrigger,
-    #[allow(dead_code)]
+
     Trigger,
-    #[allow(dead_code)]
+
     Marker,
 }
 
 impl EventType {
-    #[allow(dead_code)]
+
     pub fn new(ev_type: u8) -> Self {
         match ev_type {
             0 => Self::Recording,
@@ -71,18 +71,18 @@ impl EventType {
 #[derive(Debug, Clone, PartialEq)]
 
 pub enum EventSyncType {
-    #[allow(dead_code)]
+
     Seconds,
-    #[allow(dead_code)]
+
     Radians,
-    #[allow(dead_code)]
+
     Meters,
-    #[allow(dead_code)]
+
     Index,
 }
 
 impl EventSyncType {
-    #[allow(dead_code)]
+
     pub fn new(ev_sync: u8) -> Self {
         match ev_sync {
             1 => Self::Seconds,
@@ -97,16 +97,16 @@ impl EventSyncType {
 #[derive(Debug, Clone, PartialEq)]
 
 pub enum RangeType {
-    #[allow(dead_code)]
+
     Point,
-    #[allow(dead_code)]
+
     RangeBegin,
-    #[allow(dead_code)]
+
     RangeEnd,
 }
 
 impl RangeType {
-    #[allow(dead_code)]
+
     pub fn new(ev_range: u8) -> Self {
         match ev_range {
             0 => Self::Point,
@@ -119,20 +119,20 @@ impl RangeType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EventCause {
-    #[allow(dead_code)]
+
     Other,
-    #[allow(dead_code)]
+
     Error,
-    #[allow(dead_code)]
+
     Tool,
-    #[allow(dead_code)]
+
     Script,
-    #[allow(dead_code)]
+
     User,
 }
 
 impl EventCause {
-    #[allow(dead_code)]
+
     pub fn new(ev_cause: u8) -> Self {
         match ev_cause {
             0 => Self::Other,
@@ -147,22 +147,22 @@ impl EventCause {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SourceType {
-    #[allow(dead_code)]
+
     Other,
-    #[allow(dead_code)]
+
     Ecu,
-    #[allow(dead_code)]
+
     Bus,
-    #[allow(dead_code)]
+
     IO,
-    #[allow(dead_code)]
+
     Tool,
-    #[allow(dead_code)]
+
     User,
 }
 
 impl SourceType {
-    #[allow(dead_code)]
+
     pub fn new(source: u8) -> Self {
         match source {
             0 => Self::Other,
@@ -178,28 +178,28 @@ impl SourceType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BusType {
-    #[allow(dead_code)]
+
     None,
-    #[allow(dead_code)]
+
     Other,
-    #[allow(dead_code)]
+
     Can,
-    #[allow(dead_code)]
+
     Lin,
-    #[allow(dead_code)]
+
     Most,
-    #[allow(dead_code)]
+
     FlexRay,
-    #[allow(dead_code)]
+
     KLine,
-    #[allow(dead_code)]
+
     Ethernet,
-    #[allow(dead_code)]
+
     Usb,
 }
 
 impl BusType {
-    #[allow(dead_code)]
+
     pub fn new(source: u8) -> Self {
         match source {
             0 => Self::None,
@@ -218,14 +218,14 @@ impl BusType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ZipType {
-    #[allow(dead_code)]
+
     Deflate,
-    #[allow(dead_code)]
+
     TransposeDeflate,
 }
 
 impl ZipType {
-    #[allow(dead_code)]
+
     pub fn new(zip: u8) -> Self {
         match zip {
             0 => Self::Deflate,
@@ -379,6 +379,7 @@ impl DataType {
             // _ => panic!("")
         }
     }
+
     #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.len() == 0

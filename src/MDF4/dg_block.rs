@@ -10,10 +10,15 @@ use crate::utils;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dgblock {
     header: BlockHeader,
+
     dg_dg_next: u64,
+
     dg_cg_first: u64,
+
     dg_data: u64,
+
     dg_md_comment: u64,
+
     dg_rec_id_size: u8,
     dg_reserved: [u8; 7],
 }
@@ -65,6 +70,7 @@ impl Dgblock {
     pub fn data_location(&self) -> usize {
         self.dg_data as usize
     }
+
 
     pub fn read_data(&self, stream: &[u8], little_endian: bool) -> Vec<u8> {
         let data_block = DataBlockType::read(stream, self.data_location(), little_endian);

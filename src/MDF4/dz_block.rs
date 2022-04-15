@@ -10,18 +10,18 @@ use miniz_oxide::inflate::decompress_to_vec;
 pub struct Dzblock {
     header: BlockHeader,
 
-    #[allow(dead_code)]
+
     dz_org_block_type: [u8; 2],
-    #[allow(dead_code)]
+
     dz_zip_type: ZipType,
     dz_reserved: u8,
-    #[allow(dead_code)]
+
     dz_zip_parameter: u32,
-    #[allow(dead_code)]
+
     dz_org_data_length: u64,
-    #[allow(dead_code)]
+
     dz_data_length: u64,
-    #[allow(dead_code)]
+
     dz_data: Vec<u8>,
 }
 
