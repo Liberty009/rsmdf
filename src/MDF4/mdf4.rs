@@ -100,20 +100,20 @@ impl MDFFile for MDF4 {
 
     fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
         let channel_group = &self.channel_groups[channel_grp];
-        let data_length = channel_group.data_length();
+        // let data_length = channel_group.data_length();
         let channels = channel_group
             .first(&self.file, self.little_endian)
             .list(&self.file, self.little_endian);
         let dg = &self.data_groups[datagroup];
         let cn = &channels[channel];
 
-        let data =
-            &self.file[dg.data_location() as usize..(dg.data_location() as usize + data_length)];
+        let data = dg.read_data(&self.file, self.little_endian);
+        // &self.file[dg.data_location() as usize..(dg.data_location() as usize + data_length)];
 
         println!("Record Number: {}", channel_group.record_number());
 
-        // let mut data_blocks: Vec<&[u8]> = vec![&[0_u8]; channel_group.record_number()];
-        let mut data_blocks = Vec::new();
+        let mut data_blocks: Vec<&[u8]> = vec![&[0_u8]; channel_group.record_number()];
+        // let mut data_blocks = Vec::new();
 
         println!("Vec len: {}", data_blocks.len());
 

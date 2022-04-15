@@ -33,7 +33,6 @@ impl Block for Sdblock {
     }
 
     fn byte_len(&self) -> usize {
-        self.header.byte_len() + 
-        self.sd_data.len()
+        self.header.byte_len() + self.sd_data.len()
     }
 }

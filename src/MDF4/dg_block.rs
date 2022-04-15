@@ -3,6 +3,7 @@ use std::mem;
 use super::block::{Block, LinkedBlock};
 use super::block_header::*;
 use super::cg_block::Cgblock;
+use super::data_block::DataBlockType;
 use super::mdf4::link_extract;
 use crate::utils;
 
@@ -68,6 +69,12 @@ impl Dgblock {
 
     pub fn data_location(&self) -> usize {
         self.dg_data as usize
+    }
+
+    #[allow(dead_code)]
+    pub fn read_data(&self, stream: &[u8], little_endian: bool) -> Vec<u8> {
+        let data_block = DataBlockType::read(stream, self.data_location(), little_endian);
+        data_block.data_array()
     }
 
     // pub fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {

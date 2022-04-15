@@ -72,12 +72,13 @@ impl LinkedBlock for Cgblock {
 }
 
 impl Cgblock {
+    #[allow(dead_code)]
     pub fn data_length(&self) -> usize {
         (self.cg_record_id * self.cg_data_bytes as u64) as usize
     }
 
     pub fn record_number(&self) -> usize {
-        self.cg_record_id as usize
+        self.cg_cycle_count as usize
     }
 
     pub fn record_size(&self) -> usize {
