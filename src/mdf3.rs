@@ -1797,6 +1797,7 @@ mod cnblock_test {
         assert_eq!(cn_block.bit_number, 64);
         // assert_eq!(cn_block.data_type, mdf3::DataType::Float64);
         assert_eq!(cn_block.value_range_valid, 1);
+
         assert!(
             (cn_block.signal_min - utils::read::<f64>(
                 &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F,],
@@ -1812,6 +1813,7 @@ mod cnblock_test {
             )).abs() < 0.1
         );
         assert!((cn_block.sample_rate - 0.0).abs() < 0.1);
+
         assert_eq!(cn_block.display_name, 0);
         assert_eq!(cn_block.addition_byte_offset, 0);
     }
@@ -1907,6 +1909,7 @@ mod ccblock_test {
         assert_eq!(position, 47); // should match the block size
         assert_eq!(cc_block.block_size, 46);
         assert_eq!(cc_block.physical_range_valid, 1);
+
         assert!( (
             cc_block.physical_min - 
             utils::read::<f64>(
@@ -1922,6 +1925,7 @@ mod ccblock_test {
                 true,
                 &mut 0_usize
             )).abs() < 0.1
+
         );
         assert!(utils::eq(
             &cc_block.unit,
