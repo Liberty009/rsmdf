@@ -3,21 +3,22 @@ use std::mem;
 use super::block::{Block, LinkedBlock};
 use super::block_header::*;
 use super::cg_block::Cgblock;
+use super::data_block::DataBlockType;
 use super::mdf4::link_extract;
 use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dgblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     dg_dg_next: u64,
-    #[allow(dead_code)]
+
     dg_cg_first: u64,
-    #[allow(dead_code)]
+
     dg_data: u64,
-    #[allow(dead_code)]
+
     dg_md_comment: u64,
-    #[allow(dead_code)]
+
     dg_rec_id_size: u8,
     dg_reserved: [u8; 7],
 }
@@ -64,6 +65,16 @@ impl Dgblock {
     pub fn first(&self, stream: &[u8], little_endian: bool) -> Cgblock {
         let (_, block) = Cgblock::read(stream, self.dg_cg_first as usize, little_endian);
         block
+    }
+
+    pub fn data_location(&self) -> usize {
+        self.dg_data as usize
+    }
+
+
+    pub fn read_data(&self, stream: &[u8], little_endian: bool) -> Vec<u8> {
+        let data_block = DataBlockType::read(stream, self.data_location(), little_endian);
+        data_block.data_array(stream, little_endian)
     }
 
     // pub fn read_all(stream: &[u8], position: usize, little_endian: bool) -> Vec<Self> {

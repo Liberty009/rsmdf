@@ -14,3 +14,7 @@ pub trait LinkedBlock {
     where
         Self: std::marker::Sized;
 }
+
+pub trait DataBlock {
+    fn data_array(&self, stream: &[u8], little_endian: bool) -> Vec<u8>;
+}

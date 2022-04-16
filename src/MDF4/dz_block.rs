@@ -1,28 +1,39 @@
 use crate::utils;
 
-use super::block::Block;
+use super::block::{Block, DataBlock};
 use super::block_header::*;
 use super::mdf4_enums::ZipType;
 
+use miniz_oxide::inflate::decompress_to_vec;
+
 #[derive(Debug, Clone, PartialEq)]
-struct DZBlock {
+pub struct Dzblock {
     header: BlockHeader,
 
-    #[allow(dead_code)]
+
     dz_org_block_type: [u8; 2],
-    #[allow(dead_code)]
+
     dz_zip_type: ZipType,
     dz_reserved: u8,
-    #[allow(dead_code)]
+
     dz_zip_parameter: u32,
-    #[allow(dead_code)]
+
     dz_org_data_length: u64,
-    #[allow(dead_code)]
+
     dz_data_length: u64,
-    #[allow(dead_code)]
+
     dz_data: Vec<u8>,
 }
-impl Block for DZBlock {
+
+impl DataBlock for Dzblock {
+    fn data_array(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
+        let decompressed =
+            decompress_to_vec(self.dz_data.as_slice()).expect("Failed to decompress!");
+        decompressed
+    }
+}
+
+impl Block for Dzblock {
     fn new() -> Self {
         Self {
             header: BlockHeader::create("##DZ", 50, 0),

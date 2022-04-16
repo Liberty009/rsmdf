@@ -1,10 +1,16 @@
-use super::block::Block;
+use super::block::{Block, DataBlock};
 use super::block_header::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dtblock {
     header: BlockHeader,
     dt_data: Vec<u8>,
+}
+
+impl DataBlock for Dtblock {
+    fn data_array(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
+        self.dt_data.clone()
+    }
 }
 
 impl Block for Dtblock {

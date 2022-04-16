@@ -72,6 +72,19 @@ impl LinkedBlock for Cgblock {
 }
 
 impl Cgblock {
+    #[allow(dead_code)]
+    pub fn data_length(&self) -> usize {
+        (self.cg_record_id * self.cg_data_bytes as u64) as usize
+    }
+
+    pub fn record_number(&self) -> usize {
+        self.cg_cycle_count as usize
+    }
+
+    pub fn record_size(&self) -> usize {
+        self.cg_data_bytes as usize
+    }
+
     pub fn first(&self, stream: &[u8], little_endian: bool) -> Cnblock {
         let (_, block) = Cnblock::read(stream, self.cg_cn_first as usize, little_endian);
         block
@@ -165,7 +178,7 @@ impl Block for Cgblock {
         let cycles_nr = utils::read(stream, little_endian, &mut pos);
         let flags = utils::read(stream, little_endian, &mut pos);
         let path_separator = utils::read(stream, little_endian, &mut pos);
-        let cg_reserved: [u8; 4] = utils::read(stream, little_endian, &mut pos);
+        let cg_reserved = utils::read(stream, little_endian, &mut pos);
         let samples_byte_nr = utils::read(stream, little_endian, &mut pos);
         let invalidation_bytes_nr = utils::read(stream, little_endian, &mut pos);
 
@@ -193,7 +206,8 @@ impl Block for Cgblock {
     }
 
     fn byte_len(&self) -> usize {
-        mem::size_of_val(&self.cg_cg_next)
+        self.header.byte_len()
+            + mem::size_of_val(&self.cg_cg_next)
             + mem::size_of_val(&self.cg_cn_first)
             + mem::size_of_val(&self.cg_tx_acq_name)
             + mem::size_of_val(&self.cg_si_acq_source)
@@ -205,6 +219,7 @@ impl Block for Cgblock {
             + mem::size_of_val(&self.cg_path_separator)
             + mem::size_of_val(&self.cg_data_bytes)
             + mem::size_of_val(&self.cg_inval_bytes)
+            + mem::size_of_val(&self.cg_reserved)
     }
 }
 
@@ -239,5 +254,12 @@ mod tests {
         assert_eq!(cg.cg_flags, 0);
         // assert_eq!(cg.cg_path_separator, 10);
         assert_eq!(cg.cg_data_bytes, 10);
+    }
+
+    #[test]
+    fn byte_len() {
+        let (pos, cg) = Cgblock::read(&RAW, 0, true);
+
+        assert_eq!(pos, cg.byte_len());
     }
 }

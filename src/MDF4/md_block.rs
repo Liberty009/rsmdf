@@ -7,7 +7,7 @@ use crate::utils;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Mdblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     md_data: String,
 }
 

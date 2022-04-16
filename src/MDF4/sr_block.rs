@@ -7,17 +7,17 @@ use super::mdf4::link_extract;
 #[derive(Debug, Clone, PartialEq)]
 struct Srblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     sr_sr_next: u64,
-    #[allow(dead_code)]
+
     sr_data: u64,
-    #[allow(dead_code)]
+
     sr_cycle_count: u64,
-    #[allow(dead_code)]
+
     sr_interval: f64,
-    #[allow(dead_code)]
+
     sr_sync_type: u8,
-    #[allow(dead_code)]
+
     sr_flags: u8,
     sr_reserved: [u8; 6],
 }
