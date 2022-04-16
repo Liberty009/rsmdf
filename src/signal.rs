@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Signal {
     pub samples: Vec<f64>,
     pub timestamps: Vec<f64>,
@@ -44,7 +44,7 @@ impl Signal {
             return adjusted;
         }
 
-        if start == end {
+        if (start - end).abs() < 0.001 {
             return adjusted;
         }
 
@@ -102,11 +102,11 @@ impl Signal {
                 other.timestamps
             };
 
-            let mut new_samples = Vec::new();
+            let mut new_samples = Vec::with_capacity(self.samples.len() + other.samples.len());
             new_samples.append(&mut self.samples.clone());
             #[allow(clippy::redundant_clone)]
             new_samples.append(&mut other.samples.clone());
-            let mut new_timestamps = Vec::new();
+            let mut new_timestamps = Vec::with_capacity(self.timestamps.len() + timestamps.len());
             new_timestamps.append(&mut self.timestamps.clone());
             new_timestamps.append(&mut timestamps);
 
@@ -151,10 +151,11 @@ impl Signal {
 
     #[must_use]
     pub fn max_time(&self) -> f64 {
-        *self.timestamps.last().unwrap()
+        *self.timestamps.last().expect("No time value found")
     }
 }
 
+#[derive(PartialEq)]
 pub enum Interpolation {
     RepeatPreviousSample,
     LinearInterpolation,
