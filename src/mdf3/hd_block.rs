@@ -82,7 +82,7 @@ impl Hdblock {
 }
 
 #[cfg(test)]
-mod hdblock_test {
+mod tests {
     use crate::utils;
 
     use super::*;

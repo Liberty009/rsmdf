@@ -81,7 +81,7 @@ impl Dgblock {
 }
 
 #[cfg(test)]
-mod dgblock_test {
+mod tests {
     use super::*;
 
     #[test]

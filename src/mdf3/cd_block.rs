@@ -57,7 +57,7 @@ impl Cdblock {
 }
 
 // #[cfg(test)]
-// mod cdblock_test {
+// mod tests {
 //     use super::*;
 
 //     #[test]

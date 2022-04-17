@@ -51,7 +51,7 @@ impl Prblock {
 }
 
 #[cfg(test)]
-mod prblock_test {
+mod tests {
     use super::*;
 
     #[test]

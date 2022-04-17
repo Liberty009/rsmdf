@@ -61,7 +61,7 @@ impl Ccblock {
 }
 
 #[cfg(test)]
-mod ccblock_test {
+mod tests {
     use crate::utils;
 
     use super::*;

@@ -74,7 +74,7 @@ impl Cgblock {
 }
 
 #[cfg(test)]
-mod cgblock_test {
+mod tests {
     use super::*;
 
     #[test]

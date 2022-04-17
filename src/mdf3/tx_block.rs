@@ -56,7 +56,7 @@ impl Txblock {
 }
 
 #[cfg(test)]
-mod txblock_test {
+mod tests {
     use super::*;
 
     #[test]

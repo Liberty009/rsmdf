@@ -89,7 +89,7 @@ impl Idblock {
 }
 
 #[cfg(test)]
-mod idblock_test {
+mod tests {
     use super::*;
 
     #[test]

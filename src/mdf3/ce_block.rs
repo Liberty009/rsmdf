@@ -35,7 +35,7 @@ impl Ceblock {
 }
 
 #[cfg(test)]
-mod ceblock_test {
+mod tests {
     use super::*;
 
     #[test]

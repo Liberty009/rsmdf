@@ -202,7 +202,7 @@ impl Cnblock {
 }
 
 #[cfg(test)]
-mod cnblock_test {
+mod tests {
     use crate::utils;
 
     use super::*;

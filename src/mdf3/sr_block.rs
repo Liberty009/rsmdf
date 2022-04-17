@@ -40,7 +40,7 @@ impl Srblock {
 }
 
 #[cfg(test)]
-mod srblock_test {
+mod tests {
 
     #[test]
     fn read() {}

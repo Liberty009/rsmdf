@@ -62,7 +62,7 @@ impl Trblock {
 }
 
 // #[cfg(test)]
-// mod trblock_test {
+// mod tests {
 //     use super::*;
 
 //     #[test]
