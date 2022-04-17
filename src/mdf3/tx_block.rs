@@ -20,8 +20,6 @@ impl Mdf3Block for Txblock {
                 block_type[0], block_type[1]
             );
         }
-
-        pos += block_type.len();
         let block_size = utils::read(stream, little_endian, &mut pos);
 
         let mut text: Vec<u8> = stream[pos..pos + block_size as usize - 5]

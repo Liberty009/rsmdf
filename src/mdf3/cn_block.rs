@@ -1,6 +1,9 @@
 use crate::{record::DataTypeRead, utils};
 
-use super::{mdf3_block::Mdf3Block, tx_block::Txblock};
+use super::{
+    mdf3_block::{LinkedBlock, Mdf3Block},
+    tx_block::Txblock,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cnblock {
@@ -24,6 +27,37 @@ pub struct Cnblock {
     pub long_name: u32,
     pub display_name: u32,
     pub addition_byte_offset: u16,
+}
+
+impl LinkedBlock for Cnblock {
+    fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        if self.next == 0 {
+            None
+        } else {
+            let (_pos, block) = Self::read(stream, self.next as usize, little_endian);
+            Some(block)
+        }
+    }
+
+    fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        let mut all = Vec::new();
+
+        let next = self.next(stream, little_endian);
+
+        all.push(*self);
+        match next {
+            None => {}
+            Some(block) => all.append(&mut block.list(stream, little_endian)),
+        }
+
+        all
+    }
 }
 
 impl Mdf3Block for Cnblock {

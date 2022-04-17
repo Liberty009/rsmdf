@@ -1,6 +1,9 @@
 use crate::utils;
 
-use super::{cg_block::Cgblock, mdf3_block::Mdf3Block};
+use super::{
+    cg_block::Cgblock,
+    mdf3_block::{LinkedBlock, Mdf3Block},
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Dgblock {
@@ -13,6 +16,37 @@ pub struct Dgblock {
     pub group_number: u16,
     pub id_number: u16,
     pub reserved: u32,
+}
+
+impl LinkedBlock for Dgblock {
+    fn next(&self, stream: &[u8], little_endian: bool) -> Option<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        if self.next == 0 {
+            None
+        } else {
+            let (_pos, block) = Self::read(stream, self.next as usize, little_endian);
+            Some(block)
+        }
+    }
+
+    fn list(&self, stream: &[u8], little_endian: bool) -> Vec<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        let mut all = Vec::new();
+
+        let next = self.next(stream, little_endian);
+
+        all.push(*self);
+        match next {
+            None => {}
+            Some(block) => all.append(&mut block.list(stream, little_endian)),
+        }
+
+        all
+    }
 }
 
 impl Mdf3Block for Dgblock {
