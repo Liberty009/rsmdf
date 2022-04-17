@@ -13,10 +13,6 @@ use super::hd_block::Hdblock;
 use super::id_block::Idblock;
 use super::mdf3_block::{Mdf3Block, LinkedBlock};
 
-
-// Define constants that are used
-const TIME_CHANNEL_TYPE: u16 = 1;
-
 #[derive(Debug, Clone)]
 pub struct MDF3 {
     #[allow(dead_code)]
@@ -78,7 +74,7 @@ impl mdf::MDFFile for MDF3 {
         let channel_group =
             self.channel_groups[channel_grp].channels(&self.file, self.little_endian);
         for (i, channel) in channel_group.iter().enumerate() {
-            if channel.channel_type == TIME_CHANNEL_TYPE {
+            if channel.channel_type().is_time() {
                 return Ok(i);
             }
         }

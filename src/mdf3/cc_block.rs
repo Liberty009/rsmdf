@@ -4,15 +4,15 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ccblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub physical_range_valid: u16,
-    pub physical_min: f64,
-    pub physical_max: f64,
-    pub unit: [u8; 20],
-    pub conversion_type: u16,
-    pub size_info: u16,
-    pub conversion_data: ConversionData,
+    block_type: [u8; 2],
+    block_size: u16,
+    physical_range_valid: u16,
+    physical_min: f64,
+    physical_max: f64,
+    unit: [u8; 20],
+    conversion_type: u16,
+    size_info: u16,
+    conversion_data: ConversionData,
 }
 
 impl Mdf3Block for Ccblock {

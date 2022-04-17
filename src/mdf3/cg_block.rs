@@ -131,17 +131,10 @@ impl Cgblock {
 
     pub fn write() {}
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
-        //let (group, _) = Self::read(stream, little_endian, position);
-        let mut ch = Vec::new();
-        let mut next_cn = self.first as usize;
-        while next_cn != 0 {
-            let (_pos, cn_block) = Cnblock::read(stream, next_cn, little_endian);
-            next_cn = cn_block.next as usize;
 
-            ch.push(cn_block);
-        }
-
-        ch
+        let first_channel = self.first_channel(stream, little_endian);
+        first_channel.list(stream, little_endian)
+        
     }
 }
 
