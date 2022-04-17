@@ -17,7 +17,6 @@ pub enum ChannelHierarchyType {
 }
 
 impl ChannelHierarchyType {
-
     pub fn new(ch_type: u8) -> Self {
         match ch_type {
             0 => Self::Group,
@@ -36,7 +35,6 @@ impl ChannelHierarchyType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EventType {
-
     Recording,
 
     RecordingInterrupt,
@@ -53,7 +51,6 @@ pub enum EventType {
 }
 
 impl EventType {
-
     pub fn new(ev_type: u8) -> Self {
         match ev_type {
             0 => Self::Recording,
@@ -71,7 +68,6 @@ impl EventType {
 #[derive(Debug, Clone, PartialEq)]
 
 pub enum EventSyncType {
-
     Seconds,
 
     Radians,
@@ -82,7 +78,6 @@ pub enum EventSyncType {
 }
 
 impl EventSyncType {
-
     pub fn new(ev_sync: u8) -> Self {
         match ev_sync {
             1 => Self::Seconds,
@@ -97,7 +92,6 @@ impl EventSyncType {
 #[derive(Debug, Clone, PartialEq)]
 
 pub enum RangeType {
-
     Point,
 
     RangeBegin,
@@ -106,7 +100,6 @@ pub enum RangeType {
 }
 
 impl RangeType {
-
     pub fn new(ev_range: u8) -> Self {
         match ev_range {
             0 => Self::Point,
@@ -119,7 +112,6 @@ impl RangeType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EventCause {
-
     Other,
 
     Error,
@@ -132,7 +124,6 @@ pub enum EventCause {
 }
 
 impl EventCause {
-
     pub fn new(ev_cause: u8) -> Self {
         match ev_cause {
             0 => Self::Other,
@@ -147,7 +138,6 @@ impl EventCause {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SourceType {
-
     Other,
 
     Ecu,
@@ -162,7 +152,6 @@ pub enum SourceType {
 }
 
 impl SourceType {
-
     pub fn new(source: u8) -> Self {
         match source {
             0 => Self::Other,
@@ -178,7 +167,6 @@ impl SourceType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BusType {
-
     None,
 
     Other,
@@ -199,7 +187,6 @@ pub enum BusType {
 }
 
 impl BusType {
-
     pub fn new(source: u8) -> Self {
         match source {
             0 => Self::None,
@@ -218,14 +205,12 @@ impl BusType {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ZipType {
-
     Deflate,
 
     TransposeDeflate,
 }
 
 impl ZipType {
-
     pub fn new(zip: u8) -> Self {
         match zip {
             0 => Self::Deflate,

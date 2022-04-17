@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Read;
 
-use crate::mdf3::MDF3;
+use crate::mdf3::mdf3_file::MDF3;
 use crate::record::Record;
 use crate::signal::Signal;
 use crate::utils;

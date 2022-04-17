@@ -10,7 +10,6 @@ use miniz_oxide::inflate::decompress_to_vec;
 pub struct Dzblock {
     header: BlockHeader,
 
-
     dz_org_block_type: [u8; 2],
 
     dz_zip_type: ZipType,

@@ -32,7 +32,6 @@ pub fn link_extract(
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MDF4 {
-
     id: Idblock,
 
     header: Hdblock,

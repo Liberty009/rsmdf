@@ -2,7 +2,8 @@ on:
   push:
     branches: ["master"]
   pull_request:
-    branches: ["master"]
+    branches: ["master", "MDF4-Dev", "MDF3-Dev"]
+    types: [review_requested]
 
 name: CI
 
