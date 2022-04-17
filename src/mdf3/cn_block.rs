@@ -125,6 +125,18 @@ impl Mdf3Block for Cnblock {
 }
 
 impl Cnblock {
+    pub fn byte_offset(&self) -> usize {
+        self.start_offset as usize / 8 
+    }
+
+    pub fn data_type_len(&self) -> usize {
+        self.data_type.len()
+    }
+
+    pub fn data_type(&self) -> DataTypeRead {
+        self.data_type
+    }
+
     pub fn write() {}
 
     pub fn name(self, stream: &[u8], little_endian: bool) -> String {

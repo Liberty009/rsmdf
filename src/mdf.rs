@@ -356,7 +356,7 @@ impl TimeChannel {
 #[derive(Debug, Clone, PartialEq)]
 pub struct MdfChannel {
     pub name: String,
-    pub data_group: u64,
-    pub channel: u64,
-    pub channel_group: u64,
+    pub data_group: usize,
+    pub channel: usize,
+    pub channel_group: usize,
 }

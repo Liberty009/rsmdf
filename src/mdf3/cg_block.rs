@@ -2,21 +2,31 @@ use crate::utils;
 
 use super::{
     cn_block::Cnblock,
-    mdf3_block::{LinkedBlock, Mdf3Block},
+    mdf3_block::{LinkedBlock, Mdf3Block}, tx_block::Txblock,
 };
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cgblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub next: u32,
-    pub first: u32,
-    pub comment: u32,
-    pub record_id: u16,
-    pub channel_number: u16,
-    pub record_size: u16,
-    pub record_number: u32,
-    pub first_sample_reduction_block: u32,
+    #[allow(dead_code)]
+    block_type: [u8; 2],
+    #[allow(dead_code)]
+    block_size: u16,
+    #[allow(dead_code)]
+    next: u32,
+    #[allow(dead_code)]
+    first: u32,
+    #[allow(dead_code)]
+    comment: u32,
+    #[allow(dead_code)]
+    record_id: u16,
+    #[allow(dead_code)]
+    number_of_channels: u16,
+    #[allow(dead_code)]
+    record_size: u16,
+    #[allow(dead_code)]
+    record_number: u32,
+    #[allow(dead_code)]
+    first_sample_reduction_block: u32,
 }
 
 impl LinkedBlock for Cgblock {
@@ -82,7 +92,7 @@ impl Mdf3Block for Cgblock {
                 first,
                 comment,
                 record_id,
-                channel_number,
+                number_of_channels: channel_number,
                 record_size,
                 record_number,
                 first_sample_reduction_block,
@@ -92,6 +102,33 @@ impl Mdf3Block for Cgblock {
 }
 
 impl Cgblock {
+
+    pub fn data_length(&self) -> usize {
+        self.record_number as usize * self.record_size as usize
+    }
+
+    pub fn record_number(&self) -> usize {
+        self.record_number as usize
+    }
+
+    pub fn record_size(&self) -> usize {
+        self.record_size as usize
+    }
+
+    pub fn first_channel(&self, stream: &[u8], little_endian: bool) -> Cnblock {
+        if self.first == 0 {
+            panic!("Error");
+        }
+
+        let (_pos, cn) = Cnblock::read(stream, self.first as usize, little_endian);
+        cn
+    }
+
+    pub fn comment(&self, stream: &[u8], little_endian: bool) -> String {
+        let (_pos, tx) = Txblock::read(stream, self.comment as usize, little_endian);
+        tx.name()
+    }
+
     pub fn write() {}
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
         //let (group, _) = Self::read(stream, little_endian, position);
@@ -128,7 +165,7 @@ mod tests {
         assert_eq!(cg_block.first, 1106222);
         assert_eq!(cg_block.comment, 1107082);
         assert_eq!(cg_block.record_id, 1);
-        assert_eq!(cg_block.channel_number, 2);
+        assert_eq!(cg_block.number_of_channels, 2);
         assert_eq!(cg_block.record_size, 9);
         assert_eq!(cg_block.record_number, 124);
         assert_eq!(cg_block.first_sample_reduction_block, 0);
