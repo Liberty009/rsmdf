@@ -1,7 +1,6 @@
 use crate::utils;
 
-use super::cg_block::Cgblock;
-
+use super::{cg_block::Cgblock, mdf3_block::Mdf3Block};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Dgblock {
@@ -16,51 +15,54 @@ pub struct Dgblock {
     pub reserved: u32,
 }
 
-impl Dgblock {
-    pub fn write() {}
-    // Read the data stream in to a DGBLOCK type, position reached
-    pub fn read(stream: &[u8], little_endian: bool, position: &mut usize) -> Self {
-        let pos = position;
+impl Mdf3Block for Dgblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let mut pos = position;
 
         // Read block type to confirm
-        let block_type: [u8; 2] = stream[*pos..*pos + 2].try_into().expect("msg");
-        if !utils::eq(&block_type, &[b'D', b'G']) {
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+        if !utils::eq(&block_type, "DG".as_bytes()) {
             panic!(
                 "DGBLOCK not found. Found: {}, {}",
                 block_type[0], block_type[1]
             );
         }
 
-        *pos += block_type.len();
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let next = utils::read(stream, little_endian, &mut pos);
+        let first = utils::read(stream, little_endian, &mut pos);
+        let trigger_block = utils::read(stream, little_endian, &mut pos);
+        let data_block = utils::read(stream, little_endian, &mut pos);
+        let group_number = utils::read(stream, little_endian, &mut pos);
+        let id_number = utils::read(stream, little_endian, &mut pos);
+        let reserved = utils::read(stream, little_endian, &mut pos);
 
-        let block_size = utils::read(stream, little_endian, pos);
-        let next = utils::read(stream, little_endian, pos);
-        let first = utils::read(stream, little_endian, pos);
-        let trigger_block = utils::read(stream, little_endian, pos);
-        let data_block = utils::read(stream, little_endian, pos);
-        let group_number = utils::read(stream, little_endian, pos);
-        let id_number = utils::read(stream, little_endian, pos);
-        let reserved = utils::read(stream, little_endian, pos);
-
-        Dgblock {
-            block_type,
-            block_size,
-            next,
-            first,
-            trigger_block,
-            data_block,
-            group_number,
-            id_number,
-            reserved,
-        }
+        (
+            pos,
+            Dgblock {
+                block_type,
+                block_size,
+                next,
+                first,
+                trigger_block,
+                data_block,
+                group_number,
+                id_number,
+                reserved,
+            },
+        )
     }
+}
+
+impl Dgblock {
+    pub fn write() {}
 
     pub fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {
         let mut all = Vec::new();
         let mut next_dg = position;
 
         while next_dg != 0 {
-            let dg_block = Dgblock::read(stream, little_endian, &mut next_dg);
+            let (_pos, dg_block) = Dgblock::read(stream, next_dg, little_endian);
             next_dg = dg_block.next as usize;
             all.push(dg_block);
         }
@@ -72,7 +74,7 @@ impl Dgblock {
         let mut channel_grps = Vec::new();
         let mut next = self.first as usize;
         while next != 0 {
-            let (cg_block, _pos) = Cgblock::read(stream, little_endian, next);
+            let (_pos, cg_block) = Cgblock::read(stream, next, little_endian);
             next = cg_block.next as usize;
             channel_grps.push(cg_block);
         }
@@ -91,8 +93,8 @@ mod tests {
             0x10, 0x00, 0xDC, 0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let mut position = 0;
-        let dg_block = Dgblock::read(&dg_data, true, &mut position);
+        let position = 0;
+        let (position, dg_block) = Dgblock::read(&dg_data, position, true);
 
         assert_eq!(position, 28);
         assert_eq!(dg_block.next, 1105908);

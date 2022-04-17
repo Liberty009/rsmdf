@@ -1,6 +1,5 @@
 use crate::utils;
 
-
 #[derive(Debug, Clone, Copy)]
 pub struct ConversionLinear {
     pub p1: f64,

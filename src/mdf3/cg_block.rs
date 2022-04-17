@@ -1,7 +1,6 @@
 use crate::utils;
 
-use super::cn_block::Cnblock;
-
+use super::{cn_block::Cnblock, mdf3_block::Mdf3Block};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cgblock {
@@ -17,20 +16,19 @@ pub struct Cgblock {
     pub first_sample_reduction_block: u32,
 }
 
-impl Cgblock {
-    pub fn write() {}
-    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (Cgblock, usize) {
+impl Mdf3Block for Cgblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let mut pos = position;
-        let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+        // stream[pos..pos + 2].try_into().expect("msg");
 
-        if !utils::eq(&block_type, &[b'C', b'G']) {
+        if !utils::eq(&block_type, "CG".as_bytes()) {
             panic!(
                 "CGBLOCK not found. Found: {}, {}",
                 block_type[0] as char, block_type[1] as char
             );
         }
 
-        pos += block_type.len();
 
         let block_size = utils::read(stream, little_endian, &mut pos);
         let next = utils::read(stream, little_endian, &mut pos);
@@ -43,6 +41,7 @@ impl Cgblock {
         let first_sample_reduction_block = utils::read(stream, little_endian, &mut pos);
 
         (
+            pos,
             Cgblock {
                 block_type,
                 block_size,
@@ -55,15 +54,18 @@ impl Cgblock {
                 record_number,
                 first_sample_reduction_block,
             },
-            pos,
         )
     }
+}
+
+impl Cgblock {
+    pub fn write() {}
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
         //let (group, _) = Self::read(stream, little_endian, position);
         let mut ch = Vec::new();
         let mut next_cn = self.first as usize;
         while next_cn != 0 {
-            let (cn_block, _position) = Cnblock::read(stream, little_endian, next_cn);
+            let (_pos, cn_block) = Cnblock::read(stream, next_cn, little_endian);
             next_cn = cn_block.next as usize;
 
             ch.push(cn_block);
@@ -85,7 +87,7 @@ mod tests {
             0x00, 0x00,
         ];
 
-        let (cg_block, position) = Cgblock::read(&cg_data, true, 0);
+        let (position, cg_block) = Cgblock::read(&cg_data, 0, true);
 
         assert_eq!(position, 30);
 

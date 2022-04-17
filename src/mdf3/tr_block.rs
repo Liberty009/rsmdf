@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone)]
 pub struct Trblock {
     pub block_type: [u8; 2],
@@ -8,15 +7,12 @@ pub struct Trblock {
     pub events: Vec<Event>,
 }
 
-impl Trblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-    #[allow(dead_code)]
-    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (Trblock, usize) {
+impl Mdf3Block for Trblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let mut pos = position;
 
-        let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
-        if !utils::eq(&block_type, &[b'T', b'R']) {
+        let block_type: [u8; 2] = utils::read(&stream[pos..], little_endian, &mut pos);
+        if !utils::eq(&block_type, "TR".as_bytes()) {
             panic!(
                 "TRBLOCK not found. Found: {}, {}",
                 block_type[0], block_type[1]
@@ -31,6 +27,7 @@ impl Trblock {
         let (events, pos) = Trblock::read_events(stream, pos, little_endian, trigger_events_number);
 
         (
+            pos,
             Trblock {
                 block_type,
                 block_size,
@@ -38,9 +35,13 @@ impl Trblock {
                 trigger_events_number,
                 events,
             },
-            pos,
         )
     }
+}
+
+impl Trblock {
+    #[allow(dead_code)]
+    pub fn write() {}
 
     #[allow(dead_code)]
     pub fn read_events(
@@ -108,4 +109,4 @@ impl Trblock {
 
 use crate::utils;
 
-use super::event::Event;
+use super::{event::Event, mdf3_block::Mdf3Block};

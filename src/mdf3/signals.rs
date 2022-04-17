@@ -1,6 +1,5 @@
 use crate::utils;
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Signals {
     pub data_group: u32,

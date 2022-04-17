@@ -71,7 +71,6 @@ impl Dgblock {
         self.dg_data as usize
     }
 
-
     pub fn read_data(&self, stream: &[u8], little_endian: bool) -> Vec<u8> {
         let data_block = DataBlockType::read(stream, self.data_location(), little_endian);
         data_block.data_array(stream, little_endian)

@@ -1,5 +1,6 @@
 use crate::utils;
 
+use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Hdblock {
@@ -22,41 +23,33 @@ pub struct Hdblock {
     pub timer_id: [u8; 32],
 }
 
-impl Hdblock {
-    pub fn write() {}
-    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (Hdblock, usize) {
+impl Mdf3Block for Hdblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let mut pos = position;
-        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("");
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
 
-        if !utils::eq(&block_type, &[b'H', b'D']) {
+        if !utils::eq(&block_type, "HD".as_bytes()) {
             panic!("Incorrect type for HDBLOCK");
         }
 
-        pos += block_type.len();
         let block_size = utils::read(stream, little_endian, &mut pos);
         let data_group_block = utils::read(stream, little_endian, &mut pos);
         let file_comment = utils::read(stream, little_endian, &mut pos);
         let program_block = utils::read(stream, little_endian, &mut pos);
         let data_group_number = utils::read(stream, little_endian, &mut pos);
-        let date: [u8; 10] = stream[pos..pos + 10].try_into().expect("msg");
-        pos += date.len();
-        let time: [u8; 8] = stream[pos..pos + 8].try_into().expect("msg");
-        pos += time.len();
-        let author: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += author.len();
-        let department: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += department.len();
-        let project: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += project.len();
-        let subject: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += subject.len();
+        let date: [u8; 10] = utils::read(stream, little_endian, &mut pos);
+        let time: [u8; 8] = utils::read(stream, little_endian, &mut pos);
+        let author: [u8; 32] = utils::read(stream, little_endian, &mut pos);
+        let department: [u8; 32] = utils::read(stream, little_endian, &mut pos);
+        let project: [u8; 32] = utils::read(stream, little_endian, &mut pos);
+        let subject: [u8; 32] = utils::read(stream, little_endian, &mut pos);
         let timestamp = utils::read(stream, little_endian, &mut pos);
         let utc_time_offset = utils::read(stream, little_endian, &mut pos);
         let time_quality = utils::read(stream, little_endian, &mut pos);
-        let timer_id: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += timer_id.len();
+        let timer_id: [u8; 32] = utils::read(stream, little_endian, &mut pos);
 
         (
+            pos,
             Hdblock {
                 position,
                 block_type,
@@ -76,9 +69,12 @@ impl Hdblock {
                 time_quality,
                 timer_id,
             },
-            pos,
         )
     }
+}
+
+impl Hdblock {
+    pub fn write() {}
 }
 
 #[cfg(test)]
@@ -124,7 +120,7 @@ mod tests {
             0x6F, 0x6E, 0x3A, 0x20, 0x41, 0x53, 0x41, 0x50, 0x32, 0x5F,
         ];
 
-        let (hd_block, position) = Hdblock::read(&hd_data, 0, true);
+        let (position, hd_block) = Hdblock::read(&hd_data, 0, true);
 
         println!("Length {}", position);
         assert_eq!(position, 208);

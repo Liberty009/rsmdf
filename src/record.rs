@@ -2,6 +2,24 @@ use std::mem;
 
 use crate::utils;
 
+const UNSIGNED_INT_DEFAULT: u16 = 0;
+const SIGNED_INT_DEFAULT: u16 = 1;
+const FLOAT32_DEFAULT: u16 = 2;
+const FLOAT64_DEFAULT: u16 = 3;
+const FFLOAT_DEFAULT: u16 = 4;
+const GFLOAT_DEFAULT: u16 = 5;
+const DFLOAT_DEFAULT: u16 = 6;
+const STRING_NULL_TERM: u16 = 7;
+const BYTE_ARRAY: u16 = 8;
+const UNSIGNED_INT_BIGENDIAN: u16 = 9;
+const SIGNED_INT_BIGENDIAN: u16 = 10;
+const FLOAT32_BIGENDIAN: u16 = 11;
+const FLOAT64_BIGENDIAN: u16 = 12;
+const UNSIGNED_INT_LITTLEENDIAN: u16 = 13;
+const SIGNED_INT_LITTLEENDIAN: u16 = 14;
+const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
+const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DataType {
     UnsignedInt,
@@ -22,6 +40,83 @@ pub struct DataTypeRead {
 }
 
 impl DataTypeRead {
+    pub fn new(datatype: u16, little_endian: bool) -> Self {
+        match datatype {
+            UNSIGNED_INT_DEFAULT => DataTypeRead {
+                data_type: DataType::UnsignedInt,
+                little_endian,
+            },
+            SIGNED_INT_DEFAULT => DataTypeRead {
+                data_type: DataType::SignedInt,
+                little_endian,
+            },
+            FLOAT32_DEFAULT => DataTypeRead {
+                data_type: DataType::Float32,
+                little_endian,
+            },
+            FLOAT64_DEFAULT => DataTypeRead {
+                data_type: DataType::Float64,
+                little_endian,
+            },
+            FFLOAT_DEFAULT => DataTypeRead {
+                data_type: DataType::FFloat,
+                little_endian,
+            },
+            GFLOAT_DEFAULT => DataTypeRead {
+                data_type: DataType::GFloat,
+                little_endian,
+            },
+            DFLOAT_DEFAULT => DataTypeRead {
+                data_type: DataType::DFloat,
+                little_endian,
+            },
+            STRING_NULL_TERM => DataTypeRead {
+                data_type: DataType::StringNullTerm,
+                little_endian,
+            },
+            BYTE_ARRAY => DataTypeRead {
+                data_type: DataType::ByteArray,
+                little_endian,
+            },
+            UNSIGNED_INT_BIGENDIAN => DataTypeRead {
+                data_type: DataType::UnsignedInt,
+                little_endian: false,
+            },
+            SIGNED_INT_BIGENDIAN => DataTypeRead {
+                data_type: DataType::SignedInt,
+                little_endian: false,
+            },
+            FLOAT32_BIGENDIAN => DataTypeRead {
+                data_type: DataType::Float32,
+                little_endian: false,
+            },
+            FLOAT64_BIGENDIAN => DataTypeRead {
+                data_type: DataType::Float64,
+                little_endian: false,
+            },
+            UNSIGNED_INT_LITTLEENDIAN => DataTypeRead {
+                data_type: DataType::UnsignedInt,
+                little_endian: true,
+            },
+            SIGNED_INT_LITTLEENDIAN => DataTypeRead {
+                data_type: DataType::SignedInt,
+                little_endian: true,
+            },
+            FLOAT32_INT_LITTLEENDIAN => DataTypeRead {
+                data_type: DataType::Float32,
+                little_endian: true,
+            },
+            FLOAT64_INT_LITTLEENDIAN => DataTypeRead {
+                data_type: DataType::Float64,
+                little_endian: true,
+            },
+            _ => {
+                println!("Found data type: {}", datatype);
+                panic!("Data type not found. Type was:")
+            }
+        }
+    }
+
     pub fn len(self) -> usize {
         match self.data_type {
             DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),

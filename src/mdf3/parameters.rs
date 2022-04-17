@@ -1,5 +1,3 @@
-
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Parameters {
     #[allow(dead_code)]

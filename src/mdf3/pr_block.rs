@@ -1,6 +1,6 @@
 use crate::utils;
 
-
+use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prblock {
@@ -9,21 +9,15 @@ pub struct Prblock {
     pub program_data: Vec<u8>,
 }
 
-impl Prblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-    #[allow(dead_code)]
-    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (Prblock, usize) {
+impl Mdf3Block for Prblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let mut pos = position;
-        let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
-        if !utils::eq(&block_type, &[b'P', b'R']) {
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+        if !utils::eq(&block_type, "PR".as_bytes()) {
             panic!("PR Block not found");
         }
 
-        pos += block_type.len();
-
         let block_size = utils::read(stream, little_endian, &mut pos);
-        pos += 2;
 
         //let mut program_data = vec![0; block_size as usize];
         let mut program_data: Vec<u8> = stream[pos..block_size as usize - pos]
@@ -40,14 +34,19 @@ impl Prblock {
         }
 
         (
+            pos,
             Prblock {
                 block_type,
                 block_size,
                 program_data,
             },
-            pos,
         )
     }
+}
+
+impl Prblock {
+    #[allow(dead_code)]
+    pub fn write() {}
 }
 
 #[cfg(test)]
@@ -376,7 +375,7 @@ mod tests {
             0xCE, 0x9C, 0x24, 0x81, 0xAB, 0x1A, 0x29, 0x40, 0x11, 0x40, 0xCB, 0x99,
         ];
 
-        let (_pr_block, _position) = Prblock::read(&pr_data, 0, true);
+        let (_position, _pr_block) = Prblock::read(&pr_data, 0, true);
 
         //assert_eq!(position, 4349);
     }

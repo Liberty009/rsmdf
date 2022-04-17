@@ -1,5 +1,6 @@
 use crate::utils;
 
+use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Txblock {
@@ -8,13 +9,12 @@ pub struct Txblock {
     pub text: Vec<u8>,
 }
 
-impl Txblock {
-    pub fn write() {}
-    pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (Txblock, usize) {
+impl Mdf3Block for Txblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let mut pos = position;
 
-        let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("");
-        if !utils::eq(&block_type, &[b'T', b'X']) {
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+        if !utils::eq(&block_type, "TX".as_bytes()) {
             panic!(
                 "TXBLOCK type incorrect. Found : {}, {}",
                 block_type[0], block_type[1]
@@ -37,14 +37,18 @@ impl Txblock {
         pos += text.len();
 
         (
+            pos,
             Txblock {
                 block_type,
                 block_size,
                 text,
             },
-            pos,
         )
     }
+}
+
+impl Txblock {
+    pub fn write() {}
 
     pub fn name(self) -> String {
         //let mut name = "".to_string();
@@ -136,7 +140,7 @@ mod tests {
 
         let _text_bytes = text.as_bytes();
 
-        let (_tx_block, position) = Txblock::read(&tx_data, 0, true);
+        let (position, _tx_block) = Txblock::read(&tx_data, 0, true);
 
         //println!("Pos: {}", position);
         //println!("String: {}END", str::from_utf8(&tx_block.text).expect(""));

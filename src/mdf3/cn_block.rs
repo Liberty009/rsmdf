@@ -1,25 +1,6 @@
-use crate::{utils, record::{DataTypeRead, DataType}};
+use crate::{record::DataTypeRead, utils};
 
-use super::tx_block::Txblock;
-
-
-const UNSIGNED_INT_DEFAULT: u16 = 0;
-const SIGNED_INT_DEFAULT: u16 = 1;
-const FLOAT32_DEFAULT: u16 = 2;
-const FLOAT64_DEFAULT: u16 = 3;
-const FFLOAT_DEFAULT: u16 = 4;
-const GFLOAT_DEFAULT: u16 = 5;
-const DFLOAT_DEFAULT: u16 = 6;
-const STRING_NULL_TERM: u16 = 7;
-const BYTE_ARRAY: u16 = 8;
-const UNSIGNED_INT_BIGENDIAN: u16 = 9;
-const SIGNED_INT_BIGENDIAN: u16 = 10;
-const FLOAT32_BIGENDIAN: u16 = 11;
-const FLOAT64_BIGENDIAN: u16 = 12;
-const UNSIGNED_INT_LITTLEENDIAN: u16 = 13;
-const SIGNED_INT_LITTLEENDIAN: u16 = 14;
-const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
-const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
+use super::{mdf3_block::Mdf3Block, tx_block::Txblock};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cnblock {
@@ -45,13 +26,11 @@ pub struct Cnblock {
     pub addition_byte_offset: u16,
 }
 
-impl Cnblock {
-    pub fn write() {}
-    pub fn read(stream: &[u8], little_endian: bool, position: usize) -> (Cnblock, usize) {
+impl Mdf3Block for Cnblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
         let mut pos = position;
-        let block_type: [u8; 2] = stream[pos..pos + 2].try_into().expect("msg");
-        pos += block_type.len();
-        if !utils::eq(&block_type, &[b'C', b'N']) {
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+        if !utils::eq(&block_type, "CN".as_bytes()) {
             panic!("CNBLOCK not found.");
         }
 
@@ -73,80 +52,7 @@ impl Cnblock {
         let bit_number = utils::read(stream, little_endian, &mut pos);
 
         let datatype: u16 = utils::read(stream, little_endian, &mut pos);
-        let data_type = match datatype {
-            UNSIGNED_INT_DEFAULT => DataTypeRead {
-                data_type: DataType::UnsignedInt,
-                little_endian,
-            },
-            SIGNED_INT_DEFAULT => DataTypeRead {
-                data_type: DataType::SignedInt,
-                little_endian,
-            },
-            FLOAT32_DEFAULT => DataTypeRead {
-                data_type: DataType::Float32,
-                little_endian,
-            },
-            FLOAT64_DEFAULT => DataTypeRead {
-                data_type: DataType::Float64,
-                little_endian,
-            },
-            FFLOAT_DEFAULT => DataTypeRead {
-                data_type: DataType::FFloat,
-                little_endian,
-            },
-            GFLOAT_DEFAULT => DataTypeRead {
-                data_type: DataType::GFloat,
-                little_endian,
-            },
-            DFLOAT_DEFAULT => DataTypeRead {
-                data_type: DataType::DFloat,
-                little_endian,
-            },
-            STRING_NULL_TERM => DataTypeRead {
-                data_type: DataType::StringNullTerm,
-                little_endian,
-            },
-            BYTE_ARRAY => DataTypeRead {
-                data_type: DataType::ByteArray,
-                little_endian,
-            },
-            UNSIGNED_INT_BIGENDIAN => DataTypeRead {
-                data_type: DataType::UnsignedInt,
-                little_endian: false,
-            },
-            SIGNED_INT_BIGENDIAN => DataTypeRead {
-                data_type: DataType::SignedInt,
-                little_endian: false,
-            },
-            FLOAT32_BIGENDIAN => DataTypeRead {
-                data_type: DataType::Float32,
-                little_endian: false,
-            },
-            FLOAT64_BIGENDIAN => DataTypeRead {
-                data_type: DataType::Float64,
-                little_endian: false,
-            },
-            UNSIGNED_INT_LITTLEENDIAN => DataTypeRead {
-                data_type: DataType::UnsignedInt,
-                little_endian: true,
-            },
-            SIGNED_INT_LITTLEENDIAN => DataTypeRead {
-                data_type: DataType::SignedInt,
-                little_endian: true,
-            },
-            FLOAT32_INT_LITTLEENDIAN => DataTypeRead {
-                data_type: DataType::Float32,
-                little_endian: true,
-            },
-            FLOAT64_INT_LITTLEENDIAN => DataTypeRead {
-                data_type: DataType::Float64,
-                little_endian: true,
-            },
-            _ => {
-                println!("Found data type: {}", datatype);
-                panic!("Data type not found. Type was:")
-            }
-        };
+        let data_type = DataTypeRead::new(datatype, little_endian);
 
         let value_range_valid = utils::read(stream, little_endian, &mut pos);
         let signal_min = utils::read(stream, little_endian, &mut pos);
@@ -157,6 +63,7 @@ impl Cnblock {
         let addition_byte_offset = utils::read(stream, little_endian, &mut pos);
 
         (
+            pos,
             Cnblock {
                 block_type,
                 block_size,
@@ -179,9 +86,12 @@ impl Cnblock {
                 display_name,
                 addition_byte_offset,
             },
-            pos,
         )
     }
+}
+
+impl Cnblock {
+    pub fn write() {}
 
     pub fn name(self, stream: &[u8], little_endian: bool) -> String {
         let mut name = "".to_string();
@@ -189,7 +99,7 @@ impl Cnblock {
         if self.channel_type == 1 {
             name = "time".to_string();
         } else if self.long_name != 0 {
-            let (tx, _pos) = Txblock::read(stream, self.long_name as usize, little_endian);
+            let (_pos, tx) = Txblock::read(stream, self.long_name as usize, little_endian);
 
             name = match std::str::from_utf8(&tx.text) {
                 Ok(v) => v.to_string(),
@@ -232,7 +142,7 @@ mod tests {
             0x52, 0x45, 0x54, 0x45, 0x00, 0x54, 0x58, 0xBB,
         ];
 
-        let (cn_block, _position) = Cnblock::read(&cn_data, true, 0);
+        let (_pos, cn_block) = Cnblock::read(&cn_data, 0, true);
 
         //assert_eq!(position, 228);
         assert_eq!(cn_block.block_size, 228);
@@ -272,18 +182,24 @@ mod tests {
         assert_eq!(cn_block.value_range_valid, 1);
 
         assert!(
-            (cn_block.signal_min - utils::read::<f64>(
-                &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F,],
-                true,
-                &mut 0_usize)).abs() < 0.1
+            (cn_block.signal_min
+                - utils::read::<f64>(
+                    &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F,],
+                    true,
+                    &mut 0_usize
+                ))
+            .abs()
+                < 0.1
         );
         assert!(
-            (cn_block.signal_max-
-            utils::read::<f64>(
-                &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40,],
-                true,
-                &mut 0_usize
-            )).abs() < 0.1
+            (cn_block.signal_max
+                - utils::read::<f64>(
+                    &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40,],
+                    true,
+                    &mut 0_usize
+                ))
+            .abs()
+                < 0.1
         );
         assert!((cn_block.sample_rate - 0.0).abs() < 0.1);
 

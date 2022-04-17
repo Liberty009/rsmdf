@@ -25,9 +25,9 @@ impl DataBlockType {
                 for dl in dl_list {
                     data.append(&mut dl.data_array(stream, little_endian));
                 }
-                
-                
-               data},
+
+                data
+            }
         }
     }
 

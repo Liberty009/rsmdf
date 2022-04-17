@@ -1,5 +1,6 @@
 use crate::utils;
 
+use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ceblock {
@@ -9,29 +10,30 @@ pub struct Ceblock {
     pub additional: Vec<u8>,
 }
 
-impl Ceblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-    #[allow(dead_code)]
-    pub fn read(stream: &[u8], little_endian: bool) -> (Ceblock, usize) {
-        let mut position = 0;
-        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
-        position += block_type.len();
-        let block_size: u16 = utils::read(stream, little_endian, &mut position);
-        let extension_type: u16 = utils::read(stream, little_endian, &mut position);
+impl Mdf3Block for Ceblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let mut pos = position;
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let extension_type = utils::read(stream, little_endian, &mut pos);
 
-        let additional = stream[position..block_size as usize].to_vec();
+        let additional = stream[pos..block_size as usize].to_vec();
 
         (
+            pos,
             Ceblock {
                 block_type,
                 block_size,
                 extension_type,
                 additional,
             },
-            position,
         )
     }
+}
+
+impl Ceblock {
+    #[allow(dead_code)]
+    pub fn write() {}
 }
 
 #[cfg(test)]
@@ -58,7 +60,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let (ce_block, _position) = Ceblock::read(&ce_data, true);
+        let (_position, ce_block) = Ceblock::read(&ce_data, 0, true);
 
         // assert_eq!(position, 0);
         assert_eq!(ce_block.block_size, 128);

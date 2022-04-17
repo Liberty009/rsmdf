@@ -1,5 +1,6 @@
 use crate::utils;
 
+use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Srblock {
@@ -11,21 +12,23 @@ pub struct Srblock {
     pub time_interval_length: f64,
 }
 
-impl Srblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-    #[allow(dead_code)]
-    pub fn read(stream: &[u8], little_endian: bool) -> (Srblock, usize) {
-        let mut position = 0;
-        let block_type: [u8; 2] = stream.try_into().expect("msg");
-        position += block_type.len();
-        let block_size = utils::read(stream, little_endian, &mut position);
-        let next = utils::read(stream, little_endian, &mut position);
-        let data_block = utils::read(stream, little_endian, &mut position);
-        let samples_reduced_number = utils::read(stream, little_endian, &mut position);
-        let time_interval_length = utils::read(stream, little_endian, &mut position);
+impl Mdf3Block for Srblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let mut pos = position;
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
+
+        if !utils::eq(&block_type, "SR".as_bytes()){
+            panic!("Expected SR block but found: {:?}", block_type);
+        }
+
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let next = utils::read(stream, little_endian, &mut pos);
+        let data_block = utils::read(stream, little_endian, &mut pos);
+        let samples_reduced_number = utils::read(stream, little_endian, &mut pos);
+        let time_interval_length = utils::read(stream, little_endian, &mut pos);
 
         (
+            pos,
             Srblock {
                 block_type,
                 block_size,
@@ -34,9 +37,13 @@ impl Srblock {
                 samples_reduced_number,
                 time_interval_length,
             },
-            position,
         )
     }
+}
+
+impl Srblock {
+    #[allow(dead_code)]
+    pub fn write() {}
 }
 
 #[cfg(test)]

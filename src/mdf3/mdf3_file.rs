@@ -2,19 +2,18 @@ use crate::mdf::{self, MdfChannel};
 use crate::mdf3::cg_block::Cgblock;
 use crate::mdf3::cn_block::Cnblock;
 use crate::record::Record;
-use crate::{signal};
+use crate::signal;
 use std::fs::File;
 use std::io::prelude::*;
 
 use super::dg_block::Dgblock;
 use super::hd_block::Hdblock;
 use super::id_block::Idblock;
+use super::mdf3_block::Mdf3Block;
 use super::tx_block::Txblock;
 
 // Define constants that are used
 const TIME_CHANNEL_TYPE: u16 = 1;
-
-
 
 #[derive(Debug, Clone)]
 pub struct MDF3 {
@@ -40,20 +39,19 @@ impl mdf::MDFFile for MDF3 {
         let mut ch = Vec::new();
 
         let (_id_block, position, little_endian) = Idblock::read(&self.file);
-        let (hd_block, _pos) = Hdblock::read(&self.file, position, little_endian);
+        let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
 
         let mut next_dg = hd_block.data_group_block;
 
         while next_dg != 0 {
-            let dg_block = Dgblock::read(&self.file, little_endian, &mut (next_dg as usize));
+            let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
             next_dg = dg_block.next;
             let mut next_cg = dg_block.first;
 
             dg.push(dg_block);
 
             while next_cg != 0 {
-                let (cg_block, _position) =
-                    Cgblock::read(&self.file, little_endian, next_cg as usize);
+                let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
                 next_cg = cg_block.next;
                 let mut next_cn = cg_block.first;
                 cg.push(cg_block);
@@ -61,8 +59,8 @@ impl mdf::MDFFile for MDF3 {
                 println!("Channel Group: {}", cg_block.comment);
 
                 while next_cn != 0 {
-                    let (cn_block, _position) =
-                        Cnblock::read(&self.file, little_endian, next_cn as usize);
+                    let (_pos, cn_block) =
+                        Cnblock::read(&self.file, next_cn as usize, little_endian);
                     next_cn = cn_block.next;
                     ch.push(cn_block);
 
@@ -157,8 +155,8 @@ impl mdf::MDFFile for MDF3 {
         let mut stream = Vec::new();
         let _ = file.read_to_end(&mut stream);
         let (id, pos, little_endian) = Idblock::read(&stream);
-        let (header, _pos) = Hdblock::read(&stream, pos, little_endian);
-        let (comment, _pos) = Txblock::read(&stream, header.file_comment as usize, little_endian);
+        let (_pos, header) = Hdblock::read(&stream, pos, little_endian);
+        let (_pos, comment) = Txblock::read(&stream, header.file_comment as usize, little_endian);
         let mut mdf = MDF3 {
             id,
             header,
@@ -196,7 +194,7 @@ impl mdf::MDFFile for MDF3 {
 
     fn list_data_groups(&mut self) {
         let (_id_block, position, little_endian) = Idblock::read(&self.file);
-        let (hd_block, _pos) = Hdblock::read(&self.file, position, little_endian);
+        let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
         //position += pos;
 
         let dg = Dgblock::read_all(
@@ -213,21 +211,20 @@ impl mdf::MDFFile for MDF3 {
         let mut ch = Vec::new();
 
         let (_id_block, position, little_endian) = Idblock::read(&self.file);
-        let (hd_block, _pos) = Hdblock::read(&self.file, position, little_endian);
+        let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
         //position += pos;
 
         let mut next_dg = hd_block.data_group_block;
 
         while next_dg != 0 {
-            let dg_block = Dgblock::read(&self.file, little_endian, &mut (next_dg as usize));
+            let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
             next_dg = dg_block.next;
             let mut next_cg = dg_block.first;
 
             dg.push(dg_block);
 
             while next_cg != 0 {
-                let (cg_block, _position) =
-                    Cgblock::read(&self.file, little_endian, next_cg as usize);
+                let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
                 next_cg = cg_block.next;
                 let mut next_cn = cg_block.first;
                 cg.push(cg_block);
@@ -235,8 +232,8 @@ impl mdf::MDFFile for MDF3 {
                 println!("Channel Group: {}", cg_block.comment);
 
                 while next_cn != 0 {
-                    let (cn_block, _position) =
-                        Cnblock::read(&self.file, little_endian, next_cn as usize);
+                    let (_pos, cn_block) =
+                        Cnblock::read(&self.file, next_cn as usize, little_endian);
                     next_cn = cn_block.next;
 
                     ch.push(cn_block);

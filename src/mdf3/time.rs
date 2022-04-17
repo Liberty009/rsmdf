@@ -1,6 +1,5 @@
 use crate::utils;
 
-
 #[derive(Debug, Clone, Copy)]
 pub struct TimeStruct {
     pub ms: u32,

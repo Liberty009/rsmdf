@@ -1,7 +1,6 @@
-use crate::utils;
-
 use super::conversion_data::ConversionData;
-
+use super::mdf3_block::Mdf3Block;
+use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ccblock {
@@ -16,34 +15,31 @@ pub struct Ccblock {
     pub conversion_data: ConversionData,
 }
 
-impl Ccblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-    #[allow(dead_code)]
-    pub fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
-        let mut position = 0;
-        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
-        position += block_type.len();
+impl Mdf3Block for Ccblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let mut pos = position;
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
 
-        if !utils::eq(&block_type, &[b'C', b'C']) {
+        if !utils::eq(&block_type, "CC".as_bytes()) {
             panic!("CC not found");
         }
 
-        let block_size: u16 = utils::read(stream, little_endian, &mut position);
-        let physical_range_valid: u16 = utils::read(stream, little_endian, &mut position);
-        let physical_min: f64 = utils::read(stream, little_endian, &mut position);
-        let physical_max: f64 = utils::read(stream, little_endian, &mut position);
-        let unit: [u8; 20] = stream[position..position + 20].try_into().expect("msg");
-        position += unit.len();
-        let conversion_type: u16 = utils::read(stream, little_endian, &mut position);
-        let size_info: u16 = utils::read(stream, little_endian, &mut position);
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let physical_range_valid = utils::read(stream, little_endian, &mut pos);
+        let physical_min = utils::read(stream, little_endian, &mut pos);
+        let physical_max = utils::read(stream, little_endian, &mut pos);
+        let unit = utils::read(stream, little_endian, &mut pos);
+        let conversion_type = utils::read(stream, little_endian, &mut pos);
+        let size_info = utils::read(stream, little_endian, &mut pos);
 
         let datatype = 1;
 
-        let (conversion_data, pos) = ConversionData::read(stream, little_endian, datatype);
-        position += pos;
+        let (conversion_data, pos_conversion) =
+            ConversionData::read(stream, little_endian, datatype);
+        pos += pos_conversion;
 
         (
+            pos,
             Self {
                 block_type,
                 block_size,
@@ -55,9 +51,13 @@ impl Ccblock {
                 size_info,
                 conversion_data,
             },
-            position,
         )
     }
+}
+
+impl Ccblock {
+    #[allow(dead_code)]
+    pub fn write() {}
 }
 
 #[cfg(test)]
@@ -88,28 +88,31 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let (cc_block, position) = Ccblock::read(&cc_data, true);
+        let (position, cc_block) = Ccblock::read(&cc_data, 0, true);
 
         assert_eq!(position, 47); // should match the block size
         assert_eq!(cc_block.block_size, 46);
         assert_eq!(cc_block.physical_range_valid, 1);
 
-        assert!( (
-            cc_block.physical_min - 
-            utils::read::<f64>(
-                &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F],
-                true,
-                &mut 0_usize
-            )).abs() < 0.1
+        assert!(
+            (cc_block.physical_min
+                - utils::read::<f64>(
+                    &[0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F],
+                    true,
+                    &mut 0_usize
+                ))
+            .abs()
+                < 0.1
         );
-        assert!((
-            cc_block.physical_max -
-            utils::read::<f64>(
-                &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40],
-                true,
-                &mut 0_usize
-            )).abs() < 0.1
-
+        assert!(
+            (cc_block.physical_max
+                - utils::read::<f64>(
+                    &[0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40],
+                    true,
+                    &mut 0_usize
+                ))
+            .abs()
+                < 0.1
         );
         assert!(utils::eq(
             &cc_block.unit,

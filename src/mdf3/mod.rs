@@ -1,22 +1,23 @@
 pub mod mdf3_file;
 
-
-mod id_block;
-mod hd_block;
-mod tx_block;
-mod pr_block;
-mod tr_block;
-mod event;
-mod sr_block;
-mod dg_block;
+mod cc_block;
+mod cd_block;
+mod ce_block;
 mod cg_block;
 mod cn_block;
-mod cc_block;
-mod conversion_data;
-mod parameters;
 mod conversion;
+mod conversion_data;
 mod date;
-mod time;
-mod cd_block;
+mod dg_block;
+mod event;
+mod hd_block;
+mod id_block;
+mod parameters;
+mod pr_block;
 mod signals;
-mod ce_block;
+mod sr_block;
+mod time;
+mod tr_block;
+mod tx_block;
+
+mod mdf3_block;

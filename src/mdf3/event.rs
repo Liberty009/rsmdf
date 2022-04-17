@@ -1,6 +1,5 @@
 use crate::utils;
 
-
 #[derive(Debug, Clone, Copy)]
 pub struct Event {
     pub trigger_time: f64,

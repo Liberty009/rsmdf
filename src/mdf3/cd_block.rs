@@ -8,27 +8,23 @@ pub struct Cdblock {
     pub dims: Vec<u16>,
 }
 
-impl Cdblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-    #[allow(dead_code)]
-    pub fn read(stream: &[u8], little_endian: bool) -> (Cdblock, usize) {
-        let mut position = 0;
-        let block_type: [u8; 2] = stream[position..position + 2].try_into().expect("msg");
+impl Mdf3Block for Cdblock {
+    fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self) {
+        let mut pos = position;
+        let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
 
-        assert!(utils::eq(&block_type, &[b'C', b'D']));
+        assert!(utils::eq(&block_type, "CD".as_bytes()));
 
-        position += block_type.len();
-        let block_size: u16 = utils::read(stream, little_endian, &mut position);
-        let dependency_type: u16 = utils::read(stream, little_endian, &mut position);
-        let signal_number: u16 = utils::read(stream, little_endian, &mut position);
+        let block_size = utils::read(stream, little_endian, &mut pos);
+        let dependency_type = utils::read(stream, little_endian, &mut pos);
+        let signal_number = utils::read(stream, little_endian, &mut pos);
 
         let mut groups = Vec::with_capacity(signal_number as usize);
 
         for _i in 0..signal_number - 1 {
-            let (temp, pos) = Signals::read(stream, little_endian);
+            let (temp, pos_sig) = Signals::read(stream, little_endian);
             groups.push(temp);
-            position += pos;
+            pos += pos_sig;
         }
 
         let mut dims = Vec::new();
@@ -39,10 +35,11 @@ impl Cdblock {
             dependency_type - 255
         };
         for _i in 0..no_dependencies - 1 {
-            dims.push(utils::read(stream, little_endian, &mut position))
+            dims.push(utils::read(stream, little_endian, &mut pos))
         }
 
         (
+            pos,
             Cdblock {
                 block_type,
                 block_size,
@@ -51,9 +48,13 @@ impl Cdblock {
                 groups,
                 dims,
             },
-            position,
         )
     }
+}
+
+impl Cdblock {
+    #[allow(dead_code)]
+    pub fn write() {}
 }
 
 // #[cfg(test)]
@@ -83,4 +84,6 @@ impl Cdblock {
 //     fn write() {}
 // }
 
-use crate::{utils, mdf3::signals::Signals};
+use crate::{mdf3::signals::Signals, utils};
+
+use super::mdf3_block::Mdf3Block;
