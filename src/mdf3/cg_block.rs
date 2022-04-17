@@ -29,7 +29,6 @@ impl Mdf3Block for Cgblock {
             );
         }
 
-
         let block_size = utils::read(stream, little_endian, &mut pos);
         let next = utils::read(stream, little_endian, &mut pos);
         let first = utils::read(stream, little_endian, &mut pos);

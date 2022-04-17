@@ -17,7 +17,7 @@ impl Mdf3Block for Srblock {
         let mut pos = position;
         let block_type: [u8; 2] = utils::read(stream, little_endian, &mut pos);
 
-        if !utils::eq(&block_type, "SR".as_bytes()){
+        if !utils::eq(&block_type, "SR".as_bytes()) {
             panic!("Expected SR block but found: {:?}", block_type);
         }
 
