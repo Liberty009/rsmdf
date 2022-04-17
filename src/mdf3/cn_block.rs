@@ -76,11 +76,11 @@ impl Mdf3Block for Cnblock {
         let comment = utils::read(stream, little_endian, &mut pos);
         let channel_type = utils::read(stream, little_endian, &mut pos);
 
-        let short_name: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += short_name.len();
+        let short_name: [u8; 32] = utils::read(stream, little_endian, &mut pos);
 
-        let desc: [u8; 128] = stream[pos..pos + 128].try_into().expect("msg");
-        pos += desc.len();
+
+        let desc: [u8; 128] = utils::read(stream, little_endian, &mut pos);
+
 
         let start_offset = utils::read(stream, little_endian, &mut pos);
         let bit_number = utils::read(stream, little_endian, &mut pos);
