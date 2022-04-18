@@ -4,7 +4,7 @@ use crate::utils;
 
 use super::block::Block;
 use super::block_header::BlockHeader;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Atblock {

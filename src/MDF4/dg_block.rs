@@ -4,7 +4,7 @@ use super::block::{Block, LinkedBlock};
 use super::block_header::*;
 use super::cg_block::Cgblock;
 use super::data_block::DataBlockType;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -167,7 +167,7 @@ impl Block for Dgblock {
 #[cfg(test)]
 mod tests {
     use super::Dgblock;
-    use crate::MDF4::block::Block;
+    use crate::mdf4::block::Block;
 
     static RAW: [u8; 64] = [
         0x23, 0x23, 0x44, 0x47, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

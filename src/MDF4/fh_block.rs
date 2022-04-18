@@ -2,7 +2,7 @@ use std::mem;
 
 use super::block::Block;
 use super::block_header::*;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -95,7 +95,7 @@ impl Block for Fhblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::{block::Block, fh_block::Fhblock};
+    use crate::mdf4::{block::Block, fh_block::Fhblock};
 
     static RAW: [u8; 56] = [
         0x23, 0x23, 0x46, 0x48, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

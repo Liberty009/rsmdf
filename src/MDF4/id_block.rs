@@ -77,7 +77,7 @@ impl Block for Idblock {
 mod tests {
     use crate::{
         utils,
-        MDF4::{block::Block, id_block::Idblock},
+        mdf4::{block::Block, id_block::Idblock},
     };
 
     static RAW: [u8; 64] = [

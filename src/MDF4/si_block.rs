@@ -4,7 +4,7 @@ use crate::utils;
 
 use super::block::Block;
 use super::block_header::*;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 use super::mdf4_enums::{BusType, SourceType};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -93,7 +93,7 @@ impl Block for Siblock {
 mod tests {
     use crate::{
         utils,
-        MDF4::{
+        mdf4::{
             block::Block,
             mdf4_enums::{BusType, SourceType},
             si_block::Siblock,

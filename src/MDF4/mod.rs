@@ -17,7 +17,7 @@ mod hd_block;
 mod hl_block;
 mod id_block;
 mod md_block;
-pub mod mdf4;
+pub mod mdf4_file;
 mod mdf4_enums;
 mod sd_block;
 mod si_block;

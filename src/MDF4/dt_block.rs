@@ -45,7 +45,7 @@ impl Block for Dtblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::block::Block;
+    use crate::mdf4::block::Block;
 
     use super::Dtblock;
 
