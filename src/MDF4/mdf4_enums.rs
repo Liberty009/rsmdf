@@ -304,7 +304,7 @@ impl DataType {
         }
     }
 
-    pub fn copy_to_DataTypeRead(&self) -> record::DataTypeRead {
+    pub fn copy_to_data_type_read(&self) -> record::DataTypeRead {
         let dt = match self {
             Self::UnsignedByteLE => record::DataType::UnsignedInt,
             Self::UnsignedByteBE => record::DataType::UnsignedInt,

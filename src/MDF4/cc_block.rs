@@ -3,7 +3,7 @@ use std::mem;
 use super::block::Block;
 use super::block_header::*;
 use crate::utils;
-use crate::MDF4::mdf4::link_extract;
+use crate::mdf4::mdf4_file::link_extract;
 
 use super::mdf4_enums::CCType;
 
@@ -142,7 +142,7 @@ impl Block for Ccblock {
 mod tests {
     use std::mem;
 
-    use crate::MDF4::{block::Block, cc_block::Ccblock};
+    use crate::mdf4::{block::Block, cc_block::Ccblock};
 
     static RAW: [u8; 96] = [
         0x23, 0x23, 0x43, 0x43, 0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

@@ -4,7 +4,7 @@ use crate::utils;
 
 use super::block::Block;
 use super::block_header::*;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 use super::mdf4_enums::ChannelHierarchyType;
 
 pub struct Chblock {

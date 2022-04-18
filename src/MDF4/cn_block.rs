@@ -5,7 +5,7 @@ use super::block_header::*;
 use crate::utils;
 
 use super::block::LinkedBlock;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 use super::{
     mdf4_enums::{ChannelType, DataType, SyncType},
     tx_block::Txblock,
@@ -333,7 +333,7 @@ impl Block for Cnblock {
 mod tests {
     use std::mem;
 
-    use crate::MDF4::{block::Block, cn_block::Cnblock};
+    use crate::mdf4::{block::Block, cn_block::Cnblock};
 
     static RAW: [u8; 160] = [
         0x23, 0x23, 0x43, 0x4E, 0x00, 0x00, 0x00, 0x00, 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

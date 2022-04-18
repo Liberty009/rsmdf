@@ -3,7 +3,7 @@ use crate::utils;
 use super::block::{Block, DataBlock, LinkedBlock};
 use super::block_header::*;
 use super::dt_block::Dtblock;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dlblock {
@@ -133,7 +133,7 @@ impl Block for Dlblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::block::Block;
+    use crate::mdf4::block::Block;
 
     use super::Dlblock;
 

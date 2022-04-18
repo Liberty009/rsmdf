@@ -6,7 +6,7 @@ use crate::utils;
 
 use super::block::LinkedBlock;
 use super::cn_block::Cnblock;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 use super::tx_block;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -225,7 +225,7 @@ impl Block for Cgblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::{block::Block, cg_block::Cgblock};
+    use crate::mdf4::{block::Block, cg_block::Cgblock};
 
     static RAW: [u8; 104] = [
         0x23, 0x23, 0x43, 0x47, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
