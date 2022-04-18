@@ -14,7 +14,9 @@ pub struct Idblock {
 }
 
 impl Idblock {
+    #[allow(dead_code)]
     pub fn write() {}
+    #[allow(dead_code)]
     pub fn new(
         file_id: [u8; 8],
         format_id: [u8; 8],
