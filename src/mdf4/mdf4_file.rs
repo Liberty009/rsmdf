@@ -138,7 +138,7 @@ impl MDFFile for MDF4 {
 
         let mut extracted_data = Vec::new();
         for raw in raw_data {
-            extracted_data.push(Record::new(raw, cn.data_type().copy_to_DataTypeRead()));
+            extracted_data.push(Record::new(raw, cn.data_type().copy_to_data_type_read()));
         }
 
         extracted_data

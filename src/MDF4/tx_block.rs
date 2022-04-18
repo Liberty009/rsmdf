@@ -50,7 +50,7 @@ impl Block for Txblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::{block::Block, tx_block::Txblock};
+    use crate::mdf4::{block::Block, tx_block::Txblock};
 
     static RAW: [u8; 40] = [
         0x23, 0x23, 0x54, 0x58, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

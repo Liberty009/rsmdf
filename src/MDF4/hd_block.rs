@@ -5,7 +5,7 @@ use crate::utils;
 
 use super::dg_block::Dgblock;
 use super::md_block;
-use super::mdf4::link_extract;
+use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hdblock {
@@ -176,7 +176,7 @@ impl Block for Hdblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::{block::Block, hd_block::Hdblock};
+    use crate::mdf4::{block::Block, hd_block::Hdblock};
 
     static RAW: [u8; 104] = [
         0x23, 0x23, 0x48, 0x44, 0x00, 0x00, 0x00, 0x00, 0x68, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

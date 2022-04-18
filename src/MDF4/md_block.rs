@@ -50,7 +50,7 @@ impl Block for Mdblock {
 
 #[cfg(test)]
 mod tests {
-    use crate::MDF4::{block::Block, md_block::Mdblock};
+    use crate::mdf4::{block::Block, md_block::Mdblock};
 
     static RAW: [u8; 472] = [
         0x23, 0x23, 0x4D, 0x44, 0x00, 0x00, 0x00, 0x00, 0xD5, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
