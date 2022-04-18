@@ -99,7 +99,7 @@ impl Mdf3Block for Dgblock {
 
 impl Dgblock {
 
-
+    #[allow(dead_code)]
     pub fn data_location(&self) -> usize {
         self.data_block as usize
     }
@@ -119,8 +119,10 @@ impl Dgblock {
         todo!()
     }
 
-
-    pub fn write() {}
+    #[allow(dead_code)]
+    pub fn write() {
+        todo!()
+    }
 
     pub fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {
         let mut all = Vec::new();

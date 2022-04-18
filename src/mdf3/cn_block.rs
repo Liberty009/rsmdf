@@ -159,7 +159,7 @@ impl Cnblock {
     pub fn data_type(&self) -> DataTypeRead {
         self.data_type
     }
-
+    #[allow(dead_code)]
     pub fn write() {}
 
     pub fn name(self, stream: &[u8], little_endian: bool) -> String {
