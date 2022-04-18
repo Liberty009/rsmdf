@@ -338,6 +338,7 @@ impl mdf::MDFFile for MDF3 {
     // }
 }
 
+#[allow(dead_code)]
 pub fn print_record(value: Record) {
     match value {
         Record::Uint(number) => print!("{}", number),

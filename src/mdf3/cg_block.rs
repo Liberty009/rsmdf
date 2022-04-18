@@ -103,6 +103,7 @@ impl Mdf3Block for Cgblock {
 
 impl Cgblock {
 
+    #[allow(dead_code)]
     pub fn data_length(&self) -> usize {
         self.record_number as usize * self.record_size as usize
     }
@@ -129,6 +130,7 @@ impl Cgblock {
         tx.name()
     }
 
+    #[allow(dead_code)]
     pub fn write() {}
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
 

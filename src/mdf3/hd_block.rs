@@ -96,6 +96,7 @@ impl Hdblock {
         let (_pos, tx) = Txblock::read(stream, self.file_comment as usize, little_endian);
         tx.name()
     }
+    #[allow(dead_code)]
     pub fn write() {}
     pub fn first_data_group(&self, stream: &[u8], little_endian: bool) -> Dgblock {
         if self.data_group_block == 0 {
