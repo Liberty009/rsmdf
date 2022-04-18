@@ -4,10 +4,10 @@ use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Ceblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub extension_type: u16,
-    pub additional: Vec<u8>,
+    block_type: [u8; 2],
+    block_size: u16,
+    extension_type: u16,
+    additional: Vec<u8>,
 }
 
 impl Mdf3Block for Ceblock {

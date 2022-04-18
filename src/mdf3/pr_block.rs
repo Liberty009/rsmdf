@@ -4,9 +4,9 @@ use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub program_data: Vec<u8>,
+    block_type: [u8; 2],
+    block_size: u16,
+    program_data: Vec<u8>,
 }
 
 impl Mdf3Block for Prblock {

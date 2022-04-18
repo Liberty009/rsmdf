@@ -4,9 +4,9 @@ use super::mdf3_block::Mdf3Block;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Txblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub text: Vec<u8>,
+    block_type: [u8; 2],
+    block_size: u16,
+    text: Vec<u8>,
 }
 
 impl Mdf3Block for Txblock {
@@ -46,6 +46,7 @@ impl Mdf3Block for Txblock {
 }
 
 impl Txblock {
+    #[allow(dead_code)]
     pub fn write() {}
 
     pub fn name(self) -> String {
