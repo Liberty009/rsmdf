@@ -2,31 +2,51 @@ use crate::{record::DataTypeRead, utils};
 
 use super::{
     mdf3_block::{LinkedBlock, Mdf3Block},
-    tx_block::Txblock,
+    tx_block::Txblock, channel_type::ChannelType,
 };
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cnblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub next: u32,
-    pub conversion_formula: u32,
-    pub source_ext: u32,
-    pub dependency: u32,
-    pub comment: u32,
-    pub channel_type: u16,
-    pub short_name: [u8; 32],
-    pub desc: [u8; 128],
-    pub start_offset: u16,
-    pub bit_number: u16,
-    pub data_type: DataTypeRead,
-    pub value_range_valid: u16,
-    pub signal_min: f64,
-    pub signal_max: f64,
-    pub sample_rate: f64,
-    pub long_name: u32,
-    pub display_name: u32,
-    pub addition_byte_offset: u16,
+    #[allow(dead_code)]
+    block_type: [u8; 2],
+    #[allow(dead_code)]
+    block_size: u16,
+    #[allow(dead_code)]
+    next: u32,
+    #[allow(dead_code)]
+    conversion_formula: u32,
+    #[allow(dead_code)]
+    source_ext: u32,
+    #[allow(dead_code)]
+    dependency: u32,
+    #[allow(dead_code)]
+    comment: u32,
+    #[allow(dead_code)]
+    channel_type: u16,
+    #[allow(dead_code)]
+    short_name: [u8; 32],
+    #[allow(dead_code)]
+    desc: [u8; 128],
+    #[allow(dead_code)]
+    start_offset: u16,
+    #[allow(dead_code)]
+    bit_number: u16,
+    #[allow(dead_code)]
+    data_type: DataTypeRead,
+    #[allow(dead_code)]
+    value_range_valid: u16,
+    #[allow(dead_code)]
+    signal_min: f64,
+    #[allow(dead_code)]
+    signal_max: f64,
+    #[allow(dead_code)]
+    sample_rate: f64,
+    #[allow(dead_code)]
+    long_name: u32,
+    #[allow(dead_code)]
+    display_name: u32,
+    #[allow(dead_code)]
+    addition_byte_offset: u16,
 }
 
 impl LinkedBlock for Cnblock {
@@ -76,11 +96,11 @@ impl Mdf3Block for Cnblock {
         let comment = utils::read(stream, little_endian, &mut pos);
         let channel_type = utils::read(stream, little_endian, &mut pos);
 
-        let short_name: [u8; 32] = stream[pos..pos + 32].try_into().expect("msg");
-        pos += short_name.len();
+        let short_name: [u8; 32] = utils::read(stream, little_endian, &mut pos);
 
-        let desc: [u8; 128] = stream[pos..pos + 128].try_into().expect("msg");
-        pos += desc.len();
+
+        let desc: [u8; 128] = utils::read(stream, little_endian, &mut pos);
+
 
         let start_offset = utils::read(stream, little_endian, &mut pos);
         let bit_number = utils::read(stream, little_endian, &mut pos);
@@ -125,6 +145,21 @@ impl Mdf3Block for Cnblock {
 }
 
 impl Cnblock {
+    pub fn channel_type(&self) -> ChannelType {
+        ChannelType::new(self.channel_type)
+    }
+    pub fn byte_offset(&self) -> usize {
+        self.start_offset as usize / 8 
+    }
+
+    pub fn data_type_len(&self) -> usize {
+        self.data_type.len()
+    }
+
+    pub fn data_type(&self) -> DataTypeRead {
+        self.data_type
+    }
+
     pub fn write() {}
 
     pub fn name(self, stream: &[u8], little_endian: bool) -> String {
@@ -134,11 +169,11 @@ impl Cnblock {
             name = "time".to_string();
         } else if self.long_name != 0 {
             let (_pos, tx) = Txblock::read(stream, self.long_name as usize, little_endian);
-
-            name = match std::str::from_utf8(&tx.text) {
-                Ok(v) => v.to_string(),
-                Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-            };
+            tx.name();
+            // name = match std::str::from_utf8(&tx.text) {
+            //     Ok(v) => v.to_string(),
+            //     Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+            // };
         }
 
         name

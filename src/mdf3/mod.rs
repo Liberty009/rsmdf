@@ -21,3 +21,4 @@ mod tr_block;
 mod tx_block;
 
 mod mdf3_block;
+mod channel_type;

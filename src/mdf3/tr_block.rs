@@ -1,10 +1,15 @@
 #[derive(Debug, Clone)]
 pub struct Trblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub trigger_comment: u32,
-    pub trigger_events_number: u16,
-    pub events: Vec<Event>,
+    #[allow(dead_code)]
+    block_type: [u8; 2],
+    #[allow(dead_code)]
+    block_size: u16,
+    #[allow(dead_code)]
+    trigger_comment: u32,
+    #[allow(dead_code)]
+    trigger_events_number: u16,
+    #[allow(dead_code)]
+    events: Vec<Event>,
 }
 
 impl Mdf3Block for Trblock {

@@ -69,9 +69,9 @@ impl MDFFile for MDF4 {
                     let name = cn.clone().comment(&self.file, little_endian);
                     mdf_channels.push(mdf::MdfChannel {
                         name,
-                        data_group: dg_no as u64,
-                        channel_group: cg_no as u64,
-                        channel: cn_no as u64,
+                        data_group: dg_no,
+                        channel_group: cg_no,
+                        channel: cn_no,
                     })
                 }
             }

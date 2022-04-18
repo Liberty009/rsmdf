@@ -4,12 +4,18 @@ use super::mdf3_block::{LinkedBlock, Mdf3Block};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Srblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub next: u32,
-    pub data_block: u32,
-    pub samples_reduced_number: u32,
-    pub time_interval_length: f64,
+    #[allow(dead_code)]
+    block_type: [u8; 2],
+    #[allow(dead_code)]
+    block_size: u16,
+    #[allow(dead_code)]
+    next: u32,
+    #[allow(dead_code)]
+    data_block: u32,
+    #[allow(dead_code)]
+    samples_reduced_number: u32,
+    #[allow(dead_code)]
+    time_interval_length: f64,
 }
 
 impl LinkedBlock for Srblock {

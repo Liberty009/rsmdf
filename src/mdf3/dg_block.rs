@@ -7,15 +7,24 @@ use super::{
 
 #[derive(Debug, Clone, Copy)]
 pub struct Dgblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub next: u32,
-    pub first: u32,
-    pub trigger_block: u32,
-    pub data_block: u32,
-    pub group_number: u16,
-    pub id_number: u16,
-    pub reserved: u32,
+    #[allow(dead_code)]
+    block_type: [u8; 2],
+    #[allow(dead_code)]
+    block_size: u16,
+    #[allow(dead_code)]
+    next: u32,
+    #[allow(dead_code)]
+    first: u32,
+    #[allow(dead_code)]
+    trigger_block: u32,
+    #[allow(dead_code)]
+    data_block: u32,
+    #[allow(dead_code)]
+    group_number: u16,
+    #[allow(dead_code)]
+    id_number: u16,
+    #[allow(dead_code)]
+    reserved: u32,
 }
 
 impl LinkedBlock for Dgblock {
@@ -89,6 +98,28 @@ impl Mdf3Block for Dgblock {
 }
 
 impl Dgblock {
+
+
+    pub fn data_location(&self) -> usize {
+        self.data_block as usize
+    }
+
+    pub fn first_channel_group(&self, stream: &[u8], little_endian: bool) -> Cgblock {
+        if self.first == 0 {
+            panic!("Error");
+        }
+
+        let (_pos, cg) = Cgblock::read(stream, self.first as usize, little_endian);
+
+        cg
+    }
+
+    pub fn read_data(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
+
+        todo!()
+    }
+
+
     pub fn write() {}
 
     pub fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {
@@ -105,14 +136,10 @@ impl Dgblock {
     }
 
     pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<Cgblock> {
-        let mut channel_grps = Vec::new();
-        let mut next = self.first as usize;
-        while next != 0 {
-            let (_pos, cg_block) = Cgblock::read(stream, next, little_endian);
-            next = cg_block.next as usize;
-            channel_grps.push(cg_block);
-        }
-        channel_grps
+
+        let first_group = self.first_channel_group(stream, little_endian);
+        first_group.list(stream, little_endian)
+
     }
 }
 

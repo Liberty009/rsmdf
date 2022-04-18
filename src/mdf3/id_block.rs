@@ -2,15 +2,15 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Idblock {
-    pub file_id: [u8; 8],
-    pub format_id: [u8; 8],
-    pub program_id: [u8; 8],
-    pub default_byte_order: u16,
-    pub default_float_format: u16,
-    pub version_number: u16,
-    pub code_page_number: u16,
-    pub reserved1: [u8; 2],
-    pub reserved2: [u8; 30],
+    file_id: [u8; 8],
+    format_id: [u8; 8],
+    program_id: [u8; 8],
+    default_byte_order: u16,
+    default_float_format: u16,
+    version_number: u16,
+    code_page_number: u16,
+    reserved1: [u8; 2],
+    reserved2: [u8; 30],
 }
 
 impl Idblock {

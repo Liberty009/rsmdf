@@ -1,11 +1,11 @@
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cdblock {
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub dependency_type: u16,
-    pub signal_number: u16,
-    pub groups: Vec<Signals>,
-    pub dims: Vec<u16>,
+    block_type: [u8; 2],
+    block_size: u16,
+    dependency_type: u16,
+    signal_number: u16,
+    groups: Vec<Signals>,
+    dims: Vec<u16>,
 }
 
 impl Mdf3Block for Cdblock {

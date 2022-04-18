@@ -1,26 +1,41 @@
 use crate::utils;
 
-use super::mdf3_block::Mdf3Block;
+use super::{mdf3_block::Mdf3Block, dg_block::Dgblock, tx_block::Txblock};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Hdblock {
-    pub position: usize,
-    pub block_type: [u8; 2],
-    pub block_size: u16,
-    pub data_group_block: u32,
-    pub file_comment: u32,
-    pub program_block: u32,
-    pub data_group_number: u16,
-    pub date: [u8; 10],
-    pub time: [u8; 8],
-    pub author: [u8; 32],
-    pub department: [u8; 32],
-    pub project: [u8; 32],
-    pub subject: [u8; 32],
-    pub timestamp: u64,
-    pub utc_time_offset: i16,
-    pub time_quality: u16,
-    pub timer_id: [u8; 32],
+    #[allow(dead_code)]
+    position: usize,
+    #[allow(dead_code)]
+    block_type: [u8; 2],
+    #[allow(dead_code)]
+    block_size: u16,
+    data_group_block: u32,
+    file_comment: u32,
+    #[allow(dead_code)]
+    program_block: u32,
+    #[allow(dead_code)]
+    data_group_number: u16,
+    #[allow(dead_code)]
+    date: [u8; 10],
+    #[allow(dead_code)]
+    time: [u8; 8],
+    #[allow(dead_code)]
+    author: [u8; 32],
+    #[allow(dead_code)]
+    department: [u8; 32],
+    #[allow(dead_code)]
+    project: [u8; 32],
+    #[allow(dead_code)]
+    subject: [u8; 32],
+    #[allow(dead_code)]
+    timestamp: u64,
+    #[allow(dead_code)]
+    utc_time_offset: i16,
+    #[allow(dead_code)]
+    time_quality: u16,
+    #[allow(dead_code)]
+    timer_id: [u8; 32],
 }
 
 impl Mdf3Block for Hdblock {
@@ -74,7 +89,23 @@ impl Mdf3Block for Hdblock {
 }
 
 impl Hdblock {
+    pub fn data_group(&self) -> usize {
+        self.data_group_block as usize
+    }
+    pub fn comment(&self, stream: &[u8], little_endian: bool) -> String {
+        let (_pos, tx) = Txblock::read(stream, self.file_comment as usize, little_endian);
+        tx.name()
+    }
     pub fn write() {}
+    pub fn first_data_group(&self, stream: &[u8], little_endian: bool) -> Dgblock {
+        if self.data_group_block == 0 {
+            panic!("No data group found!");
+        }
+
+        let (_pos, data_group) = Dgblock::read(stream, self.data_group_block as usize, little_endian);
+
+        data_group
+    }
 }
 
 #[cfg(test)]
