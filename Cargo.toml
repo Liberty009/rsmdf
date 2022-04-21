@@ -20,4 +20,5 @@ debug = 1
 xml-rs = "0.8.4"
 itertools = "0.10.3"
 miniz_oxide = "0.5.1"
+chrono = "0.4.19"
 #rayon = "1.5.1"
