@@ -2,10 +2,10 @@ use std::fs::File;
 use std::io::Read;
 
 use crate::mdf3::mdf3_file::MDF3;
+use crate::mdf4::mdf4_file::MDF4;
 use crate::record::Record;
 use crate::signal::Signal;
 use crate::utils;
-use crate::mdf4::mdf4_file::MDF4;
 
 #[derive(PartialEq)]
 enum MDFVersion {
