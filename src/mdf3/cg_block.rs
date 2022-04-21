@@ -2,7 +2,8 @@ use crate::utils;
 
 use super::{
     cn_block::Cnblock,
-    mdf3_block::{LinkedBlock, Mdf3Block}, tx_block::Txblock,
+    mdf3_block::{LinkedBlock, Mdf3Block},
+    tx_block::Txblock,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -131,10 +132,8 @@ impl Cgblock {
     #[allow(dead_code)]
     pub fn write() {}
     pub fn channels(self, stream: &[u8], little_endian: bool) -> Vec<Cnblock> {
-
         let first_channel = self.first_channel(stream, little_endian);
         first_channel.list(stream, little_endian)
-        
     }
 }
 

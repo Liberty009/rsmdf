@@ -4,8 +4,8 @@ use crate::utils;
 
 use super::block::Block;
 use super::block_header::*;
-use super::mdf4_file::link_extract;
 use super::mdf4_enums::{BusType, SourceType};
+use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Siblock {
@@ -92,12 +92,12 @@ impl Block for Siblock {
 #[cfg(test)]
 mod tests {
     use crate::{
-        utils,
         mdf4::{
             block::Block,
             mdf4_enums::{BusType, SourceType},
             si_block::Siblock,
         },
+        utils,
     };
 
     static RAW: [u8; 56] = [

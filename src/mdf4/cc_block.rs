@@ -2,8 +2,8 @@ use std::mem;
 
 use super::block::Block;
 use super::block_header::*;
-use crate::utils;
 use crate::mdf4::mdf4_file::link_extract;
+use crate::utils;
 
 use super::mdf4_enums::CCType;
 

@@ -1,8 +1,9 @@
 use crate::{record::DataTypeRead, utils};
 
 use super::{
+    channel_type::ChannelType,
     mdf3_block::{LinkedBlock, Mdf3Block},
-    tx_block::Txblock, channel_type::ChannelType,
+    tx_block::Txblock,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -98,9 +99,7 @@ impl Mdf3Block for Cnblock {
 
         let short_name: [u8; 32] = utils::read(stream, little_endian, &mut pos);
 
-
         let desc: [u8; 128] = utils::read(stream, little_endian, &mut pos);
-
 
         let start_offset = utils::read(stream, little_endian, &mut pos);
         let bit_number = utils::read(stream, little_endian, &mut pos);
@@ -149,7 +148,7 @@ impl Cnblock {
         ChannelType::new(self.channel_type)
     }
     pub fn byte_offset(&self) -> usize {
-        self.start_offset as usize / 8 
+        self.start_offset as usize / 8
     }
 
     pub fn data_type_len(&self) -> usize {
