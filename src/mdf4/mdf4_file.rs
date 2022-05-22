@@ -98,13 +98,27 @@ impl MDFFile for MDF4 {
     }
 
     fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
-        let channel_group = &self.channel_groups[channel_grp];
-        // let data_length = channel_group.data_length();
-        let channels = channel_group
-            .first(&self.file, self.little_endian)
-            .list(&self.file, self.little_endian);
         let dg = &self.data_groups[datagroup];
+        let channel_groups = dg.first(&self.file, self.little_endian).list(&self.file, self.little_endian);
+
+        let channel_group = &channel_groups[channel_grp];
+        let channels = channel_group.first(&self.file, self.little_endian).list(&self.file, self.little_endian);
         let cn = &channels[channel];
+
+        // let channel_group = &self.channel_groups[channel_grp];
+        // // let data_length = channel_group.data_length();
+        // let channels = channel_group
+        //     .first(&self.file, self.little_endian)
+        //     .list(&self.file, self.little_endian);
+        
+
+        // if channels.len() <= channel {
+        //     panic!("Channel number out of range. DataGroup: {}, ChannelGroup: {}, Channel: {}", datagroup, channel_grp, channel);
+        // }
+
+
+
+        // let cn = &channels[channel];
 
         let data = dg.read_data(&self.file, self.little_endian);
         // &self.file[dg.data_location() as usize..(dg.data_location() as usize + data_length)];
