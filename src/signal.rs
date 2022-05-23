@@ -1,6 +1,8 @@
+use crate::record::Record;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Signal {
-    pub samples: Vec<f64>,
+    pub samples: Vec<Record>,
     pub timestamps: Vec<f64>,
     pub unit: String,
     pub name: String,
@@ -22,7 +24,7 @@ impl Signal {
     #[must_use]
     pub fn new(
         timestamps: Vec<f64>,
-        samples: Vec<f64>,
+        samples: Vec<Record>,
         unit: String,
         name: String,
         comment: String,

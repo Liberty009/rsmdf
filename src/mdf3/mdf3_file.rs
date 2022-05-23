@@ -289,7 +289,7 @@ impl mdf::MDFFile for MDF3 {
 
         signal::Signal::new(
             time.iter().map(|x| x.extract()).collect(),
-            some.iter().map(|x| x.extract()).collect(),
+            some,
             "Unit".to_string(),
             "Measurement".to_string(),
             "This is some measurement".to_string(),
@@ -327,6 +327,7 @@ pub fn print_record(value: Record) {
         Record::Int(number) => print!("{}", number),
         Record::Float32(number) => print!("{}", number),
         Record::Float64(number) => print!("{}", number),
+        Record::StringNullTerm(string) => print!("{}", string),
         // _ => panic!("Help!")
     };
 }
