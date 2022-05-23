@@ -1,5 +1,6 @@
 use std::mem;
 use xml::reader::{EventReader, XmlEvent};
+use rayon::prelude::*;
 
 pub fn extract_name(text: &[u8]) -> String {
     let parser = EventReader::new(text);
@@ -240,5 +241,5 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
 // }
 
 pub fn eq(array1: &[u8], other: &[u8]) -> bool {
-    array1.iter().zip(other.iter()).all(|(a, b)| a == b)
+    array1.par_iter().zip(other.par_iter()).all(|(a, b)| a == b)
 }

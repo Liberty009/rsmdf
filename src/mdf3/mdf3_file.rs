@@ -10,6 +10,7 @@ use super::dg_block::Dgblock;
 use super::hd_block::Hdblock;
 use super::id_block::Idblock;
 use super::mdf3_block::{LinkedBlock, Mdf3Block};
+use rayon::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct MDF3 {
@@ -288,7 +289,7 @@ impl mdf::MDFFile for MDF3 {
         let some = self.read_channel(datagroup, channel_grp, channel);
 
         signal::Signal::new(
-            time.iter().map(|x| x.extract()).collect(),
+            time.par_iter().map(|x| x.extract()).collect(),
             some,
             "Unit".to_string(),
             "Measurement".to_string(),

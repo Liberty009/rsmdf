@@ -1,4 +1,5 @@
 use std::mem;
+use rayon::prelude::*;
 
 use super::block::Block;
 use super::block_header::*;
@@ -94,8 +95,8 @@ impl Block for Cablock {
             ca_dim_size.push(utils::read(stream, little_endian, &mut pos));
         }
 
-        let nd_sum = ca_dim_size.iter().sum();
-        let nd_prod = ca_dim_size.iter().product();
+        let nd_sum = ca_dim_size.par_iter().sum();
+        let nd_prod = ca_dim_size.par_iter().product();
 
         let mut ca_axis_value = Vec::new();
         for _i in 0..nd_sum {

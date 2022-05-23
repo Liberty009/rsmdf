@@ -1,4 +1,5 @@
 use crate::record::Record;
+use rayon::prelude::*;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Signal {
@@ -53,25 +54,25 @@ impl Signal {
         let (start_index, end_index) = if include_ends {
             let start_index = self
                 .timestamps
-                .iter()
-                .position(|&x| start <= x)
+                .par_iter()
+                .position_first(|&x| start <= x)
                 .expect("Couldn't find time within the range given");
             let end_index = self
                 .timestamps
-                .iter()
-                .position(|&x| x <= end)
+                .par_iter()
+                .position_first(|&x| x <= end)
                 .expect("Couldn't find time within the range given");
             (start_index, end_index)
         } else {
             let start_index = self
                 .timestamps
-                .iter()
-                .position(|&x| start < x)
+                .par_iter()
+                .position_first(|&x| start < x)
                 .expect("Couldn't find time within the range given");
             let end_index = self
                 .timestamps
-                .iter()
-                .position(|&x| x < end)
+                .par_iter()
+                .position_first(|&x| x < end)
                 .expect("Couldn't find time within the range given");
             (start_index, end_index)
         };

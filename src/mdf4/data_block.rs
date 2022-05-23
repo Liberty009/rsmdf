@@ -20,7 +20,7 @@ impl DataBlockType {
             Self::List(block) => {
                 let dl_list = block.list(stream, little_endian);
 
-                let mut data = Vec::new();
+                let mut data = Vec::with_capacity(10000);
 
                 for dl in dl_list {
                     data.append(&mut dl.data_array(stream, little_endian));
