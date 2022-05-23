@@ -1,5 +1,3 @@
-
-
 use crate::mdf::{self, MdfChannel};
 use crate::mdf3::cg_block::Cgblock;
 use crate::mdf3::cn_block::Cnblock;
@@ -11,7 +9,7 @@ use std::io::prelude::*;
 use super::dg_block::Dgblock;
 use super::hd_block::Hdblock;
 use super::id_block::Idblock;
-use super::mdf3_block::{Mdf3Block, LinkedBlock};
+use super::mdf3_block::{LinkedBlock, Mdf3Block};
 
 #[derive(Debug, Clone)]
 pub struct MDF3 {
@@ -48,19 +46,14 @@ impl mdf::MDFFile for MDF3 {
 
                 for (cn_no, cn) in channels.iter().enumerate() {
                     let name = cn.name(&self.file, little_endian);
-                    mdf_channels.push(
-                        mdf::MdfChannel {
-                            name, 
-                            data_group: dg_no, 
-                            channel_group: cg_no, 
-                            channel: cn_no,
-                        }
-                    )
+                    mdf_channels.push(mdf::MdfChannel {
+                        name,
+                        data_group: dg_no,
+                        channel_group: cg_no,
+                        channel: cn_no,
+                    })
                 }
-
             }
-
-
         }
 
         mdf_channels
@@ -128,7 +121,6 @@ impl mdf::MDFFile for MDF3 {
         extracted_data
     }
 
-
     // fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
 
     //     let little_endian = true;
@@ -137,7 +129,7 @@ impl mdf::MDFFile for MDF3 {
     //     let data_length = (self.channel_groups[channel_grp].record_number
     //         * self.channel_groups[channel_grp].record_size as u32)
     //         as usize;
-    //     let data = &self.file[self.data_groups[datagroup].first_channel_group(&self.file, little_endian) 
+    //     let data = &self.file[self.data_groups[datagroup].first_channel_group(&self.file, little_endian)
     //         ..(self.data_groups[datagroup]..first_channel_group(&self.file, little_endian) + data_length)];
 
     //     println!(
@@ -200,11 +192,7 @@ impl mdf::MDFFile for MDF3 {
             id,
             header,
             comment,
-            data_groups: Dgblock::read_all(
-                &stream,
-                little_endian,
-                header.data_group(),
-            ),
+            data_groups: Dgblock::read_all(&stream, little_endian, header.data_group()),
             channels: Vec::new(),
             channel_groups: Vec::new(),
             little_endian,
@@ -236,16 +224,11 @@ impl mdf::MDFFile for MDF3 {
         let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
         //position += pos;
 
-        let dg = Dgblock::read_all(
-            &self.file,
-            little_endian,
-            hd_block.data_group(),
-        );
+        let dg = Dgblock::read_all(&self.file, little_endian, hd_block.data_group());
         self.data_groups = dg;
     }
 
     fn list_channels(&self) {
-
         let (_id_block, position, little_endian) = Idblock::read(&self.file);
         let (_pos, hd_block) = Hdblock::read(&self.file, position, little_endian);
 
@@ -261,7 +244,6 @@ impl mdf::MDFFile for MDF3 {
                 // let channels = first_channel.list(&self.file, little_endian);
 
                 println!("Channel Group: {}", cg.comment(&self.file, little_endian));
-
             }
         }
 
@@ -307,7 +289,7 @@ impl mdf::MDFFile for MDF3 {
 
         signal::Signal::new(
             time.iter().map(|x| x.extract()).collect(),
-            some.iter().map(|x| x.extract()).collect(),
+            some,
             "Unit".to_string(),
             "Measurement".to_string(),
             "This is some measurement".to_string(),
@@ -345,6 +327,7 @@ pub fn print_record(value: Record) {
         Record::Int(number) => print!("{}", number),
         Record::Float32(number) => print!("{}", number),
         Record::Float64(number) => print!("{}", number),
+        Record::StringNullTerm(string) => print!("{}", string),
         // _ => panic!("Help!")
     };
 }

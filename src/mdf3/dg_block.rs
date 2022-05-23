@@ -98,7 +98,6 @@ impl Mdf3Block for Dgblock {
 }
 
 impl Dgblock {
-
     #[allow(dead_code)]
     pub fn data_location(&self) -> usize {
         self.data_block as usize
@@ -115,7 +114,6 @@ impl Dgblock {
     }
 
     pub fn read_data(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
-
         todo!()
     }
 
@@ -138,10 +136,8 @@ impl Dgblock {
     }
 
     pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<Cgblock> {
-
         let first_group = self.first_channel_group(stream, little_endian);
         first_group.list(stream, little_endian)
-
     }
 }
 

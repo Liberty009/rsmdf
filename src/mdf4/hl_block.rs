@@ -2,8 +2,8 @@ use crate::utils;
 
 use super::block::Block;
 use super::block_header::*;
-use super::mdf4_file::link_extract;
 use super::mdf4_enums::ZipType;
+use super::mdf4_file::link_extract;
 
 #[derive(Debug, Clone, PartialEq)]
 struct Hlblock {

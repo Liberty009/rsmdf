@@ -1,6 +1,6 @@
 use crate::utils;
 
-use super::{mdf3_block::Mdf3Block, dg_block::Dgblock, tx_block::Txblock};
+use super::{dg_block::Dgblock, mdf3_block::Mdf3Block, tx_block::Txblock};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Hdblock {
@@ -103,7 +103,8 @@ impl Hdblock {
             panic!("No data group found!");
         }
 
-        let (_pos, data_group) = Dgblock::read(stream, self.data_group_block as usize, little_endian);
+        let (_pos, data_group) =
+            Dgblock::read(stream, self.data_group_block as usize, little_endian);
 
         data_group
     }
