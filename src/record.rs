@@ -143,16 +143,18 @@ pub fn _print_record(value: Record) {
         Record::Int(number) => print!("{}", number),
         Record::Float32(number) => print!("{}", number),
         Record::Float64(number) => print!("{}", number),
+        Record::StringNullTerm(string) => print!("{}", string),
         // _ => panic!("Help!")
     };
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq,Clone)]
 pub enum Record {
     Uint(u8),
     Int(i8),
     Float32(f32),
     Float64(f64),
+    StringNullTerm(String),
 }
 
 impl Record {
@@ -162,7 +164,8 @@ impl Record {
             DataType::SignedInt => Self::signed_int(stream, dtype),
             DataType::Float32 => Self::float32(stream, dtype),
             DataType::Float64 => Self::float64(stream, dtype),
-            _ => (panic!("Incorrect or not implemented type!")),
+            DataType::StringNullTerm => Self::string_null_term(stream, dtype),
+            _ => (panic!("Incorrect or not implemented type!, {:?}", dtype.data_type)),
         };
 
         rec
@@ -174,8 +177,21 @@ impl Record {
             Record::Int(number) => *number as f64,
             Record::Float32(number) => *number as f64,
             Record::Float64(number) => *number as f64,
+            Record::StringNullTerm(string) => string.parse::<f64>().unwrap(),
             // _ => panic!("Help!")
         }
+    }
+
+    fn string_null_term(stream: &[u8], _dtype: DataTypeRead) -> Self {
+        let mut string = String::new();
+
+        for char in stream {
+            if *char == 0 {
+                break;
+            }
+            string.push(*char as char);
+        }
+        Record::StringNullTerm(string)
     }
 
     fn unsigned_int(stream: &[u8], dtype: DataTypeRead) -> Self {

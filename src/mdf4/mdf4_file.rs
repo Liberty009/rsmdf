@@ -33,9 +33,7 @@ pub fn link_extract(
 #[derive(Debug, Clone, PartialEq)]
 pub struct MDF4 {
     id: Idblock,
-
     header: Hdblock,
-
     comment: String,
     data_groups: Vec<Dgblock>,
     channels: Vec<Cnblock>,
@@ -98,12 +96,15 @@ impl MDFFile for MDF4 {
     }
 
     fn read_channel(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Vec<Record> {
-        let channel_group = &self.channel_groups[channel_grp];
-        // let data_length = channel_group.data_length();
+        let dg = &self.data_groups[datagroup];
+        let channel_groups = dg
+            .first(&self.file, self.little_endian)
+            .list(&self.file, self.little_endian);
+
+        let channel_group = &channel_groups[channel_grp];
         let channels = channel_group
             .first(&self.file, self.little_endian)
             .list(&self.file, self.little_endian);
-        let dg = &self.data_groups[datagroup];
         let cn = &channels[channel];
 
         let data = dg.read_data(&self.file, self.little_endian);
@@ -246,7 +247,7 @@ impl MDFFile for MDF4 {
 
         signal::Signal::new(
             time.iter().map(|x| x.extract()).collect(),
-            some.iter().map(|x| x.extract()).collect(),
+            some,
             "Unit".to_string(),
             "Measurement".to_string(),
             "This is some measurement".to_string(),
