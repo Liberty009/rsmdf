@@ -259,11 +259,31 @@ impl MDFFile for MDF4 {
         // let _delta = if time_from_zero { start } else { 0.0 };
     }
 
-    fn export(&self, _format: &str, _filename: &str) {}
-    fn filter(&self, _channels: &str) {}
+    fn export(&self, _format: &str, _filename: &str) {
+        todo!()
+    }
+    fn filter(&self, _channels: &str) {
+        todo!()
+    }
     #[must_use]
     fn resample(&self, _raster: RasterType, _version: &str, _time_from_zero: bool) -> Self {
         self.clone()
+    }
+
+    fn convert(&self, _version: String) -> Self {
+        todo!()
+    }
+
+    fn cat(&self, _others: &[Self], _sync: bool, _add_samples_origin: bool, _direct_timestamp_continuation: bool) -> Self
+    where
+        Self: Sized {
+        todo!()
+    }
+
+    fn stack(&self, _others: &[Self], _sync: bool) -> Self
+    where
+        Self: Sized {
+        todo!()
     }
 }
 

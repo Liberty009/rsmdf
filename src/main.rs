@@ -10,19 +10,19 @@ fn main() {
     let start = Instant::now();
     // let test = mdf.read(0, 0, 1);
 
-    // let channel = mdf.search_channels("ASAM.M.SCALAR.SBYTE.IDENTICAL.DISCRETE");
-    // let channel = match channel {
-    //     Ok(x) => x,
-    //     Err(e) => panic!("{}", e),
-    // };
-    // let test = mdf.read_channel(channel);
+    let channel = mdf.search_channels("ASAM.M.SCALAR.SBYTE.IDENTICAL.DISCRETE");
+    let channel = match channel {
+        Ok(x) => x,
+        Err(e) => panic!("{}", e),
+    };
+    let test = mdf.read_channel(&channel);
 
-    for channel in &mdf.channels() {
-        let test = &mdf.read_channel(channel);
-        println!("{}", test.comment);
-    }
+    // for channel in &mdf.channels() {
+    //     let test = &mdf.read_channel(channel);
+    //     println!("{}", test.comment);
+    // }
 
-    let test = mdf.read_channel(&mdf.channels[0]);
+    // let test = mdf.read_channel(&mdf.channels[0]);
 
     println!("Max Time: {}", test.max_time());
     println!("Took: {:?}", start.elapsed());

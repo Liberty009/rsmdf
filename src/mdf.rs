@@ -146,6 +146,22 @@ impl MDFFile for MDFType {
             Self::MDF4(file) => Self::MDF4(file.resample(raster, version, time_from_zero)),
         }
     }
+
+    fn convert(&self, _version: String) -> Self {
+        todo!()
+    }
+
+    fn cat(&self, _others: &[Self], _sync: bool, _add_samples_origin: bool, _direct_timestamp_continuation: bool) -> Self
+    where
+        Self: Sized {
+        todo!()
+    }
+
+    fn stack(&self, _others: &[Self], _sync: bool) -> Self
+    where
+        Self: Sized {
+        todo!()
+    }
     // #[must_use]
     // fn select(
     //     &self,
@@ -260,6 +276,22 @@ impl MDFFile for MDF {
             channels: Vec::new(),
         }
     }
+
+    fn convert(&self, _version: String) -> Self {
+        todo!()
+    }
+
+    fn cat(&self, _others: &[Self], _sync: bool, _add_samples_origin: bool, _direct_timestamp_continuation: bool) -> Self
+    where
+        Self: Sized {
+        todo!()
+    }
+
+    fn stack(&self, _others: &[Self], _sync: bool) -> Self
+    where
+        Self: Sized {
+        todo!()
+    }
     // fn select(
     //     &self,
     //     channels: ChannelsType,
@@ -283,7 +315,18 @@ impl MDFFile for MDF {
 }
 
 pub trait MDFFile {
+    fn convert(&self, version: String) -> Self;
+
     fn channels(&self) -> Vec<MdfChannel>;
+
+    fn cat(&self, others: &[Self], sync: bool, add_samples_origin: bool, direct_timestamp_continuation: bool) -> Self
+    where
+        Self: Sized;
+
+    fn stack(&self, others: &[Self], sync: bool) -> Self
+    where
+        Self: Sized;
+
     fn find_time_channel(
         &self,
         _datagroup: usize,
