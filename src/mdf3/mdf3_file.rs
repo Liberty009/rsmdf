@@ -315,15 +315,23 @@ impl mdf::MDFFile for MDF3 {
         todo!()
     }
 
-    fn cat(&self, _others: &[Self], _sync: bool, _add_samples_origin: bool, _direct_timestamp_continuation: bool) -> Self
+    fn cat(
+        &self,
+        _others: &[Self],
+        _sync: bool,
+        _add_samples_origin: bool,
+        _direct_timestamp_continuation: bool,
+    ) -> Self
     where
-        Self: Sized {
+        Self: Sized,
+    {
         todo!()
     }
 
     fn stack(&self, _others: &[Self], _sync: bool) -> Self
     where
-        Self: Sized {
+        Self: Sized,
+    {
         todo!()
     }
     // fn select(

@@ -7,12 +7,13 @@ use crate::record::Record;
 use crate::signal::Signal;
 use crate::utils;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 enum MDFVersion {
     MDF3,
     MDF4,
 }
 
+#[derive(Debug, Clone)]
 enum MDFType {
     MDF3(MDF3),
     MDF4(MDF4),
@@ -22,7 +23,7 @@ impl MDFType {
     fn check_version(filepath: &str) -> MDFVersion {
         let mut file = File::open(filepath).expect("Could not read file");
         let mut id_stream = [0_u8; 128];
-        let _ = file.read_exact(&mut id_stream).unwrap();
+        file.read_exact(&mut id_stream).unwrap();
 
         let mut pos = 0;
         let little_endian = true;
@@ -151,15 +152,23 @@ impl MDFFile for MDFType {
         todo!()
     }
 
-    fn cat(&self, _others: &[Self], _sync: bool, _add_samples_origin: bool, _direct_timestamp_continuation: bool) -> Self
+    fn cat(
+        &self,
+        _others: &[Self],
+        _sync: bool,
+        _add_samples_origin: bool,
+        _direct_timestamp_continuation: bool,
+    ) -> Self
     where
-        Self: Sized {
+        Self: Sized,
+    {
         todo!()
     }
 
     fn stack(&self, _others: &[Self], _sync: bool) -> Self
     where
-        Self: Sized {
+        Self: Sized,
+    {
         todo!()
     }
     // #[must_use]
@@ -175,6 +184,7 @@ impl MDFFile for MDFType {
     // ) -> Vec<Signal>;
 }
 
+#[derive(Debug, Clone)]
 pub struct MDF {
     pub filepath: String,
     file: MDFType,
@@ -218,8 +228,46 @@ impl MDF {
 }
 
 impl MDFFile for MDF {
+    fn convert(&self, version: String) -> Self {
+        Self {
+            filepath: self.filepath.clone(),
+            file: self.file.convert(version),
+            channels: self.channels.clone(),
+        }
+    }
+
     fn channels(&self) -> Vec<MdfChannel> {
         self.file.channels()
+    }
+
+    fn cat(
+        &self,
+        others: &[Self],
+        sync: bool,
+        add_samples_origin: bool,
+        direct_timestamp_continuation: bool,
+    ) -> Self
+    where
+        Self: Sized,
+    {
+        if others.is_empty() {
+            self.clone()
+        } else {
+            // Note
+            self.cat(
+                &others[1..],
+                sync,
+                add_samples_origin,
+                direct_timestamp_continuation,
+            )
+        }
+    }
+
+    fn stack(&self, _others: &[Self], _sync: bool) -> Self
+    where
+        Self: Sized,
+    {
+        todo!()
     }
 
     fn find_time_channel(
@@ -254,11 +302,9 @@ impl MDFFile for MDF {
     fn list_channels(&self) {
         self.file.list_channels();
     }
-
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal {
         self.file.read(datagroup, channel_grp, channel)
     }
-
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
         self.file.cut(start, end, include_ends, time_from_zero)
     }
@@ -266,9 +312,11 @@ impl MDFFile for MDF {
     fn export(&self, format: &str, filename: &str) {
         self.file.export(format, filename)
     }
+
     fn filter(&self, channels: &str) {
         self.file.filter(channels)
     }
+
     fn resample(&self, raster: RasterType, version: &str, time_from_zero: bool) -> Self {
         Self {
             filepath: self.filepath.clone(),
@@ -276,42 +324,6 @@ impl MDFFile for MDF {
             channels: Vec::new(),
         }
     }
-
-    fn convert(&self, _version: String) -> Self {
-        todo!()
-    }
-
-    fn cat(&self, _others: &[Self], _sync: bool, _add_samples_origin: bool, _direct_timestamp_continuation: bool) -> Self
-    where
-        Self: Sized {
-        todo!()
-    }
-
-    fn stack(&self, _others: &[Self], _sync: bool) -> Self
-    where
-        Self: Sized {
-        todo!()
-    }
-    // fn select(
-    //     &self,
-    //     channels: ChannelsType,
-    //     record_offset: isize,
-    //     raw: bool,
-    //     copy_master: bool,
-    //     ignore_value2text_conversions: bool,
-    //     record_count: isize,
-    //     validate: bool,
-    // ) -> Vec<Signal> {
-    //     self.file.select(
-    //         channels,
-    //         record_offset,
-    //         raw,
-    //         copy_master,
-    //         ignore_value2text_conversions,
-    //         record_count,
-    //         validate,
-    //     )
-    // }
 }
 
 pub trait MDFFile {
@@ -319,7 +331,13 @@ pub trait MDFFile {
 
     fn channels(&self) -> Vec<MdfChannel>;
 
-    fn cat(&self, others: &[Self], sync: bool, add_samples_origin: bool, direct_timestamp_continuation: bool) -> Self
+    fn cat(
+        &self,
+        others: &[Self],
+        sync: bool,
+        add_samples_origin: bool,
+        direct_timestamp_continuation: bool,
+    ) -> Self
     where
         Self: Sized;
 
