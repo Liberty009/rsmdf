@@ -5,7 +5,7 @@ use super::block_header::*;
 use super::dt_block::Dtblock;
 use super::mdf4_file::link_extract;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dlblock {
     header: BlockHeader,
     dl_dl_next: u64,

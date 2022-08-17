@@ -22,7 +22,7 @@ impl MDFType {
     fn check_version(filepath: &str) -> MDFVersion {
         let mut file = File::open(filepath).expect("Could not read file");
         let mut id_stream = [0_u8; 128];
-        let _ = file.read_exact(&mut id_stream).unwrap();
+        file.read_exact(&mut id_stream).unwrap();
 
         let mut pos = 0;
         let little_endian = true;
@@ -43,13 +43,11 @@ impl MDFType {
         let major_version = version.next().unwrap().parse::<usize>().unwrap();
         //let _minor_version = version.next().unwrap().parse::<usize>().unwrap();
 
-        let mdf_version = match major_version {
+        match major_version {
             3 => MDFVersion::MDF3,
             4 => MDFVersion::MDF4,
             _ => panic!("Unknown MDF file version"),
-        };
-
-        mdf_version
+        }
     }
 }
 
@@ -353,7 +351,7 @@ impl TimeChannel {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MdfChannel {
     pub name: String,
     pub data_group: usize,

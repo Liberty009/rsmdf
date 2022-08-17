@@ -157,7 +157,7 @@ impl Signal {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum Interpolation {
     RepeatPreviousSample,
     LinearInterpolation,

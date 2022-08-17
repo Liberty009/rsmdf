@@ -6,7 +6,7 @@ use super::mdf4_enums::ZipType;
 
 use miniz_oxide::inflate::decompress_to_vec;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dzblock {
     header: BlockHeader,
 

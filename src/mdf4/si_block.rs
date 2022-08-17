@@ -7,7 +7,7 @@ use super::block_header::*;
 use super::mdf4_enums::{BusType, SourceType};
 use super::mdf4_file::link_extract;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Siblock {
     header: BlockHeader,
     si_tx_name: u64,

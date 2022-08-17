@@ -3,7 +3,7 @@ use std::mem;
 use crate::record;
 
 #[allow(dead_code)]
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum ChannelHierarchyType {
     Group,
     Function,
@@ -33,7 +33,7 @@ impl ChannelHierarchyType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventType {
     Recording,
 
@@ -65,7 +65,7 @@ impl EventType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 
 pub enum EventSyncType {
     Seconds,
@@ -89,7 +89,7 @@ impl EventSyncType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 
 pub enum RangeType {
     Point,
@@ -110,7 +110,7 @@ impl RangeType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EventCause {
     Other,
 
@@ -136,7 +136,7 @@ impl EventCause {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SourceType {
     Other,
 
@@ -165,7 +165,7 @@ impl SourceType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BusType {
     None,
 
@@ -203,7 +203,7 @@ impl BusType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ZipType {
     Deflate,
 
@@ -220,7 +220,7 @@ impl ZipType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ChannelType {
     FixedLength,
     VariableLength,
@@ -245,7 +245,7 @@ impl ChannelType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SyncType {
     None,
     Time,
@@ -266,7 +266,7 @@ impl SyncType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataType {
     UnsignedByteLE,
     UnsignedByteBE,
@@ -371,7 +371,7 @@ impl DataType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CCType {
     Direct,
     Parametic,

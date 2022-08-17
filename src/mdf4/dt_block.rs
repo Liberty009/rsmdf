@@ -1,7 +1,7 @@
 use super::block::{Block, DataBlock};
 use super::block_header::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dtblock {
     header: BlockHeader,
     dt_data: Vec<u8>,
