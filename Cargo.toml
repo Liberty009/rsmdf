@@ -19,5 +19,5 @@ debug = 1
 [dependencies]
 xml-rs = "0.8.4"
 itertools = "0.10.3"
-miniz_oxide = "0.5.1"
+flate2 = "1.0.24"
 #rayon = "1.5.1"
