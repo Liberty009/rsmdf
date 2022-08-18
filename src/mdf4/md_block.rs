@@ -4,7 +4,7 @@ use super::utils as mdf4_utils;
 
 use crate::utils;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mdblock {
     header: BlockHeader,
 

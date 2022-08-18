@@ -20,7 +20,7 @@ const SIGNED_INT_LITTLEENDIAN: u16 = 14;
 const FLOAT32_INT_LITTLEENDIAN: u16 = 15;
 const FLOAT64_INT_LITTLEENDIAN: u16 = 16;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataType {
     UnsignedInt,
     SignedInt,
@@ -148,7 +148,7 @@ pub fn _print_record(value: Record) {
     };
 }
 
-#[derive(Debug, PartialEq,Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Record {
     Uint(u8),
     Int(i8),
@@ -159,16 +159,14 @@ pub enum Record {
 
 impl Record {
     pub fn new(stream: &[u8], dtype: DataTypeRead) -> Self {
-        let rec = match dtype.data_type {
+        match dtype.data_type {
             DataType::UnsignedInt => Self::unsigned_int(stream, dtype),
             DataType::SignedInt => Self::signed_int(stream, dtype),
             DataType::Float32 => Self::float32(stream, dtype),
             DataType::Float64 => Self::float64(stream, dtype),
             DataType::StringNullTerm => Self::string_null_term(stream, dtype),
             _ => (panic!("Incorrect or not implemented type!, {:?}", dtype.data_type)),
-        };
-
-        rec
+        }
     }
 
     pub fn extract(&self) -> f64 {

@@ -6,7 +6,7 @@ use super::block::Block;
 use super::block_header::BlockHeader;
 use super::mdf4_file::link_extract;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Atblock {
     header: BlockHeader,
     next_at_addr: u64,

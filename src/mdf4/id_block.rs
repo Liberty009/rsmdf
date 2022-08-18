@@ -3,7 +3,7 @@ use std::mem;
 use super::block::Block;
 use crate::utils;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Idblock {
     #[allow(dead_code)]
     id_file: [u8; 8],

@@ -1,7 +1,7 @@
 use super::block::Block;
 use super::block_header::*;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Sdblock {
     header: BlockHeader,
     sd_data: Vec<u8>,

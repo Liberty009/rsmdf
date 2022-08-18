@@ -9,7 +9,7 @@ use super::cn_block::Cnblock;
 use super::mdf4_file::link_extract;
 use super::tx_block;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cgblock {
     header: BlockHeader,
     #[allow(dead_code)]

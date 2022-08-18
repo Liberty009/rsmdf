@@ -3,7 +3,7 @@ use std::mem;
 use super::block::Block;
 use crate::utils;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BlockHeader {
     pub id: [u8; 4],
     reserved0: [u8; 4],
