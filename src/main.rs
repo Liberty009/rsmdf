@@ -3,7 +3,7 @@ use std::time::Instant;
 use rsmdf::{mdf::MDFFile, mdf::MDF};
 
 fn main() {
-    let mdf = MDF::new("./example_files/Discrete_deflate.mf4");
+    let mdf = MDF::new("./example_files/ASAP2_Demo_V171_deflate.mf4");
 
     mdf.list_channels();
 
