@@ -1,12 +1,14 @@
+use std::io::Read;
+
 use crate::utils;
 
 use super::block::{Block, DataBlock};
 use super::block_header::*;
 use super::mdf4_enums::ZipType;
 
-use miniz_oxide::inflate::decompress_to_vec;
+use flate2::read::ZlibDecoder;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dzblock {
     header: BlockHeader,
 
@@ -26,11 +28,18 @@ pub struct Dzblock {
 
 impl DataBlock for Dzblock {
     fn data_array(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
-        let decompressed = match decompress_to_vec(self.dz_data.as_slice()) {
-            Ok(data) => data,
-            Err(e) => panic!("{:?}", e),
-        };
-        decompressed
+        let mut zlib_decoder = ZlibDecoder::new(&self.dz_data[..]);
+        let mut decompressed_data = vec![0u8; self.dz_org_data_length as usize];
+ 
+        let decompress_result = zlib_decoder.read_exact(&mut decompressed_data);
+        match decompress_result {
+            Ok(_) => {},
+            Err(e) => {
+                panic!("{:?}", e);
+            }
+        }
+
+        decompressed_data
     }
 }
 
