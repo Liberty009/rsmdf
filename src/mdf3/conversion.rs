@@ -173,7 +173,7 @@ impl ConversionRational {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Table {
     #[allow(dead_code)]
     ConversionTabular,
@@ -219,7 +219,7 @@ impl TableEntry {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Text {
     #[allow(dead_code)]
     ConversionTextFormula,

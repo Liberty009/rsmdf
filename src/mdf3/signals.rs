@@ -1,6 +1,6 @@
 use crate::utils;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Signals {
     pub data_group: u32,
     pub channel_group: u32,
