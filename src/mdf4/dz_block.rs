@@ -11,18 +11,12 @@ use flate2::read::ZlibDecoder;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Dzblock {
     header: BlockHeader,
-
     dz_org_block_type: [u8; 2],
-
     dz_zip_type: ZipType,
     dz_reserved: u8,
-
     dz_zip_parameter: u32,
-
     dz_org_data_length: u64,
-
     dz_data_length: u64,
-
     dz_data: Vec<u8>,
 }
 
@@ -40,8 +34,15 @@ impl DataBlock for Dzblock {
             }
         }
 
-        decompressed_data
+        match self.dz_zip_type {
+            ZipType::Deflate => decompressed_data, 
+            ZipType::TransposeDeflate => transpose(&decompressed_data)
+        }
     }
+}
+
+fn transpose(_initial_array: &[u8]) -> Vec<u8> {
+    todo!()
 }
 
 impl Block for Dzblock {
