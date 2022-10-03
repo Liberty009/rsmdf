@@ -113,8 +113,11 @@ impl Dgblock {
         cg
     }
 
-    pub fn read_data(&self, _stream: &[u8], _little_endian: bool) -> Vec<u8> {
-        todo!()
+    pub fn read_data(&self, stream: &[u8], _little_endian: bool, channel: &Cgblock) -> Vec<u8> {
+        let data_length = self.data_length(channel);
+        let data_block = self.data_block as usize;
+
+        stream[data_block..data_block+data_length].to_vec()
     }
 
     #[allow(dead_code)]
@@ -138,6 +141,12 @@ impl Dgblock {
     pub fn read_channel_groups(self, stream: &[u8], little_endian: bool) -> Vec<Cgblock> {
         let first_group = self.first_channel_group(stream, little_endian);
         first_group.list(stream, little_endian)
+    }
+
+    fn data_length(self, channel: &Cgblock) -> usize{
+        let record_number = channel.record_number();
+        let record_size = channel.record_size();
+        record_number * record_size
     }
 }
 

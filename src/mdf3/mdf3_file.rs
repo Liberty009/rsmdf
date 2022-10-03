@@ -83,7 +83,7 @@ impl mdf::MDFFile for MDF3 {
         let dg = &self.data_groups[datagroup];
         let cn = &channels[channel];
 
-        let data = dg.read_data(&self.file, self.little_endian);
+        let data = dg.read_data(&self.file, self.little_endian, channel_group);
         // &self.file[dg.data_location() as usize..(dg.data_location() as usize + data_length)];
 
         println!("Record Number: {}", channel_group.record_number());

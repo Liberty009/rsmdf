@@ -1,6 +1,6 @@
 use crate::utils;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Idblock {
     file_id: [u8; 8],
     format_id: [u8; 8],

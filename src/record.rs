@@ -148,6 +148,7 @@ pub fn _print_record(value: Record) {
     };
 }
 
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Record {
     Uint(u8),
@@ -165,7 +166,7 @@ impl Record {
             DataType::Float32 => Self::float32(stream, dtype),
             DataType::Float64 => Self::float64(stream, dtype),
             DataType::StringNullTerm => Self::string_null_term(stream, dtype),
-            _ => (panic!("Incorrect or not implemented type!, {:?}", dtype.data_type)),
+            _ => panic!("Incorrect or not implemented type!, {:?}", dtype.data_type),
         }
     }
 

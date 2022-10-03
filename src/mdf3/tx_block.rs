@@ -2,7 +2,7 @@ use crate::utils;
 
 use super::mdf3_block::Mdf3Block;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Txblock {
     block_type: [u8; 2],
     block_size: u16,
