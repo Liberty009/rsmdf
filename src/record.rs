@@ -177,7 +177,6 @@ impl Record {
             Record::Float32(number) => *number as f64,
             Record::Float64(number) => *number as f64,
             Record::StringNullTerm(string) => string.parse::<f64>().unwrap(),
-            // _ => panic!("Help!")
         }
     }
 
