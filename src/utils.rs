@@ -167,15 +167,15 @@ pub fn read<T: FromBytes>(input: &[u8], little_endian: bool, position: &mut usiz
     }
 }
 
-pub fn write_be<T: ToBytes>(input: T) -> Vec<u8>{
+pub fn write_be<T: ToBytes>(input: T) -> Vec<u8> {
     T::to_be_bytes(input)
 }
 
-pub fn write_le<T: ToBytes>(input: T) -> Vec<u8>{
+pub fn write_le<T: ToBytes>(input: T) -> Vec<u8> {
     T::to_le_bytes(input)
 }
 
-pub fn write<T: ToBytes>(input: T, little_endian: bool) -> Vec<u8>{
+pub fn write<T: ToBytes>(input: T, little_endian: bool) -> Vec<u8> {
     if little_endian {
         write_le(input)
     } else {
@@ -185,92 +185,92 @@ pub fn write<T: ToBytes>(input: T, little_endian: bool) -> Vec<u8>{
 
 impl ToBytes for usize {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for u64 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for u32 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for u16 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for u8 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 
 impl ToBytes for i64 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for i32 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for i16 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for i8 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 
 impl ToBytes for f64 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 impl ToBytes for f32 {
     fn to_be_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_be_bytes(a).to_vec()
+        a.to_be_bytes().to_vec()
     }
     fn to_le_bytes(a: Self) -> Vec<u8> {
-        ToBytes::to_le_bytes(a).to_vec()
+        a.to_le_bytes().to_vec()
     }
 }
 
