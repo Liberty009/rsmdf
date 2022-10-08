@@ -148,7 +148,6 @@ pub fn _print_record(value: Record) {
     };
 }
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Record {
     Uint(u8),
