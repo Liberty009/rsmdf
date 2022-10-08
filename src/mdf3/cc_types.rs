@@ -103,7 +103,6 @@ impl ConversionTypes {
 pub enum Physical {
     Text(Vec<String>),
     Value(Vec<f64>),
-    
 }
 
 trait Conversion {
@@ -542,7 +541,7 @@ impl Conversion for Time {
         let ms = utils::read(stream, little_endian, &mut pos);
         let days = utils::read(stream, little_endian, &mut pos);
 
-        (pos, Self { ms, days }, )
+        (pos, Self { ms, days })
     }
 
     fn convert(&self, _data: &[f64]) -> Physical {

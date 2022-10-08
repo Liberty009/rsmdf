@@ -86,6 +86,30 @@ impl Mdf3Block for Hdblock {
             },
         )
     }
+
+    fn write(&self, start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+
+        array.append(&mut utils::write(start_position, little_endian));
+        array.append(&mut self.block_type.to_vec());
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.data_group_block, little_endian));
+        array.append(&mut utils::write(self.file_comment, little_endian));
+        array.append(&mut utils::write(self.program_block, little_endian));
+        array.append(&mut utils::write(self.data_group_number, little_endian));
+        array.append(&mut self.date.to_vec());
+        array.append(&mut self.time.to_vec());
+        array.append(&mut self.author.to_vec());
+        array.append(&mut self.department.to_vec());
+        array.append(&mut self.project.to_vec());
+        array.append(&mut self.subject.to_vec());
+        array.append(&mut utils::write(self.timestamp, little_endian));
+        array.append(&mut utils::write(self.utc_time_offset, little_endian));
+        array.append(&mut utils::write(self.time_quality, little_endian));
+        array.append(&mut self.timer_id.to_vec());
+
+        array
+    }
 }
 
 impl Hdblock {
@@ -96,8 +120,6 @@ impl Hdblock {
         let (_pos, tx) = Txblock::read(stream, self.file_comment as usize, little_endian);
         tx.name()
     }
-    #[allow(dead_code)]
-    pub fn write() {}
     pub fn first_data_group(&self, stream: &[u8], little_endian: bool) -> Dgblock {
         if self.data_group_block == 0 {
             panic!("No data group found!");
@@ -107,6 +129,53 @@ impl Hdblock {
             Dgblock::read(stream, self.data_group_block as usize, little_endian);
 
         data_group
+    }
+
+    pub fn default() -> Self {
+        Self::new(
+            0usize, [0u8; 2], 0u16, 0u32, 0u32, 0u32, 0u16, [0u8; 10], [0u8; 8], [0u8; 32],
+            [0u8; 32], [0u8; 32], [0u8; 32], 0u64, 0i16, 0u16, [0u8; 32],
+        )
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        position: usize,
+        block_type: [u8; 2],
+        block_size: u16,
+        data_group_block: u32,
+        file_comment: u32,
+        program_block: u32,
+        data_group_number: u16,
+        date: [u8; 10],
+        time: [u8; 8],
+        author: [u8; 32],
+        department: [u8; 32],
+        project: [u8; 32],
+        subject: [u8; 32],
+        timestamp: u64,
+        utc_time_offset: i16,
+        time_quality: u16,
+        timer_id: [u8; 32],
+    ) -> Self {
+        Self {
+            position,
+            block_type,
+            block_size,
+            data_group_block,
+            file_comment,
+            program_block,
+            data_group_number,
+            date,
+            time,
+            author,
+            department,
+            project,
+            subject,
+            timestamp,
+            utc_time_offset,
+            time_quality,
+            timer_id,
+        }
     }
 }
 

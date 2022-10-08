@@ -1,5 +1,6 @@
 pub trait Mdf3Block {
     fn read(stream: &[u8], position: usize, little_endian: bool) -> (usize, Self);
+    fn write(&self, start_position: usize, little_endian: bool) -> Vec<u8>;
 }
 
 pub trait LinkedBlock {

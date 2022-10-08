@@ -95,6 +95,22 @@ impl Mdf3Block for Dgblock {
             },
         )
     }
+
+    fn write(&self, _start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+
+        array.append(&mut self.block_type.to_vec());
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.next, little_endian));
+        array.append(&mut utils::write(self.first, little_endian));
+        array.append(&mut utils::write(self.trigger_block, little_endian));
+        array.append(&mut utils::write(self.data_block, little_endian));
+        array.append(&mut utils::write(self.group_number, little_endian));
+        array.append(&mut utils::write(self.id_number, little_endian));
+        array.append(&mut utils::write(self.reserved, little_endian));
+
+        array
+    }
 }
 
 impl Dgblock {
@@ -117,7 +133,7 @@ impl Dgblock {
         let data_length = self.data_length(channel);
         let data_block = self.data_block as usize;
 
-        stream[data_block..data_block+data_length].to_vec()
+        stream[data_block..data_block + data_length].to_vec()
     }
 
     #[allow(dead_code)]
@@ -143,7 +159,7 @@ impl Dgblock {
         first_group.list(stream, little_endian)
     }
 
-    fn data_length(self, channel: &Cgblock) -> usize{
+    fn data_length(self, channel: &Cgblock) -> usize {
         let record_number = channel.record_number();
         let record_size = channel.record_size();
         record_number * record_size

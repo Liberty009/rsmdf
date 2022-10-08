@@ -15,7 +15,21 @@ pub struct Idblock {
 
 impl Idblock {
     #[allow(dead_code)]
-    pub fn write() {}
+    pub fn write(&self, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+
+        array.append(&mut self.file_id.to_vec());
+        array.append(&mut self.format_id.to_vec());
+        array.append(&mut self.program_id.to_vec());
+        array.append(&mut utils::write(self.default_byte_order, little_endian));
+        array.append(&mut utils::write(self.default_float_format, little_endian));
+        array.append(&mut utils::write(self.version_number, little_endian));
+        array.append(&mut utils::write(self.code_page_number, little_endian));
+        array.append(&mut self.reserved1.to_vec());
+        array.append(&mut self.reserved2.to_vec());
+
+        array
+    }
     #[allow(dead_code)]
     pub fn new(
         file_id: [u8; 8],
@@ -37,6 +51,9 @@ impl Idblock {
             reserved1: [0_u8; 2],
             reserved2: [0_u8; 30],
         }
+    }
+    pub fn default() -> Self {
+        Self::new([0u8; 8], [0u8; 8], [0u8; 8], 0u16, 0u16, 0u16, 0u16)
     }
     pub fn read(stream: &[u8]) -> (Idblock, usize, bool) {
         let mut position = 0;

@@ -116,6 +116,13 @@ impl MDFFile for MDFType {
         }
     }
 
+    fn write(&self) {
+        match self {
+            Self::MDF3(file) => file.write(),
+            Self::MDF4(_file) => todo!(),
+        }
+    }
+
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
         match self {
             Self::MDF3(file) => file.cut(start, end, include_ends, time_from_zero),
@@ -241,6 +248,10 @@ impl MDFFile for MDF {
         self.file.read(datagroup, channel_grp, channel)
     }
 
+    fn write(&self) {
+        self.file.write();
+    }
+
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool) {
         self.file.cut(start, end, include_ends, time_from_zero)
     }
@@ -301,7 +312,7 @@ pub trait MDFFile {
 
     #[must_use]
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> Signal;
-
+    fn write(&self);
     fn cut(&self, start: f64, end: f64, include_ends: bool, time_from_zero: bool);
 
     fn export(&self, format: &str, filename: &str);

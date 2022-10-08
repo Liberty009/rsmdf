@@ -42,6 +42,21 @@ impl Mdf3Block for Trblock {
             },
         )
     }
+
+    fn write(&self, _start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+
+        array.append(&mut self.block_type.to_vec());
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.trigger_comment, little_endian));
+        array.append(&mut utils::write(self.trigger_events_number, little_endian));
+
+        for event in &self.events {
+            array.append(&mut event.write(little_endian));
+        }
+
+        array
+    }
 }
 
 impl Trblock {

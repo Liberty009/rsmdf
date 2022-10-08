@@ -9,7 +9,13 @@ pub struct Event {
 
 impl Event {
     #[allow(dead_code)]
-    pub fn write() {}
+    pub fn write(&self, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+        array.append(&mut utils::write(self.trigger_time, little_endian));
+        array.append(&mut utils::write(self.pre_trigger_time, little_endian));
+        array.append(&mut utils::write(self.post_trigger_time, little_endian));
+        array
+    }
     pub fn read(stream: &[u8], position: usize, little_endian: bool) -> (Event, usize) {
         let mut pos = position;
         let trigger_time = utils::read(stream, little_endian, &mut pos);

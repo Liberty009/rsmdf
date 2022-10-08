@@ -1,4 +1,5 @@
 use crate::record::Record;
+use crate::utils;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Signal {
@@ -11,6 +12,24 @@ pub struct Signal {
 }
 
 impl Signal {
+    pub fn write(&self, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+        for sample in &self.samples {
+            array.append(&mut sample.write(little_endian));
+        }
+
+        for time in &self.timestamps {
+            array.append(&mut utils::write(*time, little_endian));
+        }
+
+        array.append(&mut self.unit.as_bytes().to_vec());
+        array.append(&mut self.name.as_bytes().to_vec());
+        array.append(&mut self.comment.as_bytes().to_vec());
+        array.push(self.raw as u8);
+
+        array
+    }
+
     #[must_use]
     pub fn len(&self) -> usize {
         self.samples.len()

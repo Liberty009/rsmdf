@@ -246,35 +246,6 @@ impl mdf::MDFFile for MDF3 {
                 println!("Channel Group: {}", cg.comment(&self.file, little_endian));
             }
         }
-
-        // let mut next_dg = hd_block.data_group_block;
-
-        // while next_dg != 0 {
-        //     let (_pos, dg_block) = Dgblock::read(&self.file, next_dg as usize, little_endian);
-        //     next_dg = dg_block.next;
-        //     let mut next_cg = dg_block.first;
-
-        //     dg.push(dg_block);
-
-        //     while next_cg != 0 {
-        //         let (_pos, cg_block) = Cgblock::read(&self.file, next_cg as usize, little_endian);
-        //         next_cg = cg_block.next;
-        //         let mut next_cn = cg_block.first;
-        //         cg.push(cg_block);
-
-        //         println!("Channel Group: {}", cg_block.comment);
-
-        //         while next_cn != 0 {
-        //             let (_pos, cn_block) =
-        //                 Cnblock::read(&self.file, next_cn as usize, little_endian);
-        //             next_cn = cn_block.next;
-
-        //             ch.push(cn_block);
-        //         }
-        //     }
-        // }
-
-        // (ch, cg, dg);
     }
 
     fn read(&self, datagroup: usize, channel_grp: usize, channel: usize) -> signal::Signal {
@@ -295,6 +266,23 @@ impl mdf::MDFFile for MDF3 {
             "This is some measurement".to_string(),
             false,
         )
+    }
+
+    fn write(&self) {
+        //todo!()
+
+        let mut array: Vec<u8> = Vec::new();
+        let idblock = Idblock::default();
+        let hdblock = Hdblock::default();
+        array.append(&mut idblock.write(self.little_endian));
+        array.append(&mut hdblock.write(array.len(), self.little_endian));
+
+        //let data_groups: Vec<Dgblock> = Vec::new();
+
+        // Write each data group to file
+        // for dg in data_groups.reverse() {
+        //     dg.write();
+        // }
     }
 
     fn cut(&self, _start: f64, _end: f64, _include_ends: bool, _time_from_zero: bool) {

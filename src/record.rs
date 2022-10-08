@@ -117,6 +117,10 @@ impl DataTypeRead {
         }
     }
 
+    pub fn write(&self, _little_endian: bool) -> Vec<u8> {
+        todo!()
+    }
+
     pub fn len(self) -> usize {
         match self.data_type {
             DataType::UnsignedInt => mem::size_of::<u8>() / mem::size_of::<u8>(),
@@ -169,6 +173,19 @@ impl Record {
         }
     }
 
+    pub fn write(&self, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+        match self {
+            Record::Uint(number) => array.push(*number),
+            Record::Int(number) => array.push(*number as u8),
+            Record::Float32(number) => array.append(&mut utils::write(*number, little_endian)),
+            Record::Float64(number) => array.append(&mut utils::write(*number, little_endian)),
+            Record::StringNullTerm(string) => array.append(&mut string.clone().into_bytes()),
+        }
+
+        array
+    }
+
     pub fn extract(&self) -> f64 {
         match self {
             Record::Uint(number) => *number as f64,
@@ -176,7 +193,6 @@ impl Record {
             Record::Float32(number) => *number as f64,
             Record::Float64(number) => *number as f64,
             Record::StringNullTerm(string) => string.parse::<f64>().unwrap(),
-            // _ => panic!("Help!")
         }
     }
 

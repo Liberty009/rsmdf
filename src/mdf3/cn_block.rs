@@ -141,6 +141,33 @@ impl Mdf3Block for Cnblock {
             },
         )
     }
+
+    fn write(&self, _start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+
+        array.append(&mut self.block_type.to_vec());
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.next, little_endian));
+        array.append(&mut utils::write(self.conversion_formula, little_endian));
+        array.append(&mut utils::write(self.source_ext, little_endian));
+        array.append(&mut utils::write(self.dependency, little_endian));
+        array.append(&mut utils::write(self.comment, little_endian));
+        array.append(&mut utils::write(self.channel_type, little_endian));
+        array.append(&mut self.short_name.to_vec());
+        array.append(&mut self.desc.to_vec());
+        array.append(&mut utils::write(self.start_offset, little_endian));
+        array.append(&mut utils::write(self.bit_number, little_endian));
+        array.append(&mut self.data_type.write(little_endian));
+        array.append(&mut utils::write(self.value_range_valid, little_endian));
+        array.append(&mut utils::write(self.signal_min, little_endian));
+        array.append(&mut utils::write(self.signal_max, little_endian));
+        array.append(&mut utils::write(self.sample_rate, little_endian));
+        array.append(&mut utils::write(self.long_name, little_endian));
+        array.append(&mut utils::write(self.display_name, little_endian));
+        array.append(&mut utils::write(self.addition_byte_offset, little_endian));
+
+        array
+    }
 }
 
 impl Cnblock {

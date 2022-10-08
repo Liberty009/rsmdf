@@ -53,12 +53,23 @@ impl Mdf3Block for Ccblock {
             },
         )
     }
+
+    fn write(&self, _start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = self.block_type.to_vec();
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.physical_range_valid, little_endian));
+        array.append(&mut utils::write(self.physical_min, little_endian));
+        array.append(&mut utils::write(self.physical_max, little_endian));
+        array.append(&mut self.unit.to_vec());
+        array.append(&mut utils::write(self.conversion_type, little_endian));
+        array.append(&mut utils::write(self.size_info, little_endian));
+        //conversion_data: ConversionData,
+
+        array
+    }
 }
 
-impl Ccblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-}
+impl Ccblock {}
 
 #[cfg(test)]
 mod tests {

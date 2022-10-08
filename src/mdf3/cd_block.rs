@@ -50,6 +50,23 @@ impl Mdf3Block for Cdblock {
             },
         )
     }
+
+    fn write(&self, _start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = self.block_type.to_vec();
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.dependency_type, little_endian));
+        array.append(&mut utils::write(self.signal_number, little_endian));
+
+        for group in &self.groups {
+            array.append(&mut group.write(little_endian));
+        }
+
+        for dim in &self.dims {
+            array.append(&mut utils::write(*dim, little_endian));
+        }
+
+        array
+    }
 }
 
 impl Cdblock {

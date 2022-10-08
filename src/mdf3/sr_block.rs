@@ -76,6 +76,22 @@ impl Mdf3Block for Srblock {
             },
         )
     }
+
+    fn write(&self, _start_position: usize, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+
+        array.append(&mut self.block_type.to_vec());
+        array.append(&mut utils::write(self.block_size, little_endian));
+        array.append(&mut utils::write(self.next, little_endian));
+        array.append(&mut utils::write(self.data_block, little_endian));
+        array.append(&mut utils::write(
+            self.samples_reduced_number,
+            little_endian,
+        ));
+        array.append(&mut utils::write(self.time_interval_length, little_endian));
+
+        array
+    }
 }
 
 impl Srblock {

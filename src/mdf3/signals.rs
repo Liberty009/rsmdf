@@ -9,7 +9,14 @@ pub struct Signals {
 
 impl Signals {
     #[allow(dead_code)]
-    pub fn write() {}
+    pub fn write(&self, little_endian: bool) -> Vec<u8> {
+        let mut array = Vec::new();
+        array.append(&mut utils::write(self.data_group, little_endian));
+        array.append(&mut utils::write(self.channel_group, little_endian));
+        array.append(&mut utils::write(self.channel, little_endian));
+
+        array
+    }
     #[allow(dead_code)]
     pub fn read(stream: &[u8], little_endian: bool) -> (Self, usize) {
         let mut position = 0;
