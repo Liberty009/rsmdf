@@ -76,10 +76,8 @@ mod tests {
     use crate::utils;
 
     use super::*;
-
-    #[test]
-    fn read() {
-        let cc_data = [
+    
+    static CC_DATA: [u8; 233] = [
             0x43, 0x43, 0x2E, 0x00, 0x01, 0x00, 0x04, 0x19, 0x60, 0x9C, 0xAE, 0xDD, 0xBC, 0x3F,
             0x52, 0xE8, 0x62, 0xFA, 0x56, 0xD3, 0x28, 0x40, 0x73, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -99,7 +97,10 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let (position, cc_block) = Ccblock::read(&cc_data, 0, true);
+    #[test]
+    fn read() {
+
+        let (position, cc_block) = Ccblock::read(&CC_DATA, 0, true);
 
         assert_eq!(position, 47); // should match the block size
         assert_eq!(cc_block.block_size, 46);
@@ -139,5 +140,13 @@ mod tests {
     }
 
     #[test]
-    fn write() {}
+    fn write() {
+        let (_position, cc_block) = Ccblock::read(&CC_DATA, 0, true);
+        
+        let write_result = cc_block.write(0, true);
+        
+        assert!(utils::eq(&CC_DATA, &write_result));
+        
+        
+    }
 }
