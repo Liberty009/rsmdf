@@ -118,7 +118,44 @@ impl DataTypeRead {
     }
 
     pub fn write(&self, _little_endian: bool) -> Vec<u8> {
-        todo!()
+        match self.data_type {
+            DataType::UnsignedInt => vec![
+                UNSIGNED_INT_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::SignedInt => vec![
+                SIGNED_INT_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::Float32 => vec![
+                FLOAT32_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::Float64 => vec![
+                FLOAT64_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::FFloat => vec![
+                FFLOAT_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::GFloat => vec![
+                GFLOAT_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::DFloat => vec![
+                DFLOAT_DEFAULT.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::StringNullTerm => vec![
+                STRING_NULL_TERM.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+            DataType::ByteArray => vec![
+                BYTE_ARRAY.try_into().unwrap(),
+                self.little_endian.try_into().unwrap(),
+            ],
+        }
     }
 
     pub fn len(self) -> usize {
@@ -191,7 +228,7 @@ impl Record {
             Record::Uint(number) => *number as f64,
             Record::Int(number) => *number as f64,
             Record::Float32(number) => *number as f64,
-            Record::Float64(number) => *number as f64,
+            Record::Float64(number) => *number,
             Record::StringNullTerm(string) => string.parse::<f64>().unwrap(),
         }
     }

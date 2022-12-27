@@ -69,11 +69,6 @@ impl Mdf3Block for Cdblock {
     }
 }
 
-impl Cdblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-}
-
 #[cfg(test)]
 mod tests {
     use crate::mdf3::cd_block;

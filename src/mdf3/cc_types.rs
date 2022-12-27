@@ -488,14 +488,15 @@ pub struct Date {
 impl Date {
     #[allow(dead_code)]
     fn to_datetime(&self) -> NaiveDateTime {
-        let _date_time = chrono::Local
-            .ymd(self.year as i32, self.month as u32, self.day as u32)
-            .and_hms_milli(
-                self.hour as u32,
-                self.min as u32,
-                (self.ms / 1000) as u32,
-                (self.ms % 1000) as u32,
-            );
+        let _date_time = chrono::Local.with_ymd_and_hms(
+            self.year as i32,
+            self.month as u32,
+            self.day as u32,
+            self.hour as u32,
+            self.min as u32,
+            (self.ms / 1000) as u32,
+            // (self.ms % 1000) as u32,
+        );
         todo!()
     }
 }
