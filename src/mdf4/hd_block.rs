@@ -10,35 +10,35 @@ use super::mdf4_file::link_extract;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hdblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     hd_dg_first: u64,
-    #[allow(dead_code)]
+
     hd_fh_first: u64,
-    #[allow(dead_code)]
+
     hd_ch_first: u64,
-    #[allow(dead_code)]
+
     hd_at_first: u64,
-    #[allow(dead_code)]
+
     hd_ev_first: u64,
-    #[allow(dead_code)]
+
     hd_md_comment: u64,
-    #[allow(dead_code)]
+
     hd_start_time_ns: u64,
-    #[allow(dead_code)]
+
     hd_tz_offset_min: i16,
-    #[allow(dead_code)]
+
     hd_dst_offset_min: i16,
-    #[allow(dead_code)]
+
     hd_time_flags: u8,
-    #[allow(dead_code)]
+
     hd_time_class: u8,
-    #[allow(dead_code)]
+
     hd_flags: u8,
-    #[allow(dead_code)]
+
     hd_reserved: u8,
-    #[allow(dead_code)]
+
     hd_start_angle_rad: f64,
-    #[allow(dead_code)]
+
     hd_start_distance_m: f64,
 }
 

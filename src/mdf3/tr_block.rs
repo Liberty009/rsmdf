@@ -1,14 +1,9 @@
 #[derive(Debug, Clone)]
 pub struct Trblock {
-    #[allow(dead_code)]
     block_type: [u8; 2],
-    #[allow(dead_code)]
     block_size: u16,
-    #[allow(dead_code)]
     trigger_comment: u32,
-    #[allow(dead_code)]
     trigger_events_number: u16,
-    #[allow(dead_code)]
     events: Vec<Event>,
 }
 
@@ -60,10 +55,7 @@ impl Mdf3Block for Trblock {
 }
 
 impl Trblock {
-    #[allow(dead_code)]
-    pub fn write() {}
 
-    #[allow(dead_code)]
     pub fn read_events(
         stream: &[u8],
         position: usize,

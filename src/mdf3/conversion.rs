@@ -7,9 +7,8 @@ pub struct ConversionLinear {
 }
 
 impl ConversionLinear {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLinear, usize) {
         let mut position = 0;
         let p1 = utils::read(stream, little_endian, &mut position);
@@ -30,9 +29,8 @@ pub struct ConversionPoly {
 }
 
 impl ConversionPoly {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionPoly, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -68,9 +66,8 @@ pub struct ConversionExponetial {
 }
 
 impl ConversionExponetial {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionExponetial, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -108,9 +105,8 @@ pub struct ConversionLog {
 }
 
 impl ConversionLog {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionLog, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -147,9 +143,8 @@ pub struct ConversionRational {
 }
 
 impl ConversionRational {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionRational, usize) {
         let mut position = 0;
         let p1: f64 = utils::read(stream, little_endian, &mut position);
@@ -175,7 +170,6 @@ impl ConversionRational {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Table {
-    #[allow(dead_code)]
     ConversionTabular,
 }
 
@@ -185,9 +179,8 @@ pub struct ConversionTabular {
 }
 
 impl ConversionTabular {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTabular, usize) {
         let mut position = 0;
         let mut value = Vec::new();
@@ -208,7 +201,6 @@ pub struct TableEntry {
 }
 
 impl TableEntry {
-    #[allow(dead_code)]
     pub fn write() {}
     pub fn read(stream: &[u8], little_endian: bool) -> (TableEntry, usize) {
         let mut position = 0;
@@ -221,9 +213,8 @@ impl TableEntry {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Text {
-    #[allow(dead_code)]
     ConversionTextFormula,
-    #[allow(dead_code)]
+
     ConversionTextRangeTable,
 }
 
@@ -233,9 +224,8 @@ pub struct ConversionTextFormula {
 }
 
 impl ConversionTextFormula {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], _little_endian: bool) -> (ConversionTextFormula, usize) {
         let mut position = 0;
         let formula: [u8; 256] = stream.try_into().expect("msg");
@@ -251,9 +241,8 @@ pub struct ConversionTextTable {
 }
 
 impl ConversionTextTable {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool, number: usize) -> (ConversionTextTable, usize) {
         let mut position = 0;
         let mut table = Vec::new();
@@ -274,7 +263,6 @@ pub struct TextTableEntry {
 }
 
 impl TextTableEntry {
-    #[allow(dead_code)]
     pub fn write() {}
     pub fn read(stream: &[u8], little_endian: bool) -> (TextTableEntry, usize) {
         let mut position = 0;
@@ -294,9 +282,8 @@ pub struct ConversionTextRangeTable {
 }
 
 impl ConversionTextRangeTable {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (ConversionTextRangeTable, usize) {
         let mut position = 0;
         let undef1 = utils::read(stream, little_endian, &mut position);
@@ -324,9 +311,8 @@ pub struct TextRange {
 }
 
 impl TextRange {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (TextRange, usize) {
         let mut position = 0;
         let lower = utils::read(stream, little_endian, &mut position);

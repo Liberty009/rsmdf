@@ -7,9 +7,8 @@ pub struct TimeStruct {
 }
 
 impl TimeStruct {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (TimeStruct, usize) {
         let mut position = 0;
         let ms = utils::read(stream, little_endian, &mut position);

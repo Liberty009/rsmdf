@@ -7,23 +7,14 @@ use super::{
 
 #[derive(Debug, Clone, Copy)]
 pub struct Dgblock {
-    #[allow(dead_code)]
     block_type: [u8; 2],
-    #[allow(dead_code)]
     block_size: u16,
-    #[allow(dead_code)]
     next: u32,
-    #[allow(dead_code)]
     first: u32,
-    #[allow(dead_code)]
     trigger_block: u32,
-    #[allow(dead_code)]
     data_block: u32,
-    #[allow(dead_code)]
     group_number: u16,
-    #[allow(dead_code)]
     id_number: u16,
-    #[allow(dead_code)]
     reserved: u32,
 }
 
@@ -114,7 +105,6 @@ impl Mdf3Block for Dgblock {
 }
 
 impl Dgblock {
-    #[allow(dead_code)]
     pub fn data_location(&self) -> usize {
         self.data_block as usize
     }
@@ -134,11 +124,6 @@ impl Dgblock {
         let data_block = self.data_block as usize;
 
         stream[data_block..data_block + data_length].to_vec()
-    }
-
-    #[allow(dead_code)]
-    pub fn write() {
-        todo!()
     }
 
     pub fn read_all(stream: &[u8], little_endian: bool, position: usize) -> Vec<Self> {

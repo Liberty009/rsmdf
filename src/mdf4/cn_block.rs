@@ -14,57 +14,57 @@ use super::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cnblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     cn_cn_next: u64, //next ATBLOCK address
-    #[allow(dead_code)]
+
     cn_composition: u64,
-    #[allow(dead_code)]
+
     cn_tx_name: u64, //address of TXBLOCK that contains the channel name
-    #[allow(dead_code)]
+
     cn_si_source: u64, //address of channel source block
-    #[allow(dead_code)]
+
     cn_cc_conversion: u64, //address of channel conversion block
-    #[allow(dead_code)]
+
     cn_data: u64, //address of signal data block for VLSD channels
-    #[allow(dead_code)]
+
     cn_md_unit: u64, //address of TXBLOCK that contains the channel unit
-    #[allow(dead_code)]
+
     cn_md_comment: u64,
-    #[allow(dead_code)]
+
     cn_at_reference: Vec<u64>,
-    #[allow(dead_code)]
+
     cn_default_x: Vec<u64>,
-    #[allow(dead_code)]
+
     channel_type: ChannelType, //integer code for the channel type
-    #[allow(dead_code)]
+
     sync_type: SyncType, //integer code for the channel's sync type
-    #[allow(dead_code)]
+
     data_type: DataType, //integer code for the channel's data type
-    #[allow(dead_code)]
+
     bit_offset: u8, //bit offset
-    #[allow(dead_code)]
+
     byte_offset: u32, //byte offset within the data record
-    #[allow(dead_code)]
+
     bit_count: u32, //channel bit count
-    #[allow(dead_code)]
+
     flags: u32, //CNBLOCK flags
-    #[allow(dead_code)]
+
     pos_invalidation_bit: u32, //invalidation bit position for the current
-    #[allow(dead_code)]
+
     precision: u8, //integer code for the precision
     reserved1: u8,
     attachment_nr: u16,
-    #[allow(dead_code)]
+
     min_raw_value: f64, //min raw value of all samples
-    #[allow(dead_code)]
+
     max_raw_value: f64, //max raw value of all samples
-    #[allow(dead_code)]
+
     lower_limit: f64, //min physical value of all samples
-    #[allow(dead_code)]
+
     upper_limit: f64, //max physical value of all samples
-    #[allow(dead_code)]
+
     lower_ext_limit: f64, //min physical value of all samples
-    #[allow(dead_code)]
+
     upper_ext_limit: f64, //max physical value of all samples
 
                           // Other attributes

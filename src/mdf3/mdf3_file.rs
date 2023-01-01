@@ -13,11 +13,10 @@ use super::mdf3_block::{LinkedBlock, Mdf3Block};
 
 #[derive(Debug, Clone)]
 pub struct MDF3 {
-    #[allow(dead_code)]
     pub id: Idblock,
-    #[allow(dead_code)]
+
     pub header: Hdblock,
-    #[allow(dead_code)]
+
     pub comment: String,
     pub data_groups: Vec<Dgblock>,
     pub channels: Vec<Cnblock>,
@@ -308,7 +307,6 @@ impl mdf::MDFFile for MDF3 {
     // }
 }
 
-#[allow(dead_code)]
 pub fn print_record(value: Record) {
     match value {
         Record::Uint(number) => print!("{}", number),

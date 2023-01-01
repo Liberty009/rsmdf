@@ -12,30 +12,30 @@ use super::tx_block;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Cgblock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     cg_cg_next: u64, //- int : next channel group address
-    #[allow(dead_code)]
+
     cg_cn_first: u64, //- int : address of first channel of this channel group
-    #[allow(dead_code)]
+
     cg_tx_acq_name: u64, //- int : address of TextBLock that contains the channel
-    #[allow(dead_code)]
+
     cg_si_acq_source: u64, //- int : address of SourceInformation that contains the
-    #[allow(dead_code)]
+
     cg_sr_first: u64, // - int : address of first SRBLOCK; this is
-    #[allow(dead_code)]
+
     cg_md_comment: u64, //- int : address of TXBLOCK/MDBLOCK that contains the
-    #[allow(dead_code)]
+
     cg_record_id: u64, //- int : record ID for the channel group
-    #[allow(dead_code)]
+
     cg_cycle_count: u64, //- int : number of cycles for this channel group
-    #[allow(dead_code)]
+
     cg_flags: u16, //- int : channel group flags
-    #[allow(dead_code)]
+
     cg_path_separator: u16,
     cg_reserved: [u8; 4],
-    #[allow(dead_code)]
+
     cg_data_bytes: u32,
-    #[allow(dead_code)]
+
     cg_inval_bytes: u32, // - int : number of bytes used for invalidation
                          // bits by this channel group
 

@@ -5,17 +5,16 @@ use crate::utils;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Idblock {
-    #[allow(dead_code)]
     id_file: [u8; 8],
-    #[allow(dead_code)]
+
     id_vers: [u8; 8],
-    #[allow(dead_code)]
+
     id_prog: [u8; 8],
-    #[allow(dead_code)]
+
     id_reserved1: [u8; 4],
-    #[allow(dead_code)]
+
     id_ver: u16,
-    #[allow(dead_code)]
+
     id_reserved2: [u8; 34],
 }
 impl Block for Idblock {

@@ -54,11 +54,6 @@ impl Mdf3Block for Prblock {
     }
 }
 
-impl Prblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

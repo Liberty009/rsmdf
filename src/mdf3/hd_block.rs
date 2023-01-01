@@ -4,37 +4,21 @@ use super::{dg_block::Dgblock, mdf3_block::Mdf3Block, tx_block::Txblock};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Hdblock {
-    #[allow(dead_code)]
-    position: usize,
-    #[allow(dead_code)]
     block_type: [u8; 2],
-    #[allow(dead_code)]
     block_size: u16,
     data_group_block: u32,
     file_comment: u32,
-    #[allow(dead_code)]
     program_block: u32,
-    #[allow(dead_code)]
     data_group_number: u16,
-    #[allow(dead_code)]
     date: [u8; 10],
-    #[allow(dead_code)]
     time: [u8; 8],
-    #[allow(dead_code)]
     author: [u8; 32],
-    #[allow(dead_code)]
     department: [u8; 32],
-    #[allow(dead_code)]
     project: [u8; 32],
-    #[allow(dead_code)]
     subject: [u8; 32],
-    #[allow(dead_code)]
     timestamp: u64,
-    #[allow(dead_code)]
     utc_time_offset: i16,
-    #[allow(dead_code)]
     time_quality: u16,
-    #[allow(dead_code)]
     timer_id: [u8; 32],
 }
 
@@ -66,7 +50,6 @@ impl Mdf3Block for Hdblock {
         (
             pos,
             Hdblock {
-                position,
                 block_type,
                 block_size,
                 data_group_block,
@@ -133,13 +116,12 @@ impl Hdblock {
 
     pub fn default() -> Self {
         Self::new(
-            0usize, [0u8; 2], 0u16, 0u32, 0u32, 0u32, 0u16, [0u8; 10], [0u8; 8], [0u8; 32],
+            [0u8; 2], 0u16, 0u32, 0u32, 0u32, 0u16, [0u8; 10], [0u8; 8], [0u8; 32],
             [0u8; 32], [0u8; 32], [0u8; 32], 0u64, 0i16, 0u16, [0u8; 32],
         )
     }
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        position: usize,
         block_type: [u8; 2],
         block_size: u16,
         data_group_block: u32,
@@ -158,7 +140,6 @@ impl Hdblock {
         timer_id: [u8; 32],
     ) -> Self {
         Self {
-            position,
             block_type,
             block_size,
             data_group_block,

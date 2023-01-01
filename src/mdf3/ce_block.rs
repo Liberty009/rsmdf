@@ -42,7 +42,6 @@ impl Mdf3Block for Ceblock {
 }
 
 impl Ceblock {
-    #[allow(dead_code)]
     pub fn write() {}
 }
 

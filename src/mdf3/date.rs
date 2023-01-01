@@ -11,9 +11,8 @@ pub struct DateStruct {
 }
 
 impl DateStruct {
-    #[allow(dead_code)]
     pub fn write() {}
-    #[allow(dead_code)]
+
     pub fn read(stream: &[u8], little_endian: bool) -> (DateStruct, usize) {
         let mut position = 0;
         let ms = utils::read(stream, little_endian, &mut position);

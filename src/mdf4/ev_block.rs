@@ -8,40 +8,40 @@ use super::mdf4_file::link_extract;
 #[derive(Debug, Clone, PartialEq)]
 pub struct EVBlock {
     header: BlockHeader,
-    #[allow(dead_code)]
+
     ev_ev_next: u64,
-    #[allow(dead_code)]
+
     ev_ev_parent: u64,
-    #[allow(dead_code)]
+
     ev_ev_range: u64,
-    #[allow(dead_code)]
+
     ev_tx_name: u64,
-    #[allow(dead_code)]
+
     ev_md_comment: u64,
-    #[allow(dead_code)]
+
     ev_scope: Vec<u64>,
-    #[allow(dead_code)]
+
     ev_at_reference: Vec<u64>,
-    #[allow(dead_code)]
+
     ev_type: EventType,
-    #[allow(dead_code)]
+
     ev_sync_type: EventSyncType,
-    #[allow(dead_code)]
+
     ev_range_type: RangeType,
-    #[allow(dead_code)]
+
     ev_cause: EventCause,
-    #[allow(dead_code)]
+
     ev_flags: u8,
     ev_reserved: [u8; 3],
-    #[allow(dead_code)]
+
     ev_scope_count: u32,
-    #[allow(dead_code)]
+
     ev_attachment_count: u16,
-    #[allow(dead_code)]
+
     ev_creator_index: u16,
-    #[allow(dead_code)]
+
     ev_sync_base_value: i64,
-    #[allow(dead_code)]
+
     ev_sync_factor: f64,
 }
 

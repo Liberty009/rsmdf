@@ -54,9 +54,6 @@ impl Mdf3Block for Txblock {
 }
 
 impl Txblock {
-    #[allow(dead_code)]
-    pub fn write() {}
-
     pub fn name(self) -> String {
         //let mut name = "".to_string();
 

@@ -8,7 +8,6 @@ pub struct Event {
 }
 
 impl Event {
-    #[allow(dead_code)]
     pub fn write(&self, little_endian: bool) -> Vec<u8> {
         let mut array = Vec::new();
         array.append(&mut utils::write(self.trigger_time, little_endian));

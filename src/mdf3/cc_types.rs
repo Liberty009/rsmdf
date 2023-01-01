@@ -354,7 +354,6 @@ impl Conversion for Rational {
 }
 
 pub struct TextFormula {
-    #[allow(dead_code)]
     formula: String,
 }
 
@@ -471,24 +470,23 @@ impl TextRangeEntry {
 }
 
 pub struct Date {
-    #[allow(dead_code)]
     ms: u16,
-    #[allow(dead_code)]
+
     min: u8,
-    #[allow(dead_code)]
+
     hour: u8,
-    #[allow(dead_code)]
+
     day: u8,
-    #[allow(dead_code)]
+
     month: u8,
-    #[allow(dead_code)]
+
     year: u8,
 }
 
 impl Date {
     #[allow(dead_code)]
     fn to_datetime(&self) -> NaiveDateTime {
-        let _date_time = chrono::Local.with_ymd_and_hms(
+        let date_time = chrono::Local.with_ymd_and_hms(
             self.year as i32,
             self.month as u32,
             self.day as u32,
@@ -530,9 +528,8 @@ impl Conversion for Date {
 }
 
 pub struct Time {
-    #[allow(dead_code)]
     ms: u32,
-    #[allow(dead_code)]
+
     days: u8,
 }
 

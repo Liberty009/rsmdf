@@ -2,7 +2,6 @@ use std::mem;
 
 use crate::record;
 
-#[allow(dead_code)]
 #[derive(PartialEq, Eq)]
 pub enum ChannelHierarchyType {
     Group,

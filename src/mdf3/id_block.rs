@@ -14,7 +14,6 @@ pub struct Idblock {
 }
 
 impl Idblock {
-    #[allow(dead_code)]
     pub fn write(&self, little_endian: bool) -> Vec<u8> {
         let mut array = Vec::new();
 
@@ -30,7 +29,7 @@ impl Idblock {
 
         array
     }
-    #[allow(dead_code)]
+
     pub fn new(
         file_id: [u8; 8],
         format_id: [u8; 8],
